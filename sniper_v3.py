@@ -19,7 +19,7 @@ HEADERS = {
 
 # --- PARAMETRI RADAR POTENZIATI ---
 # Eliminano concorsi, estrazioni e fuffa
-# BLACKLIST = [
+#BLACKLIST = [
     "usato", "ricondizionato", "custodia", "cover", "pellicola", "vetro", 
     "concorso", "estrazione", "vinci", "partecipa", "gioca", "instant win", 
     "sorteggio", "premi in palio", "scadenza", "regolamento", "invita", "estrazioni"
