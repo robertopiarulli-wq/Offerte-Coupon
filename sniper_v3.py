@@ -17,19 +17,10 @@ HEADERS = {
     "Accept-Language": "it-IT,it;q=0.9"
 }
 
-# --- PARAMETRI RADAR POTENZIATI ---
-# Eliminano concorsi, estrazioni e fuffa
-#BLACKLIST = [
-    "usato", "ricondizionato", "custodia", "cover", "pellicola", "vetro", 
-    "concorso", "estrazione", "vinci", "partecipa", "gioca", "instant win", 
-    "sorteggio", "premi in palio", "scadenza", "regolamento", "invita", "estrazioni"
-]
+# --- PARAMETRI TEST (Blacklist svuotata per sbloccare tutto) ---
+BLACKLIST = [] 
 
-# Brand da monitorare su Amazon Warehouse (Aggiunti Samsung, LG, Asus, etc.)
-TECH_BRANDS = [
-    "apple", "samsung", "sony", "ps5", "nintendo", "dyson", "lg", 
-    "asus", "bosch", "lego", "logitech", "hp", "lenovo", "xiaomi"
-]
+TECH_BRANDS = ["apple", "samsung", "sony", "ps5", "nintendo", "dyson", "lg", "asus", "xiaomi", "laptop", "smartphone"]
 
 RSS_FEEDS = {
     "ScontoMaggio": "https://www.scontomaggio.com/feed/",
@@ -38,84 +29,50 @@ RSS_FEEDS = {
     "HDBlog": "https://www.hdblog.it/offerte/feed/"
 }
 
-# --- FUNZIONI CORE ---
-
-def send_alert(tipo, titolo, prezzo, link, fonte):
-    icona = "🚨" if "ERRORE" in tipo else "🎁" if "OMAGGIO" in tipo else "🧪" if "TESTER" in tipo else "📦"
-    prezzo_display = f"{prezzo}€" if prezzo > 0 else "GRATIS / DIRETTO"
-    
-    msg = (
-        f"{icona} *{tipo}*\n\n"
-        f"📦 *{titolo}*\n"
-        f"💰 Prezzo: {prezzo_display}\n"
-        f"📡 Fonte: {fonte}\n\n"
-        f"🔗 [VAI ALL'AFFARE]({link})"
-    )
-    
+def send_alert(tipo, titolo, link, fonte):
+    msg = f"🎯 *{tipo}*\n\n📦 {titolo}\n📡 Fonte: {fonte}\n\n🔗 [LINK]({link})"
     url = f"https://api.telegram.org/bot{TG_TOKEN}/sendMessage"
-    try:
-        requests.post(url, data={"chat_id": TG_CHAT_ID, "text": msg, "parse_mode": "Markdown"}, timeout=10)
-    except Exception as e:
-        print(f"Errore TG: {e}")
+    requests.post(url, data={"chat_id": TG_CHAT_ID, "text": msg, "parse_mode": "Markdown"})
 
-def check_db_and_save(titolo, url, tipo, fonte, prezzo=0):
+def check_db_and_save(titolo, url, tipo, fonte):
     try:
         res = supabase.table("offerte").select("*").eq("url", url).execute()
         if not res.data:
-            supabase.table("offerte").insert({
-                "titolo": titolo, "url": url, "tipo": tipo, "fonte": fonte, "prezzo": prezzo
-            }).execute()
-            send_alert(tipo, titolo, prezzo, url, fonte)
+            supabase.table("offerte").insert({"titolo": titolo, "url": url, "tipo": tipo, "fonte": fonte}).execute()
+            send_alert(tipo, titolo, url, fonte)
             return True
     except Exception as e:
         print(f"Errore DB: {e}")
     return False
 
 def scan_rss():
-    print("📡 Scansione Feed RSS (Filtro Concorsi Attivo)...")
+    print("📡 Test Radar RSS in corso...")
     for nome, url in RSS_FEEDS.items():
         feed = feedparser.parse(url)
-        for entry in feed.entries:
+        for entry in feed.entries[:5]: # Prendiamo solo i primi 5 per ogni fonte
             t = entry.title.lower()
+            # TEST: Selezioniamo quasi tutto per vedere se il bot funziona
+            tipo = "TEST_RADAR"
+            if "errore" in t: tipo = "🚨 POSSIBILE ERRORE"
+            elif "gratis" in t or "omaggio" in t: tipo = "🎁 OMAGGIO"
             
-            # SALTA SE È NELLA BLACKLIST (Concorsi/Fuffa)
-            if any(b in t for b in BLACKLIST):
-                continue
-                
-            tipo = None
-            # Logica Selezione Positiva
-            if "errore" in t or "follia" in t:
-                tipo = "🚨 ERRORE PREZZO"
-            elif any(x in t for x in ["campione", "gratis", "0€", "omaggio"]):
-                # Filtriamo ulteriormente per assicurarci che sia un omaggio DIRETTO
-                if any(ok in t for ok in ["ricevi", "richiedi", "diretto", "arrivato", "post"]):
-                    tipo = "🎁 OMAGGIO DIRETTO"
-            elif "tester" in t or "provare" in t:
-                tipo = "🧪 DIVENTA TESTER"
-
-            if tipo:
-                check_db_and_save(entry.title, entry.link, tipo, nome)
+            check_db_and_save(entry.title, entry.link, tipo, nome)
 
 def scan_amazon_warehouse():
-    print("📦 Scansione Amazon Warehouse (Radar Brand Attivo)...")
-    # Cerchiamo direttamente nella sezione Warehouse per i brand tech
+    print("📦 Test Amazon Warehouse...")
     url = "https://www.amazon.it/s?k=offerte+magazzino&i=warehouse-deals"
     try:
         res = requests.get(url, headers=HEADERS, timeout=15)
         soup = BeautifulSoup(res.text, 'html.parser')
         products = soup.find_all('div', {'data-component-type': 's-search-result'})
-        
-        for p in products[:15]:
+        for p in products[:5]:
             title = p.find('h2').text.strip()
             link = "https://www.amazon.it" + p.find('a', class_='a-link-normal')['href'].split('?')[0]
-            
-            # Trigger solo se il titolo contiene uno dei nostri brand preferiti
-            if any(brand in title.lower() for brand in TECH_BRANDS):
-                check_db_and_save(title, link, "📦 WAREHOUSE TECH", "Amazon", 0)
+            check_db_and_save(title, link, "📦 AMAZON TEST", "Amazon")
     except Exception as e:
         print(f"Errore Amazon: {e}")
 
 if __name__ == "__main__":
     scan_rss()
     scan_amazon_warehouse()
-    print("✅ Ciclo Radar v3.1 Completato.")
+    print("✅ Ciclo di TEST Completato.")
