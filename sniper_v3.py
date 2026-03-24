@@ -1,32 +1,30 @@
 import os
 import requests
 import feedparser
+import datetime
 from bs4 import BeautifulSoup
 from supabase import create_client, Client
 
-# --- CONFIGURAZIONE SECRET ---
+# --- CONFIGURAZIONE ---
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 TG_TOKEN = os.environ.get("TELEGRAM_TOKEN")
 TG_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-
 HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0"}
 
-# --- 1. BLACKLIST POTENZIATA (Addio detersivi e creme) ---
+# --- FILTRI STRATEGICI ---
 BLACKLIST = [
     "detersivo", "shampoo", "crema", "siero", "panni", "ammorbidente", "dentifricio",
     "mascara", "trucco", "cosmetici", "smalto", "bagnoschiuma", "solare", "pannolini",
-    "concorso", "vinci", "estrazione", "partecipa", "gioca", "instant win", "regolamento",
-    "provami gratis", "rimborso", "cashback" # Spesso sono rimborsi complessi, li togliamo?
+    "concorso", "vinci", "estrazione", "partecipa", "gioca", "instant win", "regolamento"
 ]
 
-# --- 2. WHITELIST BRAND (Cosa vogliamo davvero) ---
 TECH_TARGETS = [
-    "apple", "iphone", "samsung", "galaxy", "sony", "ps5", "nintendo", "xbox", 
-    "dyson", "lg", "asus", "xiaomi", "laptop", "pc", "monitor", "tv", "tablet", 
-    "cuffie", "lego", "robot", "scopa elettrica"
+    "apple", "iphone", "ipad", "macbook", "samsung", "galaxy", "sony", "ps5", "playstation",
+    "nintendo", "switch", "xbox", "dyson", "lg", "oled", "asus", "xiaomi", "laptop", 
+    "rtx", "nvidia", "canon", "nikon", "dj", "bose", "sonos", "garmin"
 ]
 
 RSS_FEEDS = {
@@ -36,10 +34,13 @@ RSS_FEEDS = {
     "HDBlog": "https://www.hdblog.it/offerte/feed/"
 }
 
-def send_alert(tipo, titolo, link, fonte):
-    # Personalizziamo l'icona in base al contenuto
-    icona = "🚨" if "ERRORE" in tipo else "🔥" if "TECH" in tipo else "🎁"
-    msg = f"{icona} *{tipo}*\n\n📦 {titolo}\n📡 Fonte: {fonte}\n\n🔗 [APRI OFFERTA]({link})"
+def send_alert(tipo, titolo, link, fonte, is_test=False):
+    if is_test:
+        msg = f"🤖 *Radar Status*: Operativo\n⏱️ {datetime.datetime.now().strftime('%H:%M')}\n✅ Scansione fonti completata."
+    else:
+        icona = "🚨" if "ERRORE" in tipo else "🔥" if "TECH" in tipo else "🎁"
+        msg = f"{icona} *{tipo}*\n\n📦 {titolo}\n📡 Fonte: {fonte}\n\n🔗 [APRI ORA]({link})"
+    
     url = f"https://api.telegram.org/bot{TG_TOKEN}/sendMessage"
     requests.post(url, data={"chat_id": TG_CHAT_ID, "text": msg, "parse_mode": "Markdown"})
 
@@ -55,33 +56,35 @@ def check_db_and_save(titolo, url, tipo, fonte):
     return False
 
 def scan_rss():
-    print("📡 Scansione Radar v3.2...")
+    print("📡 Scansione Radar v3.3...")
+    found_something = False
     for nome, url_feed in RSS_FEEDS.items():
         feed = feedparser.parse(url_feed)
         for entry in feed.entries:
             t = entry.title.lower()
-            
-            # FILTRO 1: Salta se è in Blacklist
-            if any(b in t for b in BLACKLIST):
-                continue
+            if any(b in t for b in BLACKLIST): continue
             
             tipo = None
-            
-            # FILTRO 2: Cerca Errori o Omaggi di valore
-            if "errore" in t or "follia" in t:
+            # 1. Errori/Bug
+            if any(x in t for x in ["errore", "follia", "baco", "prezzaccio"]):
                 tipo = "🚨 ERRORE PREZZO"
-            elif any(x in t for x in ["0€", "gratis", "omaggio"]):
-                # Se è gratis, lo prendiamo solo se non è un detersivo (già filtrato da blacklist)
-                tipo = "🎁 OMAGGIO / CAMPIONE"
+            # 2. Omaggi Reali (Non cosmetici)
+            elif any(x in t for x in ["0€", "gratis", "omaggio", "tester"]):
+                tipo = "🎁 OMAGGIO VALORE"
+            # 3. Target Tech
             elif any(brand in t for brand in TECH_TARGETS):
-                # Se contiene un brand della nostra lista tech
-                tipo = "🔥 AFFARE TECH"
+                tipo = "🔥 TECH TARGET"
+            # 4. Sconti Massicci
+            elif any(s in t for s in ["70%", "80%", "90%", "fuori tutto"]):
+                tipo = "💣 SCONTO BOMBA"
             
             if tipo:
-                check_db_and_save(entry.title, entry.link, tipo, nome)
+                if check_db_and_save(entry.title, entry.link, tipo, nome):
+                    found_something = True
+    return found_something
 
 def scan_amazon_warehouse():
-    print("📦 Scansione Amazon Warehouse (Filtro Brand)...")
+    print("📦 Scansione Warehouse...")
     url = "https://www.amazon.it/s?k=offerte+magazzino&i=warehouse-deals"
     try:
         res = requests.get(url, headers=HEADERS, timeout=15)
@@ -90,14 +93,14 @@ def scan_amazon_warehouse():
         for p in products[:15]:
             title = p.find('h2').text.strip()
             link = "https://www.amazon.it" + p.find('a', class_='a-link-normal')['href'].split('?')[0]
-            
-            # Prendiamo solo se è un brand tech desiderato
             if any(brand in title.lower() for brand in TECH_TARGETS):
-                check_db_and_save(title, link, "📦 AMAZON WAREHOUSE", "Amazon")
-    except Exception as e:
-        print(f"Errore Amazon: {e}")
+                check_db_and_save(title, link, "📦 WAREHOUSE TECH", "Amazon")
+    except: pass
 
 if __name__ == "__main__":
-    scan_rss()
+    # Esegue la scansione
+    something_new = scan_rss()
     scan_amazon_warehouse()
-    print("✅ Ciclo Radar v3.2 Completato.")
+    
+    # Log di sistema su GitHub
+    print(f"✅ Ciclo Completato. Nuove offerte inviate: {something_new}")
