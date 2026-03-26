@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Richiesta Preventivo Rapida</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root { --primary: #0088cc; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; padding-bottom: 100px; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+        .card { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; }
+        .card img { width: 100%; height: 180px; object-fit: contain; }
+        .qty-box { margin-top: 15px; display: flex; justify-content: center; align-items: center; gap: 10px; }
+        input[type="number"] { width: 60px; padding: 8px; border: 1px solid #ddd; border-radius: 5px; }
+        .footer { position: fixed; bottom: 0; left: 0; width: 100%; background: white; padding: 20px; box-shadow: 0 -4px 10px rgba(0,0,0,0.1); display: flex; justify-content: center; }
+        .btn-send { background: var(--primary); color: white; border: none; padding: 15px 40px; border-radius: 30px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-send:hover { background: #006699; transform: scale(1.05); }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1 id="titolo-cliente">Benvenuto</h1>
+        <p>Seleziona i prodotti e la quantità per ricevere un preventivo.</p>
+    </div>
+
+    <div class="grid" id="container"></div>
+
+    <div class="footer">
+        <button class="btn-send" onclick="inviaPreventivo()">🚀 Richiedi Preventivo</button>
+    </div>
+
+    <script>
+        const SB_URL = "LA_TUA_URL_SUPABASE";
+        const SB_KEY = "LA_TUA_ANON_KEY";
+        const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const clienteSlug = urlParams.get('c') || 'generico';
+
+        async function init() {
+            // 1. Carica Info Cliente
+            const { data: cliente } = await supabaseClient.from('clienti').select('nome_attivita').eq('slug', clienteSlug).single();
+            if(cliente) document.getElementById('titolo-cliente').innerText = "Offerta per: " + cliente.nome_attivita;
+
+            // 2. Carica Prodotti
+            const { data: prodotti } = await supabaseClient.from('prodotti').select('*');
+            const container = document.getElementById('container');
+            prodotti.forEach(p => {
+                container.innerHTML += `
+                    <div class="card">
+                        <img src="${p.immagine_url}">
+                        <h3>${p.nome}</h3>
+                        <div class="qty-box">
+                            <span>Quantità:</span>
+                            <input type="number" class="qty-input" data-id="${p.id}" data-nome="${p.nome}" min="0" value="0">
+                        </div>
+                    </div>`;
+            });
+        }
+
+        async function inviaPreventivo() {
+            const scelte = Array.from(document.querySelectorAll('.qty-input'))
+                .filter(el => el.value > 0)
+                .map(el => ({ nome: el.dataset.nome, qta: el.value }));
+
+            if(scelte.length === 0) return alert("Scegli almeno un prodotto!");
+
+            const { error } = await supabaseClient.from('richieste_preventivo').insert({
+                cliente_slug: clienteSlug,
+                prodotti_scelti: scelte
+            });
+
+            if(!error) {
+                alert("Richiesta inviata! Riceverai una notifica a breve.");
+                location.reload(); 
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>
