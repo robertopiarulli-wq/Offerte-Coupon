@@ -88,7 +88,7 @@ def scan_rss():
                 # Se è un grande brand e c'è una parola "affare"
                 if any(ok in t for ok in ["sconto", "minimo", "offerta", "ribasso", "crollato", "%"]):
                     tipo = "💎 GOLD TECH TARGET"
-            elif any(s in t for s in ["80%", "90%", "fuori tutto"]):
+            elif any(s in t for s in ["70%", "80%", "fuori tutto"]):
                 tipo = "💣 SCONTO MASSICCIO"
             
             if tipo:
