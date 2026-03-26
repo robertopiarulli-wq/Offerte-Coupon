@@ -1,7 +1,4 @@
-import os
-import requests
-import feedparser
-import datetime
+import os, requests, datetime
 from bs4 import BeautifulSoup
 from supabase import create_client, Client
 
@@ -14,49 +11,19 @@ TG_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/122.0.0.0",
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "Accept-Language": "it-IT,it;q=0.9"
 }
 
-# --- 1. BLACKLIST ---
-BLACKLIST = [
-    "detersivo", "shampoo", "crema", "siero", "panni", "ammorbidente", "dentifricio",
-    "mascara", "trucco", "cosmetici", "smalto", "bagnoschiuma", "solare", "pannolini",
-    "concorso", "vinci", "estrazione", "regolamento", "carta", "conto", "hype", "revolut", "bonus"
-]
-
-# --- 2. GOLD TARGETS ---
-GOLD_TARGETS = [
-    "apple", "iphone", "ipad", "macbook", "airpods", "samsung", "galaxy", "sony", "ps5", 
-    "playstation", "nintendo", "switch", "xbox", "dyson", "lg", "oled", "asus", "rog", 
-    "msi", "rtx", "nvidia", "hp", "lenovo", "dell", "logitech", "razer", "bose", "sonos", 
-    "canon", "nikon", "dji", "garmin", "laptop", "monitor", "tv", "smartphone", "tablet",
-    "cuffie", "smartwatch", "bici", "monopattino"
-]
-
-# --- 3. FONTI ---
-RSS_FEEDS = {
-    "Pepper_Elettronica": "https://www.pepper.it/rss/elettronica",
-    "Pepper_Informatica": "https://www.pepper.it/rss/informatica",
-    "HDBlog_Offerte": "https://www.hdblog.it/offerte/feed/",
-    "Hardware_Upgrade": "https://www.hwupgrade.it/rss_offerte.xml"
-}
+# --- TARGET & BLACKLIST ---
+BLACKLIST = ["detersivo", "shampoo", "crema", "siero", "panni", "carta", "conto", "hype"]
+GOLD_TARGETS = ["apple", "iphone", "ipad", "macbook", "samsung", "galaxy", "sony", "ps5", "nintendo", "switch", "xbox", "dyson", "lg", "oled", "asus", "msi", "rtx", "nvidia", "laptop", "monitor", "tv", "smartphone"]
 
 def send_alert(tipo, titolo, link, fonte):
-    icona = "🚨" if "ERRORE" in tipo else "💎" if "GOLD" in tipo else "🔥"
-    msg = (
-        f"{icona} *{tipo}*\n"
-        f"━━━━━━━━━━━━━━━\n"
-        f"📦 *{titolo}*\n"
-        f"📡 Fonte: {fonte}\n"
-        f"━━━━━━━━━━━━━━━\n"
-        f"🔗 [APRI OFFERTA ORA]({link})"
-    )
+    icona = "🚨" if "ERRORE" in tipo else "💎"
+    msg = f"{icona} *{tipo}*\n\n📦 {titolo}\n📡 Fonte: {fonte}\n\n🔗 [VEDI ORA]({link})"
     url = f"https://api.telegram.org/bot{TG_TOKEN}/sendMessage"
-    try:
-        requests.post(url, data={"chat_id": TG_CHAT_ID, "text": msg, "parse_mode": "Markdown"}, timeout=10)
-    except Exception as e:
-        print(f"Errore Telegram: {e}")
+    requests.post(url, data={"chat_id": TG_CHAT_ID, "text": msg, "parse_mode": "Markdown"})
 
 def check_db_and_save(titolo, url, tipo, fonte):
     try:
@@ -65,52 +32,51 @@ def check_db_and_save(titolo, url, tipo, fonte):
             supabase.table("offerte").insert({"titolo": titolo, "url": url, "tipo": tipo, "fonte": fonte}).execute()
             send_alert(tipo, titolo, url, fonte)
             return True
-    except Exception as e:
-        print(f"Errore DB: {e}")
-    return False
+    except: return False
 
-def run_scanner():
-    print("🛰️ Avvio Scansione Forzata v3.9.1...")
-    found_count = 0
-    for nome, url_feed in RSS_FEEDS.items():
-        try:
-            response = requests.get(url_feed, headers=HEADERS, timeout=20)
-            feed = feedparser.parse(response.content)
-            print(f"--- {nome}: {len(feed.entries)} articoli ---")
-            for entry in feed.entries:
-                t = entry.title.lower()
-                if any(b in t for b in BLACKLIST): continue
-                
-                tipo = None
-                if any(x in t for x in ["errore", "follia", "baco", "0€", "bug"]):
-                    tipo = "🚨 ERRORE DI PREZZO"
-                elif any(brand in t for brand in GOLD_TARGETS):
-                    tipo = "💎 GOLD TECH TARGET"
-                elif any(s in t for s in ["70%", "80%", "90%", "fuori tutto"]):
-                    tipo = "🔥 SCONTO BOMBA"
-                
-                if tipo:
-                    if check_db_and_save(entry.title, entry.link, tipo, nome):
-                        found_count += 1
-        except Exception as e:
-            print(f"❌ Errore su {nome}: {e}")
-    print(f"✅ Nuovi messaggi: {found_count}")
-
-def scan_amazon_warehouse():
-    print("📦 Scansione Warehouse...")
-    url = "https://www.amazon.it/s?k=elettronica&i=warehouse-deals"
+def scrape_pepper():
+    print("🌶️ Scraping Pepper Elettronica...")
+    url = "https://www.pepper.it/nuovo/elettronica"
     try:
-        res = requests.get(url, headers=HEADERS, timeout=15)
+        res = requests.get(url, headers=HEADERS, timeout=20)
         soup = BeautifulSoup(res.text, 'html.parser')
-        products = soup.find_all('div', {'data-component-type': 's-search-result'})
-        for p in products[:10]:
-            title = p.find('h2').text.strip()
-            link = "https://www.amazon.it" + p.find('a', class_='a-link-normal')['href'].split('?')[0]
-            if any(brand in title.lower() for brand in GOLD_TARGETS):
-                check_db_and_save(title, link, "📦 WAREHOUSE GOLD", "Amazon")
-    except Exception as e:
-        print(f"Errore Warehouse: {e}")
+        # Troviamo tutti i titoli delle offerte
+        articles = soup.find_all('strong', class_='thread-title')
+        print(f"--- Trovati {len(articles)} potenziali articoli su Pepper ---")
+        
+        for art in articles:
+            titolo = art.text.strip()
+            t = titolo.lower()
+            link_tag = art.find('a')
+            if not link_tag: continue
+            link = "https://www.pepper.it" + link_tag['href'].split('?')[0]
+
+            if any(b in t for b in BLACKLIST): continue
+            
+            tipo = None
+            if any(x in t for x in ["errore", "follia", "0€", "bug"]): tipo = "🚨 ERRORE"
+            elif any(brand in t for brand in GOLD_TARGETS): tipo = "💎 TARGET GOLD"
+            elif any(s in t for s in ["70%", "80%", "90%"]): tipo = "🔥 SCONTO"
+
+            if tipo:
+                check_db_and_save(titolo, link, tipo, "Pepper Web")
+    except Exception as e: print(f"Errore Pepper: {e}")
+
+def scrape_hdblog():
+    print("📱 Scraping HDBlog...")
+    url = "https://www.hdblog.it/offerte/"
+    try:
+        res = requests.get(url, headers=HEADERS, timeout=20)
+        soup = BeautifulSoup(res.text, 'html.parser')
+        articles = soup.find_all('a', class_='title')
+        print(f"--- Trovati {len(articles)} articoli su HDBlog ---")
+        for art in articles:
+            titolo = art.text.strip()
+            link = art['href']
+            if any(brand in titolo.lower() for brand in GOLD_TARGETS):
+                check_db_and_save(titolo, link, "💎 TARGET GOLD", "HDBlog Web")
+    except: pass
 
 if __name__ == "__main__":
-    run_scanner()
-    scan_amazon_warehouse()
+    scrape_pepper()
+    scrape_hdblog()
