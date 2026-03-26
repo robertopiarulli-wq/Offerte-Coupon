@@ -10,13 +10,16 @@ TG_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
+# Header "Umani" avanzati
 HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-    "Accept-Language": "it-IT,it;q=0.9"
+    "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "it-IT,it;q=0.9",
+    "Referer": "https://www.google.it/", # Fondamentale: fingiamo di venire da Google
+    "DNT": "1"
 }
 
-# --- TARGET & BLACKLIST ---
-BLACKLIST = ["detersivo", "shampoo", "crema", "siero", "panni", "carta", "conto", "hype"]
+BLACKLIST = ["detersivo", "shampoo", "crema", "siero", "panni", "carta", "conto", "hype", "bonus"]
 GOLD_TARGETS = ["apple", "iphone", "ipad", "macbook", "samsung", "galaxy", "sony", "ps5", "nintendo", "switch", "xbox", "dyson", "lg", "oled", "asus", "msi", "rtx", "nvidia", "laptop", "monitor", "tv", "smartphone"]
 
 def send_alert(tipo, titolo, link, fonte):
@@ -34,49 +37,39 @@ def check_db_and_save(titolo, url, tipo, fonte):
             return True
     except: return False
 
-def scrape_pepper():
-    print("🌶️ Scraping Pepper Elettronica...")
-    url = "https://www.pepper.it/nuovo/elettronica"
+def scrape_pepper_mobile():
+    print("🌶️ Tentativo su Pepper Mobile...")
+    # Proviamo l'URL mobile che a volte ha meno protezioni
+    url = "https://www.pepper.it/nuovo" 
     try:
-        res = requests.get(url, headers=HEADERS, timeout=20)
+        session = requests.Session()
+        res = session.get(url, headers=HEADERS, timeout=30)
+        print(f"Status Code Pepper: {res.status_code}") # Vediamo se ci dà 403 (Forbidden)
+        
         soup = BeautifulSoup(res.text, 'html.parser')
-        # Troviamo tutti i titoli delle offerte
-        articles = soup.find_all('strong', class_='thread-title')
-        print(f"--- Trovati {len(articles)} potenziali articoli su Pepper ---")
+        # Cambiamo selettore per cercare di beccare i titoli in modo più grezzo
+        articles = soup.find_all(['a', 'span'], class_=lambda x: x and 'title' in x.lower())
+        
+        print(f"--- Trovati {len(articles)} elementi potenziali su Pepper ---")
         
         for art in articles:
             titolo = art.text.strip()
+            if len(titolo) < 10: continue
             t = titolo.lower()
-            link_tag = art.find('a')
-            if not link_tag: continue
-            link = "https://www.pepper.it" + link_tag['href'].split('?')[0]
+            
+            # Se è un link, prendiamo l'href
+            link = art.get('href', '#')
+            if link.startswith('/'): link = "https://www.pepper.it" + link
 
             if any(b in t for b in BLACKLIST): continue
             
             tipo = None
             if any(x in t for x in ["errore", "follia", "0€", "bug"]): tipo = "🚨 ERRORE"
             elif any(brand in t for brand in GOLD_TARGETS): tipo = "💎 TARGET GOLD"
-            elif any(s in t for s in ["70%", "80%", "90%"]): tipo = "🔥 SCONTO"
-
-            if tipo:
-                check_db_and_save(titolo, link, tipo, "Pepper Web")
+            
+            if tipo and link != '#':
+                check_db_and_save(titolo, link, tipo, "Pepper Stealth")
     except Exception as e: print(f"Errore Pepper: {e}")
 
-def scrape_hdblog():
-    print("📱 Scraping HDBlog...")
-    url = "https://www.hdblog.it/offerte/"
-    try:
-        res = requests.get(url, headers=HEADERS, timeout=20)
-        soup = BeautifulSoup(res.text, 'html.parser')
-        articles = soup.find_all('a', class_='title')
-        print(f"--- Trovati {len(articles)} articoli su HDBlog ---")
-        for art in articles:
-            titolo = art.text.strip()
-            link = art['href']
-            if any(brand in titolo.lower() for brand in GOLD_TARGETS):
-                check_db_and_save(titolo, link, "💎 TARGET GOLD", "HDBlog Web")
-    except: pass
-
 if __name__ == "__main__":
-    scrape_pepper()
-    scrape_hdblog()
+    scrape_pepper_mobile()
