@@ -3,83 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Richiesta Preventivo Rapida</title>
+    <title>Richiesta Preventivo</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --primary: #0088cc; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; padding-bottom: 100px; }
-        .header { text-align: center; margin-bottom: 30px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
-        .card { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; }
-        .card img { width: 100%; height: 180px; object-fit: contain; }
-        .qty-box { margin-top: 15px; display: flex; justify-content: center; align-items: center; gap: 10px; }
-        input[type="number"] { width: 60px; padding: 8px; border: 1px solid #ddd; border-radius: 5px; }
-        .footer { position: fixed; bottom: 0; left: 0; width: 100%; background: white; padding: 20px; box-shadow: 0 -4px 10px rgba(0,0,0,0.1); display: flex; justify-content: center; }
-        .btn-send { background: var(--primary); color: white; border: none; padding: 15px 40px; border-radius: 30px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .btn-send:hover { background: #006699; transform: scale(1.05); }
+        body { font-family: sans-serif; background: #f8f9fa; padding: 20px; padding-bottom: 100px; }
+        .container { max-width: 800px; margin: auto; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+        .card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center; }
+        .card img { width: 100%; height: 150px; object-fit: contain; }
+        .footer { position: fixed; bottom: 0; left: 0; width: 100%; background: white; padding: 20px; box-shadow: 0 -5px 15px rgba(0,0,0,0.05); text-align: center; }
+        .btn { background: #0088cc; color: white; border: none; padding: 12px 30px; border-radius: 25px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
-
-    <div class="header">
-        <h1 id="titolo-cliente">Benvenuto</h1>
-        <p>Seleziona i prodotti e la quantità per ricevere un preventivo.</p>
+    <div class="container">
+        <h1 id="welcome">Caricamento...</h1>
+        <div class="grid" id="product-list"></div>
     </div>
 
-    <div class="grid" id="container"></div>
-
     <div class="footer">
-        <button class="btn-send" onclick="inviaPreventivo()">🚀 Richiedi Preventivo</button>
+        <button class="btn" onclick="inviaRichiesta()">🚀 Richiedi Preventivo</button>
     </div>
 
     <script>
-        const SB_URL = "https://fxcuwfpdzymwkemzppgm.supabase.co";
-        const SB_KEY = "sb_publishable__jf5n22-ZlvGPRN-BAh38A_WdVt7B9d";
-        const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
+        // CONFIGURAZIONE
+        const URL = "https://fxcuwfpdzymwkemzppgm.supabase.co";
+        const KEY = "sb_publishable__jf5n22-ZlvGPRN-BAh38A_WdVt7B9d"; 
+        const supabase = window.supabase.createClient(URL, KEY);
 
-        const urlParams = new URLSearchParams(window.location.search);
-        const clienteSlug = urlParams.get('c') || 'generico';
+        const params = new URLSearchParams(window.location.search);
+        const slug = params.get('c');
 
-        async function init() {
-            // 1. Carica Info Cliente
-            const { data: cliente } = await supabaseClient.from('clienti').select('nome_attivita').eq('slug', clienteSlug).single();
-            if(cliente) document.getElementById('titolo-cliente').innerText = "Offerta per: " + cliente.nome_attivita;
+        async function start() {
+            // 1. Identifica il cliente dalla tabella contacts
+            const { data: contact } = await supabase.from('contacts').select('nome').eq('slug', slug).single();
+            document.getElementById('welcome').innerText = contact ? `Offerta per: ${contact.nome}` : "Benvenuto";
 
-            // 2. Carica Prodotti
-            const { data: prodotti } = await supabaseClient.from('prodotti').select('*');
-            const container = document.getElementById('container');
+            // 2. Carica i prodotti
+            const { data: prodotti } = await supabase.from('prodotti').select('*');
+            const list = document.getElementById('product-list');
             prodotti.forEach(p => {
-                container.innerHTML += `
+                list.innerHTML += `
                     <div class="card">
                         <img src="${p.immagine_url}">
-                        <h3>${p.nome}</h3>
-                        <div class="qty-box">
-                            <span>Quantità:</span>
-                            <input type="number" class="qty-input" data-id="${p.id}" data-nome="${p.nome}" min="0" value="0">
-                        </div>
+                        <h4>${p.nome}</h4>
+                        <input type="number" class="qta" data-nome="${p.nome}" min="0" value="0" style="width: 50px">
                     </div>`;
             });
         }
 
-        async function inviaPreventivo() {
-            const scelte = Array.from(document.querySelectorAll('.qty-input'))
+        async function inviaRichiesta() {
+            const scelte = Array.from(document.querySelectorAll('.qta'))
                 .filter(el => el.value > 0)
-                .map(el => ({ nome: el.dataset.nome, qta: el.value }));
+                .map(el => ({ articolo: el.dataset.nome, quantita: el.value }));
 
-            if(scelte.length === 0) return alert("Scegli almeno un prodotto!");
+            if (scelte.length === 0) return alert("Seleziona almeno un prodotto!");
 
-            const { error } = await supabaseClient.from('richieste_preventivo').insert({
-                cliente_slug: clienteSlug,
+            const { error } = await supabase.from('richieste_preventivo').insert({
+                contact_slug: slug,
                 prodotti_scelti: scelte
             });
 
-            if(!error) {
-                alert("Richiesta inviata! Riceverai una notifica a breve.");
-                location.reload(); 
-            }
+            if (!error) alert("Richiesta inviata con successo!");
         }
 
-        init();
+        start();
     </script>
 </body>
 </html>
