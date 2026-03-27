@@ -1,0 +1,32 @@
+name: Aggiornamento Automatico Prodotti
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Gira ogni notte a mezzanotte
+  workflow_dispatch:      # Ti permette di lanciarlo a mano con un tasto
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del codice
+        uses: actions/checkout@v3
+
+      - name: Installa Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Installa librerie
+        run: pip install requests beautifulsoup4
+
+      - name: Esegui lo Scraper
+        run: python scraper.py
+
+      - name: Salva i cambiamenti su GitHub
+        run: |
+          git config --global user.name 'Automation Bot'
+          git config --global user.email 'bot@github.com'
+          git add prodotti.json
+          git commit -m "Aggiornamento automatico prodotti" || exit 0
+          git push
