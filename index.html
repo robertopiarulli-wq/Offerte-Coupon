@@ -3,88 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Richiesta Preventivo</title>
+    <title>Richiesta Preventivo - Catalogo</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { font-family: sans-serif; background: #f8f9fa; padding: 20px; padding-bottom: 100px; }
-        .container { max-width: 900px; margin: auto; }
-        .category-header { grid-column: 1/-1; background: #0088cc; color: white; padding: 10px 20px; border-radius: 8px; margin-top: 30px; font-size: 1.2em; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; margin-top: 20px; }
-        .card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; flex-direction: column; justify-content: space-between; }
-        .card img { width: 100%; height: 160px; object-fit: contain; margin-bottom: 10px; }
-        .card h4 { margin: 10px 0 5px 0; font-size: 1em; color: #333; }
-        .card .code { font-size: 0.75em; color: #888; margin-bottom: 5px; font-weight: bold; }
-        .card .desc { font-size: 0.85em; color: #666; margin-bottom: 15px; height: 35px; overflow: hidden; }
-        .footer { position: fixed; bottom: 0; left: 0; width: 100%; background: white; padding: 15px; box-shadow: 0 -5px 15px rgba(0,0,0,0.05); text-align: center; z-index: 100; }
-        .btn { background: #28a745; color: white; border: none; padding: 12px 40px; border-radius: 25px; font-weight: bold; cursor: pointer; font-size: 1.1em; transition: 0.3s; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; padding: 20px; padding-bottom: 120px; margin: 0; }
+        .container { max-width: 1000px; margin: auto; }
+        #welcome { color: #333; border-left: 5px solid #0088cc; padding-left: 15px; margin-bottom: 30px; }
+        .category-header { grid-column: 1/-1; background: #0088cc; color: white; padding: 12px 20px; border-radius: 8px; margin-top: 40px; font-size: 1.3em; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 25px; margin-top: 20px; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; flex-direction: column; transition: transform 0.2s; }
+        .card:hover { transform: translateY(-5px); }
+        .card img { width: 100%; height: 180px; object-fit: contain; margin-bottom: 15px; background: #fff; }
+        .card h4 { margin: 10px 0 5px 0; font-size: 1.1em; color: #222; min-height: 2.2em; display: flex; align-items: center; }
+        .card .code { font-size: 0.8em; color: #0088cc; font-weight: bold; text-transform: uppercase; }
+        .card .desc { font-size: 0.85em; color: #666; margin-bottom: 20px; line-height: 1.4; height: 3em; overflow: hidden; }
+        .qta-wrapper { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #eee; pt: 15px; padding-top: 15px; }
+        .qta-input { width: 60px; padding: 8px; border: 1px solid #ddd; border-radius: 6px; text-align: center; font-weight: bold; }
+        .footer { position: fixed; bottom: 0; left: 0; width: 100%; background: white; padding: 20px; box-shadow: 0 -5px 20px rgba(0,0,0,0.1); text-align: center; z-index: 1000; }
+        .btn { background: #28a745; color: white; border: none; padding: 15px 50px; border-radius: 30px; font-weight: bold; cursor: pointer; font-size: 1.2em; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3); transition: 0.3s; }
         .btn:hover { background: #218838; transform: scale(1.05); }
-        .qta-input { width: 60px; padding: 5px; border: 1px solid #ccc; border-radius: 5px; text-align: center; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1 id="welcome">Caricamento in corso...</h1>
+        <h1 id="welcome">Caricamento catalogo...</h1>
         <div class="grid" id="product-list"></div>
     </div>
 
     <div class="footer">
-        <button class="btn" onclick="inviaRichiesta()">🚀 Invia Richiesta Preventivo</button>
+        <button class="btn" onclick="inviaRichiesta()">🚀 Invia Ordine su WhatsApp/Telegram</button>
     </div>
 
     <script>
-        // CONFIGURAZIONE - Nota: variabile rinominata in 'sb' per evitare conflitti
+        // --- CONFIGURAZIONE ---
         const URL_SB = "https://fxcuwfpdzymwkemzppgm.supabase.co";
         const KEY_SB = "sb_publishable__jf5n22-ZlvGPRN-BAh38A_WdVt7B9d"; 
+        const TG_TOKEN = "8604086640:AAEVbCc5RphJ09ngmW1-naxIXeahirKaGIA
+"; // Inserisci qui il token di BotFather
+        const TG_CHID = "1068754998";    // Inserisci qui il tuo ID di userinfobot
+        
         const sb = window.supabase.createClient(URL_SB, KEY_SB);
-
         const params = new URLSearchParams(window.location.search);
         const slug = params.get('c');
 
         async function start() {
-            if (!slug) {
-                document.getElementById('welcome').innerText = "Benvenuto nel Catalogo";
-            } else {
-                // 1. Identifica il cliente
+            // 1. Recupero Cliente
+            if (slug) {
                 const { data: contact } = await sb.from('contacts').select('nome').eq('slug', slug).single();
-                document.getElementById('welcome').innerText = contact ? `Offerta Personalizzata per: ${contact.nome}` : "Benvenuto";
+                document.getElementById('welcome').innerText = contact ? `Offerta per: ${contact.nome}` : "Benvenuto nel Catalogo";
+            } else {
+                document.getElementById('welcome').innerText = "Catalogo Prodotti";
             }
 
-            // 2. Carica i prodotti ordinati per categoria
-            const { data: prodotti, error } = await sb.from('prodotti').select('*').order('categoria');
+            // 2. Recupero Prodotti
+            const { data: prodotti, error } = await sb.from('prodotti').select('*').order('categoria', { ascending: true });
             
-            if (error) {
-                console.error("Errore caricamento:", error);
-                return;
-            }
+            if (error) return console.error("Errore:", error);
 
             const list = document.getElementById('product-list');
-            let ultimaCategoria = "";
+            let ultimaCat = "";
 
             prodotti.forEach(p => {
-                // Aggiungi intestazione categoria se cambia
-                if (p.categoria !== ultimaCategoria) {
-                    const catDiv = document.createElement('div');
-                    catDiv.className = 'category-header';
-                    catDiv.innerText = p.categoria;
-                    list.appendChild(catDiv);
-                    ultimaCategoria = p.categoria;
+                // Separatore Categoria
+                if (p.categoria !== ultimaCat) {
+                    const h = document.createElement('div');
+                    h.className = 'category-header';
+                    h.innerText = p.categoria;
+                    list.appendChild(h);
+                    ultimaCat = p.categoria;
                 }
 
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.innerHTML = `
-                    <div>
-                        <img src="${p.immagine_url || 'https://via.placeholder.com/150'}" onerror="this.src='https://via.placeholder.com/150'">
-                        <div class="code">Cod: ${p.codice}</div>
-                        <h4>${p.nome}</h4>
-                        <div class="desc">${p.descrizione || ''}</div>
-                    </div>
-                    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 10px;">
-                        <span style="font-size: 0.9em;">Quantità:</span>
-                        <input type="number" class="qta" data-nome="${p.nome}" data-codice="${p.codice}" min="0" value="0" class="qta-input" style="width: 50px;">
+                // Card Prodotto
+                const d = document.createElement('div');
+                d.className = 'card';
+                d.innerHTML = `
+                    <img src="${p.immagine_url || 'https://via.placeholder.com/150'}">
+                    <div class="code">${p.codice || 'Cod. ND'}</div>
+                    <h4>${p.nome}</h4>
+                    <div class="desc">${p.descrizione || ''}</div>
+                    <div class="qta-wrapper">
+                        <span>Quantità:</span>
+                        <input type="number" class="qta" data-nome="${p.nome}" data-codice="${p.codice}" min="0" value="0" class="qta-input">
                     </div>
                 `;
-                list.appendChild(card);
+                list.appendChild(d);
             });
         }
 
@@ -97,19 +99,30 @@
                     quantita: el.value 
                 }));
 
-            if (scelte.length === 0) return alert("Seleziona almeno un prodotto per il preventivo!");
+            if (scelte.length === 0) return alert("Seleziona almeno un articolo!");
 
+            // 1. Salvataggio su Supabase
             const { error } = await sb.from('richieste_preventivo').insert({
                 contact_slug: slug || "anonimo",
                 prodotti_scelti: scelte
             });
 
             if (!error) {
-                alert("Ottimo! La tua richiesta è stata inviata. Ti ricontatteremo a breve.");
-                // Reset quantità
+                // 2. Invio Notifica Telegram
+                let msg = `📦 *NUOVO ORDINE*\n👤 Cliente: ${slug || 'Anonimo'}\n\n`;
+                scelte.forEach(s => msg += `• ${s.articolo}\n  Cod: ${s.codice} | Qta: ${s.quantita}\n\n`);
+
+                try {
+                    await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage?chat_id=${TG_CHID}&text=${encodeURIComponent(msg)}&parse_mode=Markdown`);
+                    alert("Richiesta inviata con successo!");
+                } catch (e) {
+                    alert("Ordine salvato, ma errore nell'invio della notifica Telegram.");
+                }
+
+                // Reset
                 document.querySelectorAll('.qta').forEach(el => el.value = 0);
             } else {
-                alert("Errore nell'invio. Riprova tra poco.");
+                alert("Errore tecnico. Riprova più tardi.");
             }
         }
 
