@@ -3,73 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Catalogo Podopiu - Preventivo Rapido</title>
+    <title>Catalogo Podopiu</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         :root { --p: #0088cc; --s: #28a745; --bg: #f4f7f9; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding-bottom: 160px; color: #333; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding-bottom: 160px; color: #333; }
         
-        /* Header & Search */
         .header { position: sticky; top: 0; background: white; z-index: 1000; padding: 15px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
         .container { max-width: 1200px; margin: auto; padding: 0 20px; }
-        .search-bar { width: 100%; padding: 15px 25px; border: 2px solid var(--p); border-radius: 50px; font-size: 16px; outline: none; box-sizing: border-box; transition: 0.3s; }
-        .search-bar:focus { box-shadow: 0 0 10px rgba(0,136,204,0.3); }
+        .search-bar { width: 100%; padding: 15px 25px; border: 2px solid var(--p); border-radius: 50px; font-size: 16px; outline: none; box-sizing: border-box; }
         
-        /* Categorie a "Celle" Linkabili */
-        .nav-cats { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px; justify-content: center; }
-        .nav-link { 
-            background: #fff; 
-            color: var(--p); 
-            padding: 8px 16px; 
-            border-radius: 8px; 
-            text-decoration: none; 
-            font-size: 11px; 
-            font-weight: bold; 
-            border: 1px solid var(--p); 
-            transition: all 0.2s ease;
-            display: inline-block;
-            cursor: pointer;
-            text-transform: uppercase;
-        }
-        .nav-link:hover { background: var(--p); color: white; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,136,204,0.2); }
-        
-        /* Layout Catalogo */
+        /* Sistema Tab/Menu Categorie */
+        .cat-toggle-btn { background: var(--p); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; width: 100%; }
+        .nav-cats { display: none; flex-wrap: wrap; gap: 10px; margin-top: 15px; justify-content: center; background: #fff; padding: 15px; border-radius: 12px; border: 1px solid #ddd; }
+        .nav-cats.active { display: flex; }
+        .nav-link { background: #f0faff; color: var(--p); padding: 8px 14px; border-radius: 6px; text-decoration: none; font-size: 11px; font-weight: bold; border: 1px solid #cce5ff; text-transform: uppercase; }
+
         #welcome { text-align: center; margin: 30px 0; font-weight: 800; color: #111; font-size: 1.8em; }
-        .cat-title { background: var(--p); color: white; padding: 12px 25px; border-radius: 8px; margin-top: 50px; scroll-margin-top: 230px; text-transform: uppercase; font-size: 1.1em; letter-spacing: 1px; }
+        .cat-title { background: var(--p); color: white; padding: 12px 25px; border-radius: 8px; margin-top: 50px; scroll-margin-top: 240px; text-transform: uppercase; }
         
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 25px; margin-top: 25px; }
-        .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 6px 15px rgba(0,0,0,0.04); display: flex; flex-direction: column; border: 2px solid transparent; transition: 0.3s; }
+        .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 6px 15px rgba(0,0,0,0.04); display: flex; flex-direction: column; border: 2px solid transparent; }
         .card.selected { border-color: var(--p); background-color: #f0faff; }
-        .card img { width: 100%; height: 200px; object-fit: contain; margin-bottom: 15px; background: #fff; }
-        .card h4 { font-size: 1.2em; margin: 10px 0; font-weight: 700; color: #000; line-height: 1.3; }
+        .card img { width: 100%; height: 180px; object-fit: contain; margin-bottom: 15px; }
         
-        /* Descrizione in Esteso */
-        .card .desc { font-size: 0.95em; color: #555; margin-bottom: 20px; line-height: 1.6; white-space: pre-line; }
+        /* Descrizione Espandibile */
+        .desc-container { font-size: 0.95em; color: #555; line-height: 1.5; margin-bottom: 15px; position: relative; }
+        .desc-text { display: block; }
+        .desc-text.collapsed { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+        .read-more { color: var(--p); cursor: pointer; font-weight: bold; font-size: 0.85em; display: inline-block; margin-top: 5px; }
+
         .sku-tag { font-size: 0.8em; color: var(--p); font-weight: bold; background: #eef7ff; padding: 4px 10px; border-radius: 5px; display: inline-block; margin-bottom: 8px; }
-        
-        /* Footer & Buttons */
         .qta-area { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #eee; padding-top: 20px; margin-top: auto; }
-        .qta-input { width: 70px; padding: 10px; border: 2px solid #ddd; border-radius: 12px; text-align: center; font-weight: bold; font-size: 1.1em; }
+        .qta-input { width: 65px; padding: 10px; border: 2px solid #ddd; border-radius: 12px; text-align: center; font-weight: bold; }
         
         .footer { position: fixed; bottom: 0; width: 100%; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); padding: 20px 0; box-shadow: 0 -5px 25px rgba(0,0,0,0.1); z-index: 2000; }
         .footer-btns { display: flex; justify-content: center; gap: 15px; max-width: 1200px; margin: auto; padding: 0 20px; }
-        .btn-cart { background: #ffc107; border: none; padding: 15px 25px; border-radius: 35px; font-weight: bold; cursor: pointer; font-size: 1.1em; }
-        .btn-send { background: var(--s); color: white; border: none; padding: 15px 40px; border-radius: 35px; font-weight: bold; font-size: 1.2em; flex-grow: 1; max-width: 600px; cursor: pointer; transition: 0.3s; }
-        .btn-send:hover { background: #218838; transform: scale(1.02); }
+        .btn-cart { background: #ffc107; border: none; padding: 15px 25px; border-radius: 35px; font-weight: bold; cursor: pointer; }
+        .btn-send { background: var(--s); color: white; border: none; padding: 15px 40px; border-radius: 35px; font-weight: bold; font-size: 1.2em; flex-grow: 1; max-width: 600px; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="header">
     <div class="container">
-        <input type="text" id="searchInput" class="search-bar" placeholder="🔍 Cerca per nome, codice, descrizione o categoria..." onkeyup="render()">
+        <input type="text" id="searchInput" class="search-bar" placeholder="🔍 Cerca prodotto..." onkeyup="render()">
+        <button class="cat-toggle-btn" onclick="toggleCats()">📂 SFOGLIA CATEGORIE</button>
         <div class="nav-cats" id="catNav"></div>
     </div>
 </div>
 
 <div class="container">
-    <h1 id="welcome">Benvenuto nel Catalogo Podopiu</h1>
+    <h1 id="welcome">Offerte Personalizzate</h1>
     <div id="catalogBody"></div>
 </div>
 
@@ -81,7 +67,6 @@
 </div>
 
 <script>
-    // CONFIGURAZIONE
     const T_ID = "8604086640:AAEVbCc5RphJ09ngmW1-naxIXeahirKaGIA"; 
     const C_ID = "1068754998";
     const S_U = "https://fxcuwfpdzymwkemzppgm.supabase.co";
@@ -89,45 +74,47 @@
 
     const sb = supabase.createClient(S_U, S_K);
     const slug = new URLSearchParams(window.location.search).get('c');
-    let carrello = JSON.parse(localStorage.getItem('podo_v7')) || {};
+    let carrello = JSON.parse(localStorage.getItem('podo_v8')) || {};
     let prodottiCache = [];
     let nomeCliente = "Cliente";
+
+    // Funzione per pulire il nome della categoria dai numeri e parentesi
+    function pulisciCat(nome) {
+        if(!nome) return "ALTRO";
+        return nome.replace(/\(\d+\)/g, '').replace(/\d+/g, '').trim().toUpperCase();
+    }
 
     async function start() {
         if (slug) {
             const { data: contact } = await sb.from('contacts').select('nome').eq('slug', slug).single();
-            if (contact) { 
-                nomeCliente = contact.nome; 
-                document.getElementById('welcome').innerText = "Offerte selezionate per " + nomeCliente; 
-            }
+            if (contact) { nomeCliente = contact.nome; document.getElementById('welcome').innerText = "Offerte per " + nomeCliente; }
         }
-        
         const { data: prodotti } = await sb.from('prodotti').select('*').order('categoria');
-        
         if(prodotti) {
-            // Filtro per tenere solo prodotti reali
-            prodottiCache = prodotti.filter(p => p.nome && p.nome.trim() !== "" && (p.immagine_url || p.descrizione));
+            prodottiCache = prodotti.filter(p => p.nome && (p.immagine_url || p.descrizione));
             aggiornaConteggio();
             setupNav();
             render();
         }
     }
 
+    function toggleCats() {
+        document.getElementById('catNav').classList.toggle('active');
+    }
+
     function setupNav() {
-        // Pulizia categorie: togliamo spazi, rendiamo tutto maiuscolo e rimuoviamo duplicati
-        let rawCats = prodottiCache.map(p => p.categoria ? p.categoria.trim().toUpperCase() : null);
-        let cats = [...new Set(rawCats)].filter(c => c && c !== "");
-        
+        // Mappa le categorie pulite
+        let cats = [...new Set(prodottiCache.map(p => pulisciCat(p.categoria)))].filter(c => c !== "");
         const nav = document.getElementById('catNav');
         nav.innerHTML = "";
         cats.forEach(c => {
-            const count = prodottiCache.filter(p => p.categoria && p.categoria.toUpperCase() === c).length;
-            // Creiamo la cella linkabile
-            const link = document.createElement('a');
-            link.className = 'nav-link';
-            link.href = "#" + c.replace(/[^A-Z0-9]/g, '');
-            link.innerText = `${c} (${count})`;
-            nav.appendChild(link);
+            const count = prodottiCache.filter(p => pulisciCat(p.categoria) === c).length;
+            const a = document.createElement('a');
+            a.className = 'nav-link';
+            a.href = "#" + c.replace(/\s/g, '');
+            a.innerText = `${c} (${count})`;
+            a.onclick = () => { if(window.innerWidth < 768) toggleCats(); };
+            nav.appendChild(a);
         });
     }
 
@@ -138,24 +125,13 @@
         let currentGrid = null;
         const term = document.getElementById('searchInput').value.toLowerCase();
         
-        const filtrati = prodottiCache.filter(p => {
-            const nome = (p.nome || "").toLowerCase();
-            const desc = (p.descrizione || "").toLowerCase();
-            const cod = (p.codice || "").toLowerCase();
-            const cat = (p.categoria || "").toLowerCase();
-            return nome.includes(term) || desc.includes(term) || cod.includes(term) || cat.includes(term);
-        });
-
-        if (filtrati.length === 0) {
-            body.innerHTML = "<p style='text-align:center; margin-top:50px; color:#666;'>Nessun prodotto trovato con questa ricerca.</p>";
-            return;
-        }
-
-        filtrati.forEach(p => {
-            const catPulita = p.categoria.trim().toUpperCase();
-            if (catPulita !== ultimaCat) {
-                ultimaCat = catPulita;
-                body.innerHTML += `<h2 class="cat-title" id="${catPulita.replace(/[^A-Z0-9]/g, '')}">${catPulita}</h2>`;
+        prodottiCache.filter(p => {
+            return p.nome.toLowerCase().includes(term) || (p.descrizione && p.descrizione.toLowerCase().includes(term));
+        }).forEach(p => {
+            const catPura = pulisciCat(p.categoria);
+            if (catPura !== ultimaCat) {
+                ultimaCat = catPura;
+                body.innerHTML += `<h2 class="cat-title" id="${catPura.replace(/\s/g, '')}">${catPura}</h2>`;
                 currentGrid = document.createElement('div');
                 currentGrid.className = 'grid';
                 body.appendChild(currentGrid);
@@ -165,78 +141,71 @@
             const qta = carrello[skuId] ? carrello[skuId].qta : 0;
             const safeId = skuId.replace(/[^a-z0-9]/gi, '_');
 
-            currentGrid.innerHTML += `
-                <div class="card ${qta > 0 ? 'selected' : ''}" id="card-${safeId}">
-                    <img src="${p.immagine_url || 'https://via.placeholder.com/200'}" onerror="this.src='https://via.placeholder.com/200'">
-                    <div class="sku-tag">CODICE: ${p.codice || '---'}</div>
-                    <h4>${p.nome}</h4>
-                    <div class="desc">${p.descrizione || ''}</div>
-                    <div class="qta-area">
-                        <span>Quantità richiesta:</span>
-                        <input type="number" class="qta-input" min="0" value="${qta}" onchange="aggiornaCarrello('${skuId.replace(/'/g, "\\'")}', '${p.nome.replace(/'/g, "\\'")}', this.value)">
-                    </div>
+            const card = document.createElement('div');
+            card.className = `card ${qta > 0 ? 'selected' : ''}`;
+            card.id = `card-${safeId}`;
+            card.innerHTML = `
+                <img src="${p.immagine_url || 'https://via.placeholder.com/200'}">
+                <div class="sku-tag">COD: ${p.codice || '---'}</div>
+                <h4>${p.nome}</h4>
+                <div class="desc-container">
+                    <span class="desc-text collapsed" id="desc-${safeId}">${p.descrizione || ''}</span>
+                    ${p.descrizione && p.descrizione.length > 150 ? `<span class="read-more" onclick="toggleDesc('${safeId}')" id="btn-${safeId}">Leggi tutto...</span>` : ''}
+                </div>
+                <div class="qta-area">
+                    <span>Q.tà:</span>
+                    <input type="number" class="qta-input" min="0" value="${qta}" onchange="aggiornaCarrello('${skuId.replace(/'/g, "\\'")}', '${p.nome.replace(/'/g, "\\'")}', this.value)">
                 </div>`;
+            currentGrid.appendChild(card);
         });
+    }
+
+    function toggleDesc(id) {
+        const text = document.getElementById('desc-' + id);
+        const btn = document.getElementById('btn-' + id);
+        if (text.classList.contains('collapsed')) {
+            text.classList.remove('collapsed');
+            btn.innerText = "Chiudi";
+        } else {
+            text.classList.add('collapsed');
+            btn.innerText = "Leggi tutto...";
+        }
     }
 
     function aggiornaCarrello(id, nome, qta) {
         qta = parseInt(qta);
         if (qta > 0) carrello[id] = { nome: nome, qta: qta };
         else delete carrello[id];
-        
-        localStorage.setItem('podo_v7', JSON.stringify(carrello));
+        localStorage.setItem('podo_v8', JSON.stringify(carrello));
         aggiornaConteggio();
-        
-        const safeId = id.replace(/[^a-z0-9]/gi, '_');
-        const card = document.getElementById('card-' + safeId);
+        const card = document.getElementById('card-' + id.replace(/[^a-z0-9]/gi, '_'));
         if(card) qta > 0 ? card.classList.add('selected') : card.classList.remove('selected');
     }
 
-    function aggiornaConteggio() { 
-        document.getElementById('cart-count').innerText = Object.keys(carrello).length; 
-    }
+    function aggiornaConteggio() { document.getElementById('cart-count').innerText = Object.keys(carrello).length; }
 
     function apriRiepilogo() {
-        let html = '<div style="max-height: 400px; overflow-y: auto; text-align: left; padding: 10px;">';
-        const keys = Object.keys(carrello);
-        if (keys.length === 0) html += '<p>Nessun prodotto selezionato.</p>';
-        else {
-            keys.forEach(id => {
-                const p = carrello[id];
-                html += `
-                    <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid #eee;">
-                        <div style="flex:1; font-size:0.9em; padding-right:10px;">
-                            <strong>${p.nome}</strong><br><small style="color:var(--p)">${id}</small>
-                        </div>
-                        <div style="font-weight:bold; color:var(--s); font-size:1.1em;">x${p.qta}</div>
-                    </div>`;
-            });
-        }
+        let html = '<div style="max-height: 300px; overflow-y: auto;">';
+        Object.keys(carrello).forEach(id => {
+            html += `<div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #eee;">
+                        <span>${carrello[id].nome}</span><strong>x${carrello[id].qta}</strong>
+                     </div>`;
+        });
         html += '</div>';
-        Swal.fire({ title: 'Riepilogo Richiesta', html: html, confirmButtonText: 'Continua lo shopping', confirmButtonColor: '#0088cc' });
+        Swal.fire({ title: 'Carrello', html: html || 'Vuoto' });
     }
 
     async function inviaOrdine() {
         const lista = Object.keys(carrello).map(id => ({ cod: id, art: carrello[id].nome, qta: carrello[id].qta }));
-        if (lista.length === 0) return Swal.fire('Oops!', 'Il carrello è ancora vuoto.', 'warning');
-
-        Swal.fire({ title: 'Invio in corso...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
-
+        if (lista.length === 0) return Swal.fire('Carrello vuoto!');
+        Swal.fire({ title: 'Invio...', didOpen: () => Swal.showLoading() });
         const { error } = await sb.from('richieste_preventivo').insert({ contact_slug: slug || "anonimo", prodotti_scelti: lista });
-
         if (!error) {
-            let msg = "📦 NUOVA RICHIESTA DA: " + nomeCliente.toUpperCase() + "\n\n";
-            lista.forEach(i => msg += "🔹 " + i.art + " (Cod: " + i.cod + ") -> Qta: " + i.qta + "\n");
-            
+            let msg = "📦 RICHIESTA DA: " + nomeCliente.toUpperCase() + "\n\n";
+            lista.forEach(i => msg += `• ${i.art} (x${i.qta})\n`);
             await fetch(`https://api.telegram.org/bot${T_ID}/sendMessage?chat_id=${C_ID}&text=${encodeURIComponent(msg)}`);
-            
-            Swal.fire({ title: 'Richiesta Inviata!', text: 'Grazie, ti risponderemo con un preventivo dedicato nel minor tempo possibile.', icon: 'success', confirmButtonColor: '#28a745' });
-            carrello = {}; 
-            localStorage.removeItem('podo_v7'); 
-            aggiornaConteggio(); 
-            render();
-        } else {
-            Swal.fire('Errore', 'Si è verificato un problema tecnico. Riprova più tardi.', 'error');
+            Swal.fire('Inviato!', 'Ti risponderemo presto.', 'success');
+            carrello = {}; localStorage.removeItem('podo_v8'); aggiornaConteggio(); render();
         }
     }
     start();
