@@ -5,50 +5,50 @@ from supabase import create_client
 
 URL_SB = os.environ.get("SUPABASE_URL")
 KEY_SB = os.environ.get("SUPABASE_KEY")
-supabase = create_client(URL_SB, KEY_SB)
+sb = create_client(URL_SB, KEY_SB)
 
 def esegui_scraping():
     home_url = "https://www.podopiu.com/negozio/"
-    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
     res = requests.get(home_url, headers=headers)
     soup = BeautifulSoup(res.text, 'html.parser')
     
-    # 1. Trova le categorie (nel sito PodoPiù sono nei box 'product-category')
-    categorie_items = soup.find_all('li', class_='product-category')
+    # Trova categorie reali
+    categorie = soup.find_all('li', class_='product-category')
     
-    for cat in categorie_items:
-        nome_categoria = cat.find('h2').text.strip()
-        link_categoria = cat.find('a')['href']
-        
-        print(f"Entro in: {nome_categoria}...")
-        
-        res_cat = requests.get(link_categoria, headers=headers)
-        soup_cat = BeautifulSoup(res_cat.text, 'html.parser')
-        
-        # 2. Trova i prodotti nella pagina della categoria
-        # In questo sito i prodotti sono dentro 'li' con classe 'product'
-        items = soup_cat.find_all('li', class_='product')
-        
-        for item in items:
+    for cat in categorie:
+        nome_cat = cat.find('h2').text.split('(')[0].strip()
+        link_cat = cat.find('a')['href']
+        print(f"Scansione: {nome_cat}")
+
+        res_c = requests.get(link_cat, headers=headers)
+        soup_c = BeautifulSoup(res_c.text, 'html.parser')
+        prodotti = soup_c.find_all('li', class_='product')
+
+        for p in prodotti:
             try:
-                # Estrazione dati specifica per PodoPiù
-                nome = item.find('h2').text.strip()
-                img = item.find('img')['src']
-                # Il codice spesso è negli attributi o nel testo, qui generiamo uno slug unico
-                codice_generato = nome.replace(" ", "-").upper()[:15] 
+                nome = p.find('h2').text.strip()
+                img = p.find('img')['src'] if p.find('img') else ""
+                link_p = p.find('a')['href']
                 
+                # Entriamo nel prodotto per SKU e Descrizione
+                res_p = requests.get(link_p, headers=headers)
+                soup_p = BeautifulSoup(res_p.text, 'html.parser')
+                
+                sku = soup_p.find('span', class_='sku').text.strip() if soup_p.find('span', class_='sku') else "ND"
+                desc = soup_p.find('div', class_='woocommerce-product-details__short-description')
+                desc_text = desc.text.strip() if desc else "Dettagli sul sito"
+
                 p_data = {
-                    "codice": codice_generato,
+                    "codice": sku,
                     "nome": nome,
                     "immagine_url": img,
-                    "descrizione": "Visualizza dettagli sul sito",
-                    "categoria": nome_categoria
+                    "descrizione": desc_text,
+                    "categoria": nome_cat
                 }
-                
-                # Upsert su Supabase
-                supabase.table("prodotti").upsert(p_data, on_conflict="codice").execute()
+                sb.table("prodotti").upsert(p_data, on_conflict="codice").execute()
             except Exception as e:
-                print(f"Errore prodotto: {e}")
+                continue
 
 if __name__ == "__main__":
     esegui_scraping()
