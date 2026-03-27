@@ -7,40 +7,53 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        :root { --p: #0088cc; --s: #28a745; --bg: #f4f7f9; }
+        :root { --p: #0088cc; --s: #28a745; --bg: #e9ecef; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding-bottom: 160px; color: #333; }
         
-        .header { position: sticky; top: 0; background: white; z-index: 1000; padding: 15px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-        .container { max-width: 1200px; margin: auto; padding: 0 20px; }
+        .header { position: sticky; top: 0; background: white; z-index: 1000; padding: 15px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .container { max-width: 1250px; margin: auto; padding: 0 20px; }
+        
         .search-bar { width: 100%; padding: 15px 25px; border: 2px solid var(--p); border-radius: 50px; font-size: 16px; outline: none; box-sizing: border-box; }
         
-        .cat-toggle-btn { background: var(--p); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px; }
-        .nav-cats { display: none; flex-wrap: wrap; gap: 8px; margin-top: 15px; justify-content: center; background: #fff; padding: 15px; border-radius: 12px; border: 1px solid #ddd; max-height: 300px; overflow-y: auto; }
+        /* Navigazione Categorie */
+        .cat-toggle-btn { background: var(--p); color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 14px; }
+        .nav-cats { display: none; flex-wrap: wrap; gap: 8px; margin-top: 15px; justify-content: center; background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #dee2e6; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); max-height: 300px; overflow-y: auto; }
         .nav-cats.active { display: flex; }
-        .nav-link { background: #f0faff; color: var(--p); padding: 8px 12px; border-radius: 6px; text-decoration: none; font-size: 11px; font-weight: bold; border: 1px solid #cce5ff; text-transform: uppercase; }
+        .nav-link { background: #f8f9fa; color: var(--p); padding: 8px 12px; border-radius: 6px; text-decoration: none; font-size: 11px; font-weight: bold; border: 1px solid #dee2e6; transition: 0.2s; text-transform: uppercase; }
+        .nav-link:hover { background: var(--p); color: white; border-color: var(--p); }
 
-        #welcome { text-align: center; margin: 30px 0; font-weight: 800; color: #111; font-size: 1.8em; }
-        .cat-title { background: var(--p); color: white; padding: 12px 25px; border-radius: 8px; margin-top: 50px; scroll-margin-top: 250px; text-transform: uppercase; }
+        #welcome { text-align: center; margin: 40px 0; font-weight: 800; color: #111; font-size: 2em; text-transform: uppercase; letter-spacing: -1px; }
+        .cat-title { background: var(--p); color: white; padding: 14px 25px; border-radius: 8px; margin-top: 60px; scroll-margin-top: 260px; text-transform: uppercase; font-size: 1.2em; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; margin-top: 25px; }
-        .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 6px 15px rgba(0,0,0,0.04); display: flex; flex-direction: column; border: 2px solid transparent; }
-        .card.selected { border-color: var(--p); background-color: #f0faff; }
-        .card img { width: 100%; height: 180px; object-fit: contain; margin-bottom: 15px; }
+        /* Griglia e Card Scolpite */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px; margin-top: 30px; }
+        .card { 
+            background: white; padding: 25px; border-radius: 12px; border: 1px solid #d1d9e0; 
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08); display: flex; flex-direction: column; 
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s; position: relative; 
+        }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 12px 25px rgba(0,0,0,0.15); border-color: var(--p); }
+        .card.selected { border: 2px solid var(--p); background-color: #f0faff; box-shadow: 0 0 15px rgba(0,136,204,0.2); }
         
-        .desc-container { font-size: 0.95em; color: #555; line-height: 1.5; margin-bottom: 15px; }
+        .card img { width: 100%; height: 180px; object-fit: contain; margin-bottom: 20px; border-bottom: 1px solid #f0f0f0; padding-bottom: 15px; }
+        
+        .sku-tag { font-size: 0.75em; color: #666; font-weight: bold; background: #f1f3f5; padding: 4px 10px; border-radius: 4px; display: inline-block; margin-bottom: 10px; border: 1px solid #e9ecef; }
+        h4 { font-size: 1.1em; margin: 10px 0; line-height: 1.3; min-height: 2.6em; }
+
+        .desc-container { font-size: 0.95em; color: #555; line-height: 1.5; margin-bottom: 20px; min-height: 4.5em; }
         .desc-text.collapsed { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-        .read-more { color: var(--p); cursor: pointer; font-weight: bold; font-size: 0.85em; display: inline-block; margin-top: 5px; }
+        .read-more { color: var(--p); cursor: pointer; font-weight: bold; font-size: 0.85em; display: inline-block; margin-top: 8px; text-decoration: underline; }
 
-        .sku-tag { font-size: 0.8em; color: var(--p); font-weight: bold; background: #eef7ff; padding: 4px 10px; border-radius: 5px; display: inline-block; margin-bottom: 8px; }
-        .qta-area { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #eee; padding-top: 20px; margin-top: auto; }
-        .qta-input { width: 60px; padding: 8px; border: 2px solid #ddd; border-radius: 10px; text-align: center; font-weight: bold; }
+        .qta-area { display: flex; justify-content: space-between; align-items: center; border-top: 2px solid #f8f9fa; padding-top: 20px; margin-top: auto; }
+        .qta-input { width: 65px; padding: 10px; border: 2px solid #ced4da; border-radius: 8px; text-align: center; font-weight: bold; font-size: 1.1em; color: var(--p); }
         
-        .footer { position: fixed; bottom: 0; width: 100%; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); padding: 20px 0; box-shadow: 0 -5px 25px rgba(0,0,0,0.1); z-index: 2000; }
-        .footer-btns { display: flex; justify-content: center; gap: 10px; max-width: 1200px; margin: auto; padding: 0 20px; }
-        .btn-cart { background: #ffc107; border: none; padding: 15px 20px; border-radius: 35px; font-weight: bold; cursor: pointer; }
-        .btn-send { background: var(--s); color: white; border: none; padding: 15px 30px; border-radius: 35px; font-weight: bold; font-size: 1.1em; flex-grow: 1; max-width: 500px; cursor: pointer; }
+        /* Footer e Carrello Editabile */
+        .footer { position: fixed; bottom: 0; width: 100%; background: white; padding: 20px 0; box-shadow: 0 -10px 30px rgba(0,0,0,0.15); z-index: 2000; border-top: 1px solid #dee2e6; }
+        .footer-btns { display: flex; justify-content: center; gap: 15px; max-width: 1200px; margin: auto; padding: 0 20px; }
+        .btn-cart { background: #ffc107; border: 1px solid #e0a800; padding: 15px 25px; border-radius: 12px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .btn-send { background: var(--s); color: white; border: none; padding: 15px 35px; border-radius: 12px; font-weight: bold; font-size: 1.2em; flex-grow: 1; max-width: 600px; cursor: pointer; box-shadow: 0 4px 15px rgba(40,167,69,0.3); transition: 0.2s; }
         
-        .cart-edit-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; gap: 10px; }
+        .cart-edit-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #eee; gap: 10px; }
         .btn-del { color: #dc3545; background: none; border: none; font-size: 1.2em; cursor: pointer; font-weight: bold; }
     </style>
 </head>
@@ -67,6 +80,7 @@
 </div>
 
 <script>
+    // Recupero credenziali dal file precedente
     const T_ID = "8604086640:AAEVbCc5RphJ09ngmW1-naxIXeahirKaGIA"; 
     const C_ID = "1068754998";
     const S_U = "https://fxcuwfpdzymwkemzppgm.supabase.co";
@@ -74,7 +88,7 @@
 
     const sb = supabase.createClient(S_U, S_K);
     const slug = new URLSearchParams(window.location.search).get('c');
-    let carrello = JSON.parse(localStorage.getItem('podo_v9')) || {};
+    let carrello = JSON.parse(localStorage.getItem('podo_v10')) || {};
     let prodottiCache = [];
     let nomeCliente = "Cliente";
 
@@ -120,9 +134,7 @@
             a.className = 'nav-link';
             a.href = "#" + c.replace(/\s/g, '');
             a.innerText = `${c} (${count})`;
-            a.onclick = (e) => { 
-                toggleCats(); // Chiude il menu dopo il click
-            };
+            a.onclick = () => toggleCats(); // Chiude il menu dopo il click
             nav.appendChild(a);
         });
     }
@@ -187,10 +199,9 @@
         } else {
             delete carrello[id];
         }
-        localStorage.setItem('podo_v9', JSON.stringify(carrello));
+        localStorage.setItem('podo_v10', JSON.stringify(carrello));
         aggiornaConteggio();
         
-        // Sincronizza input e card nel catalogo
         const card = document.getElementById('card-' + safeId);
         const input = document.getElementById('input-' + safeId);
         if(card) qta > 0 ? card.classList.add('selected') : card.classList.remove('selected');
@@ -209,8 +220,8 @@
                 const p = carrello[id];
                 html += `
                     <div class="cart-edit-row">
-                        <div style="flex:1; font-size:0.85em;"><strong>${p.nome}</strong><br><small>${id}</small></div>
-                        <input type="number" value="${p.qta}" style="width:45px; padding:5px; border:1px solid #ccc; border-radius:5px;" onchange="aggiornaCarrello('${id.replace(/'/g, "\\'")}', '', this.value); apriRiepilogo()">
+                        <div style="flex:1; font-size:0.85em; padding-right:10px;"><strong>${p.nome}</strong><br><small>${id}</small></div>
+                        <input type="number" value="${p.qta}" style="width:50px; padding:8px; border:1px solid #ccc; border-radius:8px; text-align:center;" onchange="aggiornaCarrello('${id.replace(/'/g, "\\'")}', '', this.value); apriRiepilogo()">
                         <button class="btn-del" onclick="aggiornaCarrello('${id.replace(/'/g, "\\'")}', '', 0); apriRiepilogo()">✖</button>
                     </div>`;
             });
@@ -240,7 +251,7 @@
                 confirmButtonColor: '#28a745' 
             });
             
-            carrello = {}; localStorage.removeItem('podo_v9'); aggiornaConteggio(); render();
+            carrello = {}; localStorage.removeItem('podo_v10'); aggiornaConteggio(); render();
         } else {
             Swal.fire('Errore', 'Problema tecnico nell\'invio. Riprova tra poco.', 'error');
         }
