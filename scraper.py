@@ -1,41 +1,54 @@
+import os
+import requests
+from bs4 import BeautifulSoup
+from supabase import create_client
+
+URL_SB = os.environ.get("SUPABASE_URL")
+KEY_SB = os.environ.get("SUPABASE_KEY")
+supabase = create_client(URL_SB, KEY_SB)
+
 def esegui_scraping():
-    home_url = "https://share.google/2a1HjpodGQ2SYBLZe" 
-    headers = {"User-Agent": "Mozilla/5.0"}
+    home_url = "https://www.podopiu.com/negozio/"
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
     res = requests.get(home_url, headers=headers)
     soup = BeautifulSoup(res.text, 'html.parser')
     
-    # Cerchiamo tutti i link che hanno la parola 'category' nella classe o nell'URL
-    categorie_links = [a for a in soup.find_all('a') if 'category' in str(a.get('class')) or 'category' in a.get('href', '')] 
+    # 1. Trova le categorie (nel sito PodoPiù sono nei box 'product-category')
+    categorie_items = soup.find_all('li', class_='product-category')
     
-    for cat in categorie_links:
-        nome_categoria = cat.text.strip()
-        link_categoria = cat['href']
+    for cat in categorie_items:
+        nome_categoria = cat.find('h2').text.strip()
+        link_categoria = cat.find('a')['href']
         
-        # Gestione link relativi
-        if not link_categoria.startswith('http'):
-            link_categoria = "https://tuo-sito-base.com" + link_categoria
-
+        print(f"Entro in: {nome_categoria}...")
+        
         res_cat = requests.get(link_categoria, headers=headers)
         soup_cat = BeautifulSoup(res_cat.text, 'html.parser')
         
-        # Cerchiamo i box prodotto usando i tag che hai visto (es. quelli con 'product')
-        items = soup_cat.find_all('div', class_=lambda x: x and 'product' in x)
+        # 2. Trova i prodotti nella pagina della categoria
+        # In questo sito i prodotti sono dentro 'li' con classe 'product'
+        items = soup_cat.find_all('li', class_='product')
         
         for item in items:
             try:
-                # Prendiamo il primo H3 o H4 che troviamo (di solito è il titolo)
-                titolo = item.find(['h2', 'h3', 'h4'])
-                # Prendiamo la prima immagine che ha 'zoom' o 'product' o la prima in assoluto
-                img = item.find('img', class_=lambda x: x and ('zoom' in x or 'product' in x)) or item.find('img')
+                # Estrazione dati specifica per PodoPiù
+                nome = item.find('h2').text.strip()
+                img = item.find('img')['src']
+                # Il codice spesso è negli attributi o nel testo, qui generiamo uno slug unico
+                codice_generato = nome.replace(" ", "-").upper()[:15] 
                 
                 p_data = {
-                    "codice": "SC-" + titolo.text.strip()[:5].upper() if titolo else "N/D", 
-                    "nome": titolo.text.strip() if titolo else "Prodotto senza nome",
-                    "immagine_url": img['src'] if img else "",
-                    "descrizione": item.text.strip()[:100], # Prende i primi 100 caratteri del box come descrizione
-                    "categoria": nome_categoria 
+                    "codice": codice_generato,
+                    "nome": nome,
+                    "immagine_url": img,
+                    "descrizione": "Visualizza dettagli sul sito",
+                    "categoria": nome_categoria
                 }
                 
-                supabase.table("prodotti").upsert(p_data, on_conflict="nome").execute()
-            except:
-                continue
+                # Upsert su Supabase
+                supabase.table("prodotti").upsert(p_data, on_conflict="codice").execute()
+            except Exception as e:
+                print(f"Errore prodotto: {e}")
+
+if __name__ == "__main__":
+    esegui_scraping()
