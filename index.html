@@ -3,150 +3,276 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Catalogo Professionale</title>
+    <title>Catalogo Offerte Personalizzate</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; padding-bottom: 120px; }
-        .sticky-header { position: sticky; top: 0; background: white; z-index: 1000; padding: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .search-container { max-width: 800px; margin: auto; }
-        .search-bar { width: 100%; padding: 12px 20px; border: 2px solid #0088cc; border-radius: 30px; font-size: 16px; outline: none; }
+        :root { --primary: #0088cc; --secondary: #28a745; --bg: #f0f2f5; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); margin: 0; padding-bottom: 140px; color: #333; }
+        
+        /* Header fisso con Ricerca */
+        .sticky-header { position: sticky; top: 0; background: white; z-index: 1000; padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .container { max-width: 1100px; margin: auto; padding: 0 20px; }
+        .search-bar { width: 100%; padding: 14px 25px; border: 2px solid var(--primary); border-radius: 35px; font-size: 16px; outline: none; box-sizing: border-box; }
+        
+        /* Navigazione Categorie */
         .nav-cats { display: flex; overflow-x: auto; gap: 10px; margin-top: 15px; padding-bottom: 5px; scrollbar-width: none; }
-        .nav-link { background: #eef7ff; color: #0088cc; padding: 8px 18px; border-radius: 20px; text-decoration: none; font-size: 13px; font-weight: bold; white-space: nowrap; border: 1px solid #cce5ff; }
-        .container { max-width: 1100px; margin: auto; padding: 20px; }
-        .cat-section-title { background: #0088cc; color: white; padding: 12px 20px; border-radius: 8px; margin-top: 40px; scroll-margin-top: 170px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 25px; margin-top: 20px; }
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; flex-direction: column; }
-        .card img { width: 100%; height: 180px; object-fit: contain; border-bottom: 1px solid #eee; margin-bottom: 15px; }
-        .card h4 { font-size: 1em; margin: 10px 0; color: #222; height: 45px; overflow: hidden; }
-        .card .sku { font-size: 0.75em; color: #0088cc; font-weight: bold; margin-bottom: 5px; }
-        .card .desc { font-size: 0.85em; color: #666; height: 50px; overflow: hidden; margin-bottom: 15px; line-height: 1.4; }
-        .footer { position: fixed; bottom: 0; width: 100%; background: white; padding: 20px; text-align: center; box-shadow: 0 -5px 20px rgba(0,0,0,0.1); z-index: 1000; }
-        .btn-send { background: #28a745; color: white; border: none; padding: 15px 60px; border-radius: 35px; cursor: pointer; font-weight: bold; font-size: 1.1em; transition: 0.3s; }
-        .btn-send:hover { background: #218838; transform: scale(1.03); }
+        .nav-link { background: #eef7ff; color: var(--primary); padding: 8px 18px; border-radius: 20px; text-decoration: none; font-size: 13px; font-weight: bold; white-space: nowrap; border: 1px solid #cce5ff; }
+        
+        /* Titoli e Welcome */
+        #welcome { color: #111; margin: 40px 0 20px 0; font-size: 1.8em; text-align: center; font-weight: bold; line-height: 1.2; }
+        .cat-title { background: var(--primary); color: white; padding: 12px 20px; border-radius: 8px; margin-top: 50px; scroll-margin-top: 180px; text-transform: uppercase; }
+        
+        /* Griglia Prodotti */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 25px; margin-top: 20px; }
+        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); display: flex; flex-direction: column; transition: 0.3s; border: 2px solid transparent; }
+        .card.selected { border-color: var(--primary); background-color: #f0faff; }
+        .card img { width: 100%; height: 180px; object-fit: contain; margin-bottom: 15px; }
+        .card h4 { font-size: 1em; margin: 10px 0; height: 40px; overflow: hidden; color: #222; }
+        .card .sku { font-size: 0.75em; color: var(--primary); font-weight: bold; }
+        
+        /* Area Quantità */
+        .qta-area { display: flex; justify-content: space-between; align-items: center; padding-top: 15px; border-top: 1px solid #f0f0f0; margin-top: auto; }
+        .qta-input { width: 65px; padding: 8px; border: 2px solid #ddd; border-radius: 10px; text-align: center; font-weight: bold; font-size: 1.1em; }
+        
+        /* Footer con Pulsanti */
+        .footer { position: fixed; bottom: 0; width: 100%; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); padding: 20px 0; text-align: center; box-shadow: 0 -5px 25px rgba(0,0,0,0.1); z-index: 2000; }
+        .footer-btns { display: flex; justify-content: center; gap: 15px; max-width: 1100px; margin: auto; padding: 0 20px; }
+        .btn-cart { background: #ffc107; color: #333; border: none; padding: 15px 20px; border-radius: 35px; cursor: pointer; font-weight: bold; flex-shrink: 0; }
+        .btn-send { background: var(--secondary); color: white; border: none; padding: 15px 40px; border-radius: 35px; cursor: pointer; font-weight: bold; font-size: 1.1em; flex-grow: 1; max-width: 500px; transition: 0.3s; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3); }
+        .btn-send:hover { background: #218838; transform: scale(1.02); }
+
+        /* Stile Riepilogo (Modale) */
+        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #eee; text-align: left; }
+        .btn-del { color: #dc3545; background: none; border: none; font-size: 1.2em; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="sticky-header">
-    <div class="search-container">
-        <input type="text" id="searchInput" class="search-bar" placeholder="🔍 Cerca per nome o codice articolo..." onkeyup="filtraProdotti()">
-        <div class="nav-cats" id="categoryNav"></div>
+    <div class="container">
+        <input type="text" id="searchInput" class="search-bar" placeholder="🔍 Cerca prodotto o codice articolo..." onkeyup="render()">
+        <div class="nav-cats" id="catNav"></div>
     </div>
 </div>
 
 <div class="container">
-    <h1 id="welcome">Inizializzazione...</h1>
-    <div id="catalogSpace"></div>
+    <h1 id="welcome">Caricamento catalogo in corso...</h1>
+    <div id="catalogBody"></div>
 </div>
 
 <div class="footer">
-    <button class="btn-send" onclick="inviaOrdine()">🚀 Invia Richiesta Preventivo</button>
+    <div class="footer-btns">
+        <button class="btn-cart" onclick="apriRiepilogo()">🛒 Riepilogo (<span id="cart-count">0</span>)</button>
+        <button class="btn-send" onclick="inviaOrdine()">🚀 INVIA RICHIESTA OFFERTE DI PREVENTIVO</button>
+    </div>
 </div>
 
 <script>
-    // Configurazione
+    // --- CONFIGURAZIONE TELEGRAM E DB ---
+    const TOKEN_TG = "IL_TUO_TOKEN_QUI";
+    const CHAT_ID_TG = "IL_TUO_CHAT_ID_QUI";
     const SB_URL = "https://fxcuwfpdzymwkemzppgm.supabase.co";
     const SB_KEY = "sb_publishable__jf5n22-ZlvGPRN-BAh38A_WdVt7B9d";
-    const TG_TOKEN = "8604086640:AAEVbCc5RphJ09ngmW1-naxIXeahirKaGIA"; 
-    const TG_CHATID = "1068754998";
+    // ------------------------------------
 
     const sb = supabase.createClient(SB_URL, SB_KEY);
-    const slug = new URLSearchParams(window.location.search).get('c');
-    let cacheProdotti = [];
+    const params = new URLSearchParams(window.location.search);
+    const slug = params.get('c');
+    
+    let carrello = JSON.parse(localStorage.getItem('podo_cart_v3')) || {};
+    let prodottiCache = [];
+    let nomeCliente = "Cliente";
 
-    async function init() {
-        // Carica Cliente
+    async function start() {
+        // Recupero nome cliente per frase a effetto
         if (slug) {
-            const { data: c } = await sb.from('contacts').select('nome').eq('slug', slug).single();
-            document.getElementById('welcome').innerText = c ? `Offerta per: ${c.nome}` : "Catalogo Prodotti";
+            const { data: contact } = await sb.from('contacts').select('nome').eq('slug', slug).single();
+            if (contact) {
+                nomeCliente = contact.nome;
+                document.getElementById('welcome').innerText = `Richiedi le offerte personalizzate per te, ${nomeCliente}!`;
+            } else {
+                document.getElementById('welcome').innerText = "Richiedi le tue offerte personalizzate!";
+            }
         }
 
-        // Carica Prodotti
-        const { data: p, error } = await sb.from('prodotti').select('*').order('categoria');
-        if (error) return console.error(error);
+        // Caricamento prodotti dal DB
+        const { data: prodotti, error } = await sb.from('prodotti').select('*').order('categoria');
+        if (error) {
+            console.error("Errore DB:", error);
+            return;
+        }
         
-        cacheProdotti = p;
-        render(cacheProdotti);
-        buildNav(cacheProdotti);
+        prodottiCache = prodotti;
+        aggiornaConteggio();
+        render();
+        setupNav();
     }
 
-    function buildNav(prodotti) {
-        const cats = [...new Set(prodotti.map(x => x.categoria))];
-        const nav = document.getElementById('categoryNav');
+    function setupNav() {
+        const cats = [...new Set(prodottiCache.map(p => p.categoria))];
+        const nav = document.getElementById('catNav');
+        nav.innerHTML = "";
         cats.forEach(c => {
-            const link = document.createElement('a');
-            link.className = 'nav-link';
-            link.href = `#${c.replace(/\s+/g, '')}`;
-            link.innerText = c;
-            nav.appendChild(link);
+            const a = document.createElement('a');
+            a.className = 'nav-link';
+            a.href = `#${c.replace(/\s/g, '')}`;
+            a.innerText = c;
+            nav.appendChild(a);
         });
     }
 
-    function render(lista) {
-        const space = document.getElementById('catalogSpace');
-        space.innerHTML = "";
-        let lastCat = "";
+    function render() {
+        const body = document.getElementById('catalogBody');
+        body.innerHTML = "";
+        let ultimaCat = "";
         let currentGrid = null;
 
-        lista.forEach(item => {
-            if (item.categoria !== lastCat) {
-                lastCat = item.categoria;
-                const h = document.createElement('h2');
-                h.className = 'cat-section-title';
-                h.id = item.categoria.replace(/\s+/g, '');
-                h.innerText = item.categoria;
-                space.appendChild(h);
+        const term = document.getElementById('searchInput').value.toLowerCase();
+        const filtrati = prodottiCache.filter(p => 
+            p.nome.toLowerCase().includes(term) || p.codice.toLowerCase().includes(term)
+        );
+
+        filtrati.forEach(p => {
+            if (p.categoria !== ultimaCat) {
+                ultimaCat = p.categoria;
+                const h2 = document.createElement('h2');
+                h2.className = 'cat-title';
+                h2.id = p.categoria.replace(/\s/g, '');
+                h2.innerText = p.categoria;
+                body.appendChild(h2);
                 
                 currentGrid = document.createElement('div');
                 currentGrid.className = 'grid';
-                space.appendChild(currentGrid);
+                body.appendChild(currentGrid);
             }
+            
+            const qtaCorrente = carrello[p.codice] ? carrello[p.codice].qta : 0;
+            const cardClass = qtaCorrente > 0 ? 'card selected' : 'card';
 
             currentGrid.innerHTML += `
-                <div class="card">
-                    <img src="${item.immagine_url || 'https://via.placeholder.com/200'}">
-                    <div class="sku">COD: ${item.codice}</div>
-                    <h4>${item.nome}</h4>
-                    <p class="desc">${item.descrizione || ''}</p>
-                    <div style="display:flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size:0.9em">Q.tà:</span>
-                        <input type="number" class="qta-box" data-nome="${item.nome}" data-sku="${item.codice}" min="0" value="0" style="width:60px; padding:5px">
+                <div class="${cardClass}" id="card-${p.codice}">
+                    <img src="${p.immagine_url || 'https://via.placeholder.com/200'}" onerror="this.src='https://via.placeholder.com/200'">
+                    <div class="sku">COD: ${p.codice}</div>
+                    <h4>${p.nome}</h4>
+                    <div class="qta-area">
+                        <span>Quantità:</span>
+                        <input type="number" class="qta-input" 
+                            data-sku="${p.codice}" 
+                            onchange="aggiornaCarrello('${p.codice}', '${p.nome.replace(/'/g, "\\'")}', this.value)" 
+                            min="0" value="${qtaCorrente}">
                     </div>
                 </div>`;
         });
     }
 
-    function filtraProdotti() {
-        const term = document.getElementById('searchInput').value.toLowerCase();
-        const filtered = cacheProdotti.filter(x => 
-            x.nome.toLowerCase().includes(term) || x.codice.toLowerCase().includes(term)
-        );
-        render(filtered);
-    }
-
-    async function inviaOrdine() {
-        const ordini = Array.from(document.querySelectorAll('.qta-box'))
-            .filter(i => parseInt(i.value) > 0)
-            .map(i => ({ art: i.dataset.nome, sku: i.dataset.sku, q: i.value }));
-
-        if (ordini.length === 0) return alert("Seleziona almeno un prodotto!");
-
-        // Salva su Supabase
-        const { error } = await sb.from('richieste_preventivo').insert({ contact_slug: slug, prodotti_scelti: ordini });
+    function aggiornaCarrello(sku, nome, qta) {
+        qta = parseInt(qta);
+        if (qta > 0) {
+            carrello[sku] = { nome, qta };
+        } else {
+            delete carrello[sku];
+        }
         
-        if (!error) {
-            // Notifica Telegram
-            let t = `📦 *ORDINE DA ${slug || 'SITO'}*\n\n`;
-            ordini.forEach(o => t += `• ${o.art} (${o.sku}) - Qta: ${o.q}\n`);
-            
-            fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage?chat_id=${TG_CHATID}&text=${encodeURIComponent(t)}&parse_mode=Markdown`);
-            
-            alert("Richiesta inviata correttamente!");
-            document.querySelectorAll('.qta-box').forEach(i => i.value = 0);
+        // Salva in memoria locale
+        localStorage.setItem('podo_cart_v3', JSON.stringify(carrello));
+        
+        // Aggiorna contatore e stile card
+        aggiornaConteggio();
+        const card = document.getElementById(`card-${sku}`);
+        if(card) {
+            if(qta > 0) card.classList.add('selected');
+            else card.classList.remove('selected');
         }
     }
 
-    init();
+    function aggiornaConteggio() {
+        const count = Object.keys(carrello).length;
+        document.getElementById('cart-count').innerText = count;
+    }
+
+    function apriRiepilogo() {
+        let html = '<div style="max-height: 350px; overflow-y: auto; padding: 10px;">';
+        const keys = Object.keys(carrello);
+        
+        if (keys.length === 0) {
+            html += '<p>Il riepilogo è vuoto.</p>';
+        } else {
+            keys.forEach(sku => {
+                const item = carrello[sku];
+                html += `
+                <div class="cart-item">
+                    <div style="flex:1; padding-right:10px;">
+                        <strong>${item.nome}</strong><br><small style="color:var(--primary)">${sku}</small>
+                    </div>
+                    <input type="number" value="${item.qta}" 
+                        style="width:50px; padding:5px; text-align:center; border-radius:5px; border:1px solid #ccc;"
+                        onchange="aggiornaCarrello('${sku}', '${item.nome.replace(/'/g, "\\'")}', this.value); apriRiepilogo()">
+                    <button class="btn-del" onclick="aggiornaCarrello('${sku}', '', 0); apriRiepilogo(); render()">✖</button>
+                </div>`;
+            });
+            html += `<button onclick="svuotaTutto()" style="margin-top:20px; color:red; border:none; background:none; cursor:pointer; font-weight:bold;">🗑 Svuota tutto il carrello</button>`;
+        }
+        html += '</div>';
+
+        Swal.fire({
+            title: 'I Tuoi Prodotti Selezionati',
+            html: html,
+            showConfirmButton: true,
+            confirmButtonText: 'Torna al Catalogo',
+            confirmButtonColor: var(--primary)
+        });
+    }
+
+    function svuotaTutto() {
+        carrello = {};
+        localStorage.removeItem('podo_cart_v3');
+        aggiornaConteggio();
+        render();
+        Swal.close();
+    }
+
+    async function inviaOrdine() {
+        const listaSotto = Object.keys(carrello).map(sku => ({
+            cod: sku,
+            art: carrello[sku].nome,
+            qta: carrello[sku].qta
+        }));
+
+        if (listaSotto.length === 0) {
+            return Swal.fire('Oops!', 'Seleziona almeno un prodotto per richiedere l\'offerta.', 'warning');
+        }
+
+        // 1. Invio a Supabase
+        const { error } = await sb.from('richieste_preventivo').insert({
+            contact_slug: slug || "anonimo",
+            prodotti_scelti: listaSotto
+        });
+
+        if (!error) {
+            // 2. Invio a Telegram
+            let messaggio = `📦 *NUOVA RICHIESTA OFFERTE*\n👤 Cliente: *${nomeCliente.toUpperCase()}*\n\n`;
+            listaSotto.forEach(i => {
+                messaggio += `• ${i.art}\n  Cod: ${i.cod} - Qta: ${i.qta}\n\n`;
+            });
+
+            fetch(`https://api.telegram.org/bot${TOKEN_TG}/sendMessage?chat_id=${CHAT_ID_TG}&text=${encodeURIComponent(messaggio)}&parse_mode=Markdown`);
+
+            Swal.fire({
+                title: 'Richiesta Inviata!',
+                text: 'Abbiamo ricevuto la tua selezione. Ti risponderemo con l\'offerta dedicata entro brevissimo.',
+                icon: 'success',
+                confirmButtonColor: var(--secondary)
+            });
+            
+            svuotaTutto();
+        } else {
+            Swal.fire('Errore', 'C\'è stato un problema durante l\'invio. Riprova tra poco.', 'error');
+        }
+    }
+
+    start();
 </script>
 </body>
 </html>
