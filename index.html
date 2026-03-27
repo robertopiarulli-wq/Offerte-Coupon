@@ -14,48 +14,48 @@
         .container { max-width: 1200px; margin: auto; padding: 0 20px; }
         .search-bar { width: 100%; padding: 15px 25px; border: 2px solid var(--p); border-radius: 50px; font-size: 16px; outline: none; box-sizing: border-box; }
         
-        /* Sistema Tab/Menu Categorie */
-        .cat-toggle-btn { background: var(--p); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; width: 100%; }
-        .nav-cats { display: none; flex-wrap: wrap; gap: 10px; margin-top: 15px; justify-content: center; background: #fff; padding: 15px; border-radius: 12px; border: 1px solid #ddd; }
+        .cat-toggle-btn { background: var(--p); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px; }
+        .nav-cats { display: none; flex-wrap: wrap; gap: 8px; margin-top: 15px; justify-content: center; background: #fff; padding: 15px; border-radius: 12px; border: 1px solid #ddd; max-height: 300px; overflow-y: auto; }
         .nav-cats.active { display: flex; }
-        .nav-link { background: #f0faff; color: var(--p); padding: 8px 14px; border-radius: 6px; text-decoration: none; font-size: 11px; font-weight: bold; border: 1px solid #cce5ff; text-transform: uppercase; }
+        .nav-link { background: #f0faff; color: var(--p); padding: 8px 12px; border-radius: 6px; text-decoration: none; font-size: 11px; font-weight: bold; border: 1px solid #cce5ff; text-transform: uppercase; }
 
         #welcome { text-align: center; margin: 30px 0; font-weight: 800; color: #111; font-size: 1.8em; }
-        .cat-title { background: var(--p); color: white; padding: 12px 25px; border-radius: 8px; margin-top: 50px; scroll-margin-top: 240px; text-transform: uppercase; }
+        .cat-title { background: var(--p); color: white; padding: 12px 25px; border-radius: 8px; margin-top: 50px; scroll-margin-top: 250px; text-transform: uppercase; }
         
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 25px; margin-top: 25px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; margin-top: 25px; }
         .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 6px 15px rgba(0,0,0,0.04); display: flex; flex-direction: column; border: 2px solid transparent; }
         .card.selected { border-color: var(--p); background-color: #f0faff; }
         .card img { width: 100%; height: 180px; object-fit: contain; margin-bottom: 15px; }
         
-        /* Descrizione Espandibile */
-        .desc-container { font-size: 0.95em; color: #555; line-height: 1.5; margin-bottom: 15px; position: relative; }
-        .desc-text { display: block; }
+        .desc-container { font-size: 0.95em; color: #555; line-height: 1.5; margin-bottom: 15px; }
         .desc-text.collapsed { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
         .read-more { color: var(--p); cursor: pointer; font-weight: bold; font-size: 0.85em; display: inline-block; margin-top: 5px; }
 
         .sku-tag { font-size: 0.8em; color: var(--p); font-weight: bold; background: #eef7ff; padding: 4px 10px; border-radius: 5px; display: inline-block; margin-bottom: 8px; }
         .qta-area { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #eee; padding-top: 20px; margin-top: auto; }
-        .qta-input { width: 65px; padding: 10px; border: 2px solid #ddd; border-radius: 12px; text-align: center; font-weight: bold; }
+        .qta-input { width: 60px; padding: 8px; border: 2px solid #ddd; border-radius: 10px; text-align: center; font-weight: bold; }
         
         .footer { position: fixed; bottom: 0; width: 100%; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); padding: 20px 0; box-shadow: 0 -5px 25px rgba(0,0,0,0.1); z-index: 2000; }
-        .footer-btns { display: flex; justify-content: center; gap: 15px; max-width: 1200px; margin: auto; padding: 0 20px; }
-        .btn-cart { background: #ffc107; border: none; padding: 15px 25px; border-radius: 35px; font-weight: bold; cursor: pointer; }
-        .btn-send { background: var(--s); color: white; border: none; padding: 15px 40px; border-radius: 35px; font-weight: bold; font-size: 1.2em; flex-grow: 1; max-width: 600px; cursor: pointer; }
+        .footer-btns { display: flex; justify-content: center; gap: 10px; max-width: 1200px; margin: auto; padding: 0 20px; }
+        .btn-cart { background: #ffc107; border: none; padding: 15px 20px; border-radius: 35px; font-weight: bold; cursor: pointer; }
+        .btn-send { background: var(--s); color: white; border: none; padding: 15px 30px; border-radius: 35px; font-weight: bold; font-size: 1.1em; flex-grow: 1; max-width: 500px; cursor: pointer; }
+        
+        .cart-edit-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; gap: 10px; }
+        .btn-del { color: #dc3545; background: none; border: none; font-size: 1.2em; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="header">
     <div class="container">
-        <input type="text" id="searchInput" class="search-bar" placeholder="🔍 Cerca prodotto..." onkeyup="render()">
-        <button class="cat-toggle-btn" onclick="toggleCats()">📂 SFOGLIA CATEGORIE</button>
+        <input type="text" id="searchInput" class="search-bar" placeholder="🔍 Cerca prodotto o codice..." onkeyup="render()">
+        <button class="cat-toggle-btn" onclick="toggleCats()">📂 SFOGLIA CATEGORIE <span id="cat-indicator">▼</span></button>
         <div class="nav-cats" id="catNav"></div>
     </div>
 </div>
 
 <div class="container">
-    <h1 id="welcome">Offerte Personalizzate</h1>
+    <h1 id="welcome">Preparazione offerte...</h1>
     <div id="catalogBody"></div>
 </div>
 
@@ -74,11 +74,10 @@
 
     const sb = supabase.createClient(S_U, S_K);
     const slug = new URLSearchParams(window.location.search).get('c');
-    let carrello = JSON.parse(localStorage.getItem('podo_v8')) || {};
+    let carrello = JSON.parse(localStorage.getItem('podo_v9')) || {};
     let prodottiCache = [];
     let nomeCliente = "Cliente";
 
-    // Funzione per pulire il nome della categoria dai numeri e parentesi
     function pulisciCat(nome) {
         if(!nome) return "ALTRO";
         return nome.replace(/\(\d+\)/g, '').replace(/\d+/g, '').trim().toUpperCase();
@@ -87,8 +86,14 @@
     async function start() {
         if (slug) {
             const { data: contact } = await sb.from('contacts').select('nome').eq('slug', slug).single();
-            if (contact) { nomeCliente = contact.nome; document.getElementById('welcome').innerText = "Offerte per " + nomeCliente; }
+            if (contact) { 
+                nomeCliente = contact.nome; 
+                document.getElementById('welcome').innerText = "Offerte selezionate per " + nomeCliente; 
+            }
+        } else {
+            document.getElementById('welcome').innerText = "Le tue offerte personalizzate";
         }
+        
         const { data: prodotti } = await sb.from('prodotti').select('*').order('categoria');
         if(prodotti) {
             prodottiCache = prodotti.filter(p => p.nome && (p.immagine_url || p.descrizione));
@@ -99,11 +104,13 @@
     }
 
     function toggleCats() {
-        document.getElementById('catNav').classList.toggle('active');
+        const nav = document.getElementById('catNav');
+        const ind = document.getElementById('cat-indicator');
+        nav.classList.toggle('active');
+        ind.innerText = nav.classList.contains('active') ? "▲" : "▼";
     }
 
     function setupNav() {
-        // Mappa le categorie pulite
         let cats = [...new Set(prodottiCache.map(p => pulisciCat(p.categoria)))].filter(c => c !== "");
         const nav = document.getElementById('catNav');
         nav.innerHTML = "";
@@ -113,7 +120,9 @@
             a.className = 'nav-link';
             a.href = "#" + c.replace(/\s/g, '');
             a.innerText = `${c} (${count})`;
-            a.onclick = () => { if(window.innerWidth < 768) toggleCats(); };
+            a.onclick = (e) => { 
+                toggleCats(); // Chiude il menu dopo il click
+            };
             nav.appendChild(a);
         });
     }
@@ -126,7 +135,7 @@
         const term = document.getElementById('searchInput').value.toLowerCase();
         
         prodottiCache.filter(p => {
-            return p.nome.toLowerCase().includes(term) || (p.descrizione && p.descrizione.toLowerCase().includes(term));
+            return p.nome.toLowerCase().includes(term) || (p.descrizione && p.descrizione.toLowerCase().includes(term)) || (p.codice && p.codice.toLowerCase().includes(term));
         }).forEach(p => {
             const catPura = pulisciCat(p.categoria);
             if (catPura !== ultimaCat) {
@@ -141,22 +150,20 @@
             const qta = carrello[skuId] ? carrello[skuId].qta : 0;
             const safeId = skuId.replace(/[^a-z0-9]/gi, '_');
 
-            const card = document.createElement('div');
-            card.className = `card ${qta > 0 ? 'selected' : ''}`;
-            card.id = `card-${safeId}`;
-            card.innerHTML = `
-                <img src="${p.immagine_url || 'https://via.placeholder.com/200'}">
-                <div class="sku-tag">COD: ${p.codice || '---'}</div>
-                <h4>${p.nome}</h4>
-                <div class="desc-container">
-                    <span class="desc-text collapsed" id="desc-${safeId}">${p.descrizione || ''}</span>
-                    ${p.descrizione && p.descrizione.length > 150 ? `<span class="read-more" onclick="toggleDesc('${safeId}')" id="btn-${safeId}">Leggi tutto...</span>` : ''}
-                </div>
-                <div class="qta-area">
-                    <span>Q.tà:</span>
-                    <input type="number" class="qta-input" min="0" value="${qta}" onchange="aggiornaCarrello('${skuId.replace(/'/g, "\\'")}', '${p.nome.replace(/'/g, "\\'")}', this.value)">
+            currentGrid.innerHTML += `
+                <div class="card ${qta > 0 ? 'selected' : ''}" id="card-${safeId}">
+                    <img src="${p.immagine_url || 'https://via.placeholder.com/200'}">
+                    <div class="sku-tag">COD: ${p.codice || '---'}</div>
+                    <h4>${p.nome}</h4>
+                    <div class="desc-container">
+                        <span class="desc-text collapsed" id="desc-${safeId}">${p.descrizione || ''}</span>
+                        ${p.descrizione && p.descrizione.length > 150 ? `<span class="read-more" onclick="toggleDesc('${safeId}')" id="btn-${safeId}">Leggi tutto...</span>` : ''}
+                    </div>
+                    <div class="qta-area">
+                        <span>Q.tà:</span>
+                        <input type="number" class="qta-input" min="0" id="input-${safeId}" value="${qta}" onchange="aggiornaCarrello('${skuId.replace(/'/g, "\\'")}', '${p.nome.replace(/'/g, "\\'")}', this.value)">
+                    </div>
                 </div>`;
-            currentGrid.appendChild(card);
         });
     }
 
@@ -174,38 +181,68 @@
 
     function aggiornaCarrello(id, nome, qta) {
         qta = parseInt(qta);
-        if (qta > 0) carrello[id] = { nome: nome, qta: qta };
-        else delete carrello[id];
-        localStorage.setItem('podo_v8', JSON.stringify(carrello));
+        const safeId = id.replace(/[^a-z0-9]/gi, '_');
+        if (qta > 0) {
+            carrello[id] = { nome: (nome || carrello[id].nome), qta: qta };
+        } else {
+            delete carrello[id];
+        }
+        localStorage.setItem('podo_v9', JSON.stringify(carrello));
         aggiornaConteggio();
-        const card = document.getElementById('card-' + id.replace(/[^a-z0-9]/gi, '_'));
+        
+        // Sincronizza input e card nel catalogo
+        const card = document.getElementById('card-' + safeId);
+        const input = document.getElementById('input-' + safeId);
         if(card) qta > 0 ? card.classList.add('selected') : card.classList.remove('selected');
+        if(input) input.value = qta > 0 ? qta : 0;
     }
 
     function aggiornaConteggio() { document.getElementById('cart-count').innerText = Object.keys(carrello).length; }
 
     function apriRiepilogo() {
-        let html = '<div style="max-height: 300px; overflow-y: auto;">';
-        Object.keys(carrello).forEach(id => {
-            html += `<div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #eee;">
-                        <span>${carrello[id].nome}</span><strong>x${carrello[id].qta}</strong>
-                     </div>`;
-        });
+        let html = '<div style="max-height: 400px; overflow-y: auto; text-align: left;">';
+        const keys = Object.keys(carrello);
+        if (keys.length === 0) {
+            html += '<p style="text-align:center; padding:20px;">Il carrello è vuoto.</p>';
+        } else {
+            keys.forEach(id => {
+                const p = carrello[id];
+                html += `
+                    <div class="cart-edit-row">
+                        <div style="flex:1; font-size:0.85em;"><strong>${p.nome}</strong><br><small>${id}</small></div>
+                        <input type="number" value="${p.qta}" style="width:45px; padding:5px; border:1px solid #ccc; border-radius:5px;" onchange="aggiornaCarrello('${id.replace(/'/g, "\\'")}', '', this.value); apriRiepilogo()">
+                        <button class="btn-del" onclick="aggiornaCarrello('${id.replace(/'/g, "\\'")}', '', 0); apriRiepilogo()">✖</button>
+                    </div>`;
+            });
+        }
         html += '</div>';
-        Swal.fire({ title: 'Carrello', html: html || 'Vuoto' });
+        Swal.fire({ title: 'Modifica Richiesta', html: html, confirmButtonText: 'Torna al catalogo', confirmButtonColor: '#0088cc' });
     }
 
     async function inviaOrdine() {
         const lista = Object.keys(carrello).map(id => ({ cod: id, art: carrello[id].nome, qta: carrello[id].qta }));
-        if (lista.length === 0) return Swal.fire('Carrello vuoto!');
-        Swal.fire({ title: 'Invio...', didOpen: () => Swal.showLoading() });
+        if (lista.length === 0) return Swal.fire('Oops!', 'Seleziona almeno un prodotto prima di inviare.', 'warning');
+
+        Swal.fire({ title: 'Invio richiesta...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+
         const { error } = await sb.from('richieste_preventivo').insert({ contact_slug: slug || "anonimo", prodotti_scelti: lista });
+
         if (!error) {
-            let msg = "📦 RICHIESTA DA: " + nomeCliente.toUpperCase() + "\n\n";
-            lista.forEach(i => msg += `• ${i.art} (x${i.qta})\n`);
+            let msg = "📦 NUOVA RICHIESTA DA: " + nomeCliente.toUpperCase() + "\n\n";
+            lista.forEach(i => msg += `• ${i.art} (Cod: ${i.cod}) - Qta: ${i.qta}\n`);
+            
             await fetch(`https://api.telegram.org/bot${T_ID}/sendMessage?chat_id=${C_ID}&text=${encodeURIComponent(msg)}`);
-            Swal.fire('Inviato!', 'Ti risponderemo presto.', 'success');
-            carrello = {}; localStorage.removeItem('podo_v8'); aggiornaConteggio(); render();
+            
+            Swal.fire({ 
+                title: 'Richiesta Inviata!', 
+                text: 'Grazie ' + nomeCliente + ', abbiamo ricevuto la tua richiesta. Ti risponderemo con un preventivo dedicato a breve!', 
+                icon: 'success', 
+                confirmButtonColor: '#28a745' 
+            });
+            
+            carrello = {}; localStorage.removeItem('podo_v9'); aggiornaConteggio(); render();
+        } else {
+            Swal.fire('Errore', 'Problema tecnico nell\'invio. Riprova tra poco.', 'error');
         }
     }
     start();
