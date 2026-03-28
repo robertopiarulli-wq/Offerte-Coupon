@@ -3,138 +3,141 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Catalogo Podopiu</title>
+    <title>Catalogo Podopiu 2026</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        :root { --p: #0088cc; --s: #28a745; --bg: #e9ecef; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding-bottom: 160px; color: #333; }
+        :root { --p: #0088cc; --s: #28a745; --bg: #f4f7f9; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding-bottom: 160px; color: #333; }
         
-        .header { position: sticky; top: 0; background: white; z-index: 1000; padding: 15px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        /* Header & Search */
+        .header { position: sticky; top: 0; background: white; z-index: 1000; padding: 15px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
         .container { max-width: 1250px; margin: auto; padding: 0 20px; }
+        .search-bar { width: 100%; padding: 15px 25px; border: 2px solid #ddd; border-radius: 50px; font-size: 16px; outline: none; transition: 0.3s; }
+        .search-bar:focus { border-color: var(--p); box-shadow: 0 0 10px rgba(0,136,204,0.1); }
         
-        .search-bar { width: 100%; padding: 15px 25px; border: 2px solid var(--p); border-radius: 50px; font-size: 16px; outline: none; box-sizing: border-box; }
-        
-        /* Navigazione Categorie */
-        .cat-toggle-btn { background: var(--p); color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 14px; }
-        .nav-cats { display: none; flex-wrap: wrap; gap: 8px; margin-top: 15px; justify-content: center; background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #dee2e6; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); max-height: 300px; overflow-y: auto; }
+        /* Categorie Navigation */
+        .cat-toggle-btn { background: #f8f9fa; color: var(--p); border: 1px solid #ddd; padding: 12px; border-radius: 12px; cursor: pointer; font-weight: bold; margin-top: 10px; width: 100%; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; }
+        .nav-cats { display: none; flex-wrap: wrap; gap: 8px; margin-top: 15px; justify-content: center; background: white; padding: 15px; border-radius: 12px; border: 1px solid #eee; }
         .nav-cats.active { display: flex; }
-        .nav-link { background: #f8f9fa; color: var(--p); padding: 8px 12px; border-radius: 6px; text-decoration: none; font-size: 11px; font-weight: bold; border: 1px solid #dee2e6; transition: 0.2s; text-transform: uppercase; }
+        .nav-link { background: #fff; color: #555; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 11px; font-weight: 700; border: 1px solid #ddd; transition: 0.2s; }
         .nav-link:hover { background: var(--p); color: white; border-color: var(--p); }
 
-        #welcome { text-align: center; margin: 40px 0; font-weight: 800; color: #111; font-size: 2em; text-transform: uppercase; letter-spacing: -1px; }
-        .cat-title { background: var(--p); color: white; padding: 14px 25px; border-radius: 8px; margin-top: 60px; scroll-margin-top: 260px; text-transform: uppercase; font-size: 1.2em; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        #welcome { text-align: center; margin: 40px 0; font-weight: 800; color: #1e293b; font-size: 2.2em; text-transform: uppercase; letter-spacing: -1px; }
+        .cat-title { background: white; color: var(--p); border-left: 5px solid var(--p); padding: 15px 20px; border-radius: 4px; margin-top: 50px; text-transform: uppercase; font-size: 1.3em; font-weight: 900; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         
-        /* Griglia e Card Scolpite */
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px; margin-top: 30px; }
-        .card { 
-            background: white; padding: 25px; border-radius: 12px; border: 1px solid #d1d9e0; 
-            box-shadow: 0 8px 20px rgba(0,0,0,0.08); display: flex; flex-direction: column; 
-            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s; position: relative; 
-        }
-        .card:hover { transform: translateY(-5px); box-shadow: 0 12px 25px rgba(0,0,0,0.15); border-color: var(--p); }
-        .card.selected { border: 2px solid var(--p); background-color: #f0faff; box-shadow: 0 0 15px rgba(0,136,204,0.2); }
+        /* Grid & Cards */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; margin-top: 25px; }
+        .card { background: white; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0,0,0,0.02); display: flex; flex-direction: column; transition: 0.3s; position: relative; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 12px 20px rgba(0,0,0,0.06); }
+        .card.selected { border: 2px solid var(--p); background-color: #f0f9ff; }
         
-        .card img { width: 100%; height: 180px; object-fit: contain; margin-bottom: 20px; border-bottom: 1px solid #f0f0f0; padding-bottom: 15px; }
-        
-        .sku-tag { font-size: 0.75em; color: #666; font-weight: bold; background: #f1f3f5; padding: 4px 10px; border-radius: 4px; display: inline-block; margin-bottom: 10px; border: 1px solid #e9ecef; }
-        h4 { font-size: 1.1em; margin: 10px 0; line-height: 1.3; min-height: 2.6em; }
+        .card img { width: 100%; height: 160px; object-fit: contain; margin-bottom: 15px; background: #fff; }
+        h4 { font-size: 1.05em; margin: 10px 0; color: #1e293b; line-height: 1.3; min-height: 2.6em; }
 
-        .desc-container { font-size: 0.95em; color: #555; line-height: 1.5; margin-bottom: 20px; min-height: 4.5em; }
-        .desc-text.collapsed { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-        .read-more { color: var(--p); cursor: pointer; font-weight: bold; font-size: 0.85em; display: inline-block; margin-top: 8px; text-decoration: underline; }
+        .variant-label { font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px; display: block; }
+        .variant-select { width: 100%; padding: 10px; border-radius: 10px; border: 2px solid #f1f5f9; background: #f8fafc; font-size: 13px; font-weight: 600; margin-bottom: 15px; outline: none; cursor: pointer; }
+        .variant-select:focus { border-color: var(--p); }
 
-        .qta-area { display: flex; justify-content: space-between; align-items: center; border-top: 2px solid #f8f9fa; padding-top: 20px; margin-top: auto; }
-        .qta-input { width: 65px; padding: 10px; border: 2px solid #ced4da; border-radius: 8px; text-align: center; font-weight: bold; font-size: 1.1em; color: var(--p); }
+        .qta-area { display: flex; justify-content: space-between; align-items: center; padding-top: 15px; border-top: 1px solid #f1f5f9; }
+        .qta-input { width: 55px; padding: 8px; border: 2px solid #e2e8f0; border-radius: 8px; text-align: center; font-weight: bold; font-size: 15px; }
         
-        /* Footer e Carrello Editabile */
-        .footer { position: fixed; bottom: 0; width: 100%; background: white; padding: 20px 0; box-shadow: 0 -10px 30px rgba(0,0,0,0.15); z-index: 2000; border-top: 1px solid #dee2e6; }
-        .footer-btns { display: flex; justify-content: center; gap: 15px; max-width: 1200px; margin: auto; padding: 0 20px; }
-        .btn-cart { background: #ffc107; border: 1px solid #e0a800; padding: 15px 25px; border-radius: 12px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .btn-send { background: var(--s); color: white; border: none; padding: 15px 35px; border-radius: 12px; font-weight: bold; font-size: 1.2em; flex-grow: 1; max-width: 600px; cursor: pointer; box-shadow: 0 4px 15px rgba(40,167,69,0.3); transition: 0.2s; }
-        
-        .cart-edit-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #eee; gap: 10px; }
-        .btn-del { color: #dc3545; background: none; border: none; font-size: 1.2em; cursor: pointer; font-weight: bold; }
+        .btn-add { background: var(--p); color: white; border: none; padding: 10px 15px; border-radius: 10px; font-weight: 800; font-size: 12px; cursor: pointer; transition: 0.2s; }
+        .btn-add:active { transform: scale(0.95); }
+
+        /* Footer */
+        .footer { position: fixed; bottom: 0; width: 100%; background: white; padding: 25px 0; box-shadow: 0 -10px 25px rgba(0,0,0,0.1); z-index: 2000; border-top: 1px solid #e2e8f0; }
+        .footer-btns { display: flex; justify-content: center; gap: 15px; max-width: 1100px; margin: auto; padding: 0 20px; }
+        .btn-cart { background: #f1f5f9; border: 1px solid #e2e8f0; padding: 15px 25px; border-radius: 15px; font-weight: bold; cursor: pointer; position: relative; }
+        .cart-badge { position: absolute; top: -5px; right: -5px; background: red; color: white; font-size: 10px; padding: 3px 7px; border-radius: 50%; }
+        .btn-send { background: var(--s); color: white; border: none; padding: 15px 35px; border-radius: 15px; font-weight: 800; font-size: 1.1em; flex-grow: 1; cursor: pointer; box-shadow: 0 4px 12px rgba(40,167,69,0.2); }
     </style>
 </head>
 <body>
 
 <div class="header">
     <div class="container">
-        <input type="text" id="searchInput" class="search-bar" placeholder="🔍 Cerca prodotto o codice..." onkeyup="render()">
-        <button class="cat-toggle-btn" onclick="toggleCats()">📂 SFOGLIA CATEGORIE <span id="cat-indicator">▼</span></button>
+        <input type="text" id="searchInput" class="search-bar" placeholder="🔍 Cerca nome prodotto o codice articolo..." onkeyup="render()">
+        <button class="cat-toggle-btn" onclick="toggleCats()">📂 Sfoglia per Categoria</button>
         <div class="nav-cats" id="catNav"></div>
     </div>
 </div>
 
 <div class="container">
-    <h1 id="welcome">Preparazione offerte...</h1>
+    <h1 id="welcome">Inizializzazione...</h1>
     <div id="catalogBody"></div>
 </div>
 
 <div class="footer">
     <div class="footer-btns">
-        <button class="btn-cart" onclick="apriRiepilogo()">🛒 (<span id="cart-count">0</span>)</button>
+        <button class="btn-cart" onclick="apriRiepilogo()">
+            🛒 LISTA <span id="cart-count" class="cart-badge">0</span>
+        </button>
         <button class="btn-send" onclick="inviaOrdine()">🚀 INVIA RICHIESTA PREVENTIVO</button>
     </div>
 </div>
 
 <script>
-    // Recupero credenziali dal file precedente
+    // --- CONFIGURAZIONE (INSERISCI I TUOI DATI QUI) ---
     const T_ID = "8604086640:AAEVbCc5RphJ09ngmW1-naxIXeahirKaGIA"; 
     const C_ID = "1068754998";
-    const S_U = "https://fxcuwfpdzymwkemzppgm.supabase.co";
-    const S_K = "sb_publishable__jf5n22-ZlvGPRN-BAh38A_WdVt7B9d";
+    const S_U = "https://fxcuwfpdzymwkemzppgm.supabase.co"; 
+    const S_K = "sb_publishable__jf5n22-ZlvGPRN-BAh38A_WdVt7B9d"; // <-- METTI LA TUA KEY QUI!
 
     const sb = supabase.createClient(S_U, S_K);
     const slug = new URLSearchParams(window.location.search).get('c');
-    let carrello = JSON.parse(localStorage.getItem('podo_v10')) || {};
+    let carrello = JSON.parse(localStorage.getItem('podo_order_2026')) || {};
     let prodottiCache = [];
     let nomeCliente = "Cliente";
 
-    function pulisciCat(nome) {
-        if(!nome) return "ALTRO";
-        return nome.replace(/\(\d+\)/g, '').replace(/\d+/g, '').trim().toUpperCase();
-    }
-
     async function start() {
+        // 1. Gestione Nome Cliente
         if (slug) {
             const { data: contact } = await sb.from('contacts').select('nome').eq('slug', slug).single();
             if (contact) { 
                 nomeCliente = contact.nome; 
-                document.getElementById('welcome').innerText = "Offerte selezionate per " + nomeCliente; 
+                document.getElementById('welcome').innerText = "Offerte per " + nomeCliente; 
             }
         } else {
-            document.getElementById('welcome').innerText = "Le tue offerte personalizzate";
+            document.getElementById('welcome').innerText = "Listino Professionale 2026";
         }
         
-        const { data: prodotti } = await sb.from('prodotti').select('*').order('categoria');
-        if(prodotti) {
-            prodottiCache = prodotti.filter(p => p.nome && (p.immagine_url || p.descrizione));
-            aggiornaConteggio();
-            setupNav();
-            render();
+        // 2. Recupero Prodotti e Raggruppamento
+        const { data: prodotti, error } = await sb.from('prodotti').select('*').order('nome');
+        
+        if (error) {
+            document.getElementById('welcome').innerText = "Errore di connessione.";
+            return;
         }
+
+        const grouped = prodotti.reduce((acc, item) => {
+            const nome = item.nome.trim();
+            if (!acc[nome]) {
+                acc[nome] = { ...item, varianti: [], img: item.immagine_url };
+            }
+            acc[nome].varianti.push({ cod: item.codice, spec: item.specifica });
+            if (item.immagine_url && !acc[nome].img) acc[nome].img = item.immagine_url;
+            return acc;
+        }, {});
+
+        prodottiCache = Object.values(grouped);
+        setupNav();
+        render();
+        aggiornaConteggio();
     }
 
-    function toggleCats() {
-        const nav = document.getElementById('catNav');
-        const ind = document.getElementById('cat-indicator');
-        nav.classList.toggle('active');
-        ind.innerText = nav.classList.contains('active') ? "▲" : "▼";
-    }
+    function toggleCats() { document.getElementById('catNav').classList.toggle('active'); }
 
     function setupNav() {
-        let cats = [...new Set(prodottiCache.map(p => pulisciCat(p.categoria)))].filter(c => c !== "");
+        let cats = [...new Set(prodottiCache.map(p => p.categoria?.toUpperCase()))].filter(Boolean);
         const nav = document.getElementById('catNav');
         nav.innerHTML = "";
         cats.forEach(c => {
-            const count = prodottiCache.filter(p => pulisciCat(p.categoria) === c).length;
             const a = document.createElement('a');
             a.className = 'nav-link';
             a.href = "#" + c.replace(/\s/g, '');
-            a.innerText = `${c} (${count})`;
-            a.onclick = () => toggleCats(); // Chiude il menu dopo il click
+            a.innerText = c;
+            a.onclick = () => toggleCats();
             nav.appendChild(a);
         });
     }
@@ -146,10 +149,13 @@
         let currentGrid = null;
         const term = document.getElementById('searchInput').value.toLowerCase();
         
-        prodottiCache.filter(p => {
-            return p.nome.toLowerCase().includes(term) || (p.descrizione && p.descrizione.toLowerCase().includes(term)) || (p.codice && p.codice.toLowerCase().includes(term));
-        }).forEach(p => {
-            const catPura = pulisciCat(p.categoria);
+        const filtrati = prodottiCache.filter(p => 
+            p.nome.toLowerCase().includes(term) || 
+            p.varianti.some(v => v.cod?.toLowerCase().includes(term))
+        );
+
+        filtrati.forEach(p => {
+            const catPura = p.categoria?.toUpperCase() || "VARIE";
             if (catPura !== ultimaCat) {
                 ultimaCat = catPura;
                 body.innerHTML += `<h2 class="cat-title" id="${catPura.replace(/\s/g, '')}">${catPura}</h2>`;
@@ -158,104 +164,109 @@
                 body.appendChild(currentGrid);
             }
             
-            const skuId = (p.codice && p.codice !== 'N/A') ? p.codice : p.nome;
-            const qta = carrello[skuId] ? carrello[skuId].qta : 0;
-            const safeId = skuId.replace(/[^a-z0-9]/gi, '_');
-
+            const isInCart = Object.values(carrello).some(item => item.parentName === p.nome);
+            
             currentGrid.innerHTML += `
-                <div class="card ${qta > 0 ? 'selected' : ''}" id="card-${safeId}">
-                    <img src="${p.immagine_url || 'https://via.placeholder.com/200'}">
-                    <div class="sku-tag">COD: ${p.codice || '---'}</div>
+                <div class="card ${isInCart ? 'selected' : ''}" id="card-${p.id}">
+                    <img src="${p.img || 'https://via.placeholder.com/200?text=Podopiu'}" onerror="this.src='https://via.placeholder.com/200'">
                     <h4>${p.nome}</h4>
-                    <div class="desc-container">
-                        <span class="desc-text collapsed" id="desc-${safeId}">${p.descrizione || ''}</span>
-                        ${p.descrizione && p.descrizione.length > 150 ? `<span class="read-more" onclick="toggleDesc('${safeId}')" id="btn-${safeId}">Leggi tutto...</span>` : ''}
-                    </div>
+                    
+                    <span class="variant-label">Codice / Formato</span>
+                    <select class="variant-select" id="sel-${p.id}">
+                        ${p.varianti.map(v => `<option value="${v.cod}">${v.spec || 'Unica'} [${v.cod || 'N/D'}]</option>`).join('')}
+                    </select>
+
                     <div class="qta-area">
-                        <span>Q.tà:</span>
-                        <input type="number" class="qta-input" min="0" id="input-${safeId}" value="${qta}" onchange="aggiornaCarrello('${skuId.replace(/'/g, "\\'")}', '${p.nome.replace(/'/g, "\\'")}', this.value)">
+                        <input type="number" class="qta-input" min="1" id="qta-${p.id}" value="1">
+                        <button class="btn-add" onclick="aggiungi('${p.id}', '${p.nome.replace(/'/g, "\\'")}')">AGGIUNGI</button>
                     </div>
                 </div>`;
         });
     }
 
-    function toggleDesc(id) {
-        const text = document.getElementById('desc-' + id);
-        const btn = document.getElementById('btn-' + id);
-        if (text.classList.contains('collapsed')) {
-            text.classList.remove('collapsed');
-            btn.innerText = "Chiudi";
-        } else {
-            text.classList.add('collapsed');
-            btn.innerText = "Leggi tutto...";
-        }
-    }
+    function aggiungi(pId, nome) {
+        const qta = parseInt(document.getElementById('qta-' + pId).value);
+        const sel = document.getElementById('sel-' + pId);
+        const cod = sel.value;
+        const spec = sel.options[sel.selectedIndex].text;
 
-    function aggiornaCarrello(id, nome, qta) {
-        qta = parseInt(qta);
-        const safeId = id.replace(/[^a-z0-9]/gi, '_');
         if (qta > 0) {
-            carrello[id] = { nome: (nome || carrello[id].nome), qta: qta };
-        } else {
-            delete carrello[id];
+            carrello[cod] = { 
+                nomeCompleto: `${nome} (${spec})`, 
+                parentName: nome,
+                qta: qta,
+                codice: cod
+            };
+            aggiornaConteggio();
+            render();
+            Swal.fire({ title: 'Aggiunto!', icon: 'success', timer: 800, showConfirmButton: false, position: 'center' });
+            localStorage.setItem('podo_order_2026', JSON.stringify(carrello));
         }
-        localStorage.setItem('podo_v10', JSON.stringify(carrello));
-        aggiornaConteggio();
-        
-        const card = document.getElementById('card-' + safeId);
-        const input = document.getElementById('input-' + safeId);
-        if(card) qta > 0 ? card.classList.add('selected') : card.classList.remove('selected');
-        if(input) input.value = qta > 0 ? qta : 0;
     }
 
-    function aggiornaConteggio() { document.getElementById('cart-count').innerText = Object.keys(carrello).length; }
+    function aggiornaConteggio() {
+        const count = Object.keys(carrello).length;
+        document.getElementById('cart-count').innerText = count;
+        document.getElementById('cart-count').style.display = count > 0 ? 'block' : 'none';
+    }
 
     function apriRiepilogo() {
-        let html = '<div style="max-height: 400px; overflow-y: auto; text-align: left;">';
-        const keys = Object.keys(carrello);
-        if (keys.length === 0) {
-            html += '<p style="text-align:center; padding:20px;">Il carrello è vuoto.</p>';
+        let html = '<div style="text-align:left; max-height:400px; overflow-y:auto;">';
+        const items = Object.keys(carrello);
+        if (items.length === 0) {
+            html += '<p style="text-align:center; padding:20px;">Nessun prodotto selezionato.</p>';
         } else {
-            keys.forEach(id => {
-                const p = carrello[id];
+            items.forEach(cod => {
+                const p = carrello[cod];
                 html += `
-                    <div class="cart-edit-row">
-                        <div style="flex:1; font-size:0.85em; padding-right:10px;"><strong>${p.nome}</strong><br><small>${id}</small></div>
-                        <input type="number" value="${p.qta}" style="width:50px; padding:8px; border:1px solid #ccc; border-radius:8px; text-align:center;" onchange="aggiornaCarrello('${id.replace(/'/g, "\\'")}', '', this.value); apriRiepilogo()">
-                        <button class="btn-del" onclick="aggiornaCarrello('${id.replace(/'/g, "\\'")}', '', 0); apriRiepilogo()">✖</button>
-                    </div>`;
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #eee;">
+                    <div style="font-size:12px; width:70%"><strong>${p.nomeCompleto}</strong></div>
+                    <div style="display:flex; align-items:center; gap:8px">
+                        <input type="number" value="${p.qta}" style="width:35px; text-align:center" onchange="modifica('${cod}', this.value)">
+                        <button onclick="rimuovi('${cod}')" style="color:red; background:none; border:none; font-weight:bold; cursor:pointer">✖</button>
+                    </div>
+                </div>`;
             });
         }
         html += '</div>';
-        Swal.fire({ title: 'Modifica Richiesta', html: html, confirmButtonText: 'Torna al catalogo', confirmButtonColor: '#0088cc' });
+        Swal.fire({ title: 'La tua Lista', html: html, confirmButtonText: 'Chiudi', confirmButtonColor: var(--p) });
+    }
+
+    function modifica(cod, qta) {
+        if(qta <= 0) return rimuovi(cod);
+        carrello[cod].qta = parseInt(qta);
+        localStorage.setItem('podo_order_2026', JSON.stringify(carrello));
+        aggiornaConteggio();
+    }
+
+    function rimuovi(cod) {
+        delete carrello[cod];
+        localStorage.setItem('podo_order_2026', JSON.stringify(carrello));
+        aggiornaConteggio();
+        apriRiepilogo();
+        render();
     }
 
     async function inviaOrdine() {
-        const lista = Object.keys(carrello).map(id => ({ cod: id, art: carrello[id].nome, qta: carrello[id].qta }));
-        if (lista.length === 0) return Swal.fire('Oops!', 'Seleziona almeno un prodotto prima di inviare.', 'warning');
+        const lista = Object.values(carrello);
+        if (lista.length === 0) return Swal.fire('Attenzione', 'La lista è vuota!', 'warning');
 
-        Swal.fire({ title: 'Invio richiesta...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+        Swal.fire({ title: 'Invio in corso...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
-        const { error } = await sb.from('richieste_preventivo').insert({ contact_slug: slug || "anonimo", prodotti_scelti: lista });
+        let msg = `📦 *NUOVA RICHIESTA PREVENTIVO*\n`;
+        msg += `👤 Cliente: *${nomeCliente}*\n`;
+        msg += `----------------------------------\n`;
+        lista.forEach(i => msg += `• ${i.nomeCompleto} x${i.qta}\n`);
 
-        if (!error) {
-            let msg = "📦 NUOVA RICHIESTA DA: " + nomeCliente.toUpperCase() + "\n\n";
-            lista.forEach(i => msg += `• ${i.art} (Cod: ${i.cod}) - Qta: ${i.qta}\n`);
-            
-            await fetch(`https://api.telegram.org/bot${T_ID}/sendMessage?chat_id=${C_ID}&text=${encodeURIComponent(msg)}`);
-            
-            Swal.fire({ 
-                title: 'Richiesta Inviata!', 
-                text: 'Grazie ' + nomeCliente + ', abbiamo ricevuto la tua richiesta. Ti risponderemo con un preventivo dedicato a breve!', 
-                icon: 'success', 
-                confirmButtonColor: '#28a745' 
-            });
-            
-            carrello = {}; localStorage.removeItem('podo_v10'); aggiornaConteggio(); render();
-        } else {
-            Swal.fire('Errore', 'Problema tecnico nell\'invio. Riprova tra poco.', 'error');
+        try {
+            await fetch(`https://api.telegram.org/bot${T_ID}/sendMessage?chat_id=${C_ID}&text=${encodeURIComponent(msg)}&parse_mode=Markdown`);
+            Swal.fire('Inviato!', 'Riceverai il preventivo a breve.', 'success');
+            carrello = {}; localStorage.removeItem('podo_order_2026'); aggiornaConteggio(); render();
+        } catch {
+            Swal.fire('Errore', 'Impossibile inviare. Riprova.', 'error');
         }
     }
+
     start();
 </script>
 </body>
