@@ -13,7 +13,6 @@
         .header { position: sticky; top: 0; background: white; z-index: 1000; padding: 15px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
         .container { max-width: 1250px; margin: auto; padding: 0 20px; }
         
-        /* Tasti Selezione Catalogo */
         .selector-area { display: flex; gap: 10px; margin-bottom: 15px; }
         .btn-select { flex: 1; padding: 15px; border-radius: 12px; border: 2px solid transparent; font-weight: 800; cursor: pointer; transition: 0.3s; text-transform: uppercase; font-size: 14px; }
         .btn-p { background: #e0f2fe; color: var(--p); border-color: var(--p); }
@@ -25,7 +24,6 @@
         
         #welcome { text-align: center; margin: 30px 0; font-weight: 800; color: var(--dark); font-size: 1.8em; text-transform: uppercase; }
         
-        /* Grid e Card */
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-top: 20px; }
         .card { background: white; padding: 15px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0,0,0,0.02); transition: 0.3s; }
         .card img { width: 100%; height: 200px; object-fit: contain; background: #fff; border-radius: 8px; cursor: pointer; }
@@ -36,45 +34,4 @@
         .qta-input { width: 50px; padding: 8px; border: 2px solid #e2e8f0; border-radius: 8px; text-align: center; font-weight: bold; }
         .btn-add { background: var(--p); color: white; border: none; padding: 10px 15px; border-radius: 8px; font-weight: 800; cursor: pointer; }
 
-        .footer { position: fixed; bottom: 0; width: 100%; background: white; padding: 20px 0; box-shadow: 0 -10px 25px rgba(0,0,0,0.1); z-index: 2000; }
-        .footer-btns { display: flex; gap: 10px; max-width: 1100px; margin: auto; padding: 0 20px; }
-        .btn-cart { background: #f1f5f9; border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; font-weight: bold; position: relative; cursor: pointer; }
-        .cart-badge { position: absolute; top: -5px; right: -5px; background: red; color: white; font-size: 10px; padding: 3px 7px; border-radius: 50%; }
-        .btn-send { background: var(--s); color: white; border: none; padding: 15px; border-radius: 12px; font-weight: 800; flex-grow: 1; cursor: pointer; }
-    </style>
-</head>
-<body>
-
-<div class="header">
-    <div class="container">
-        <div class="selector-area">
-            <button id="tab-P" class="btn-select btn-p" onclick="cambiaCatalogo('P')">PODOLOGIA</button>
-            <button id="tab-O" class="btn-select btn-o inactive" onclick="cambiaCatalogo('O')">ORTOPEDIA</button>
-        </div>
-        <input type="text" id="searchInput" class="search-bar" placeholder="🔍 Cerca codice o descrizione..." onkeyup="render()">
-    </div>
-</div>
-
-<div class="container">
-    <h1 id="welcome">Caricamento...</h1>
-    <div id="catalogBody"></div>
-</div>
-
-<div class="footer">
-    <div class="footer-btns">
-        <button class="btn-cart" onclick="apriRiepilogo()">
-            🛒 LISTA <span id="cart-count" class="cart-badge">0</span>
-        </button>
-        <button class="btn-send" onclick="inviaOrdine()">🚀 INVIA RICHIESTA</button>
-    </div>
-</div>
-
-<script>
-    // --- CONFIGURAZIONE ---
-    const T_ID = "8604086640:AAEVbCc5RphJ09ngmW1-naxIXeahirKaGIA"; 
-    const C_ID = "1068754998";
-    const S_U = "https://fxcuwfpdzymwkemzppgm.supabase.co"; 
-    const S_K = "sb_publishable__jf5n22-ZlvGPRN-BAh38A_WdVt7B9d";
-
-    const sb = supabase.createClient(S_U, S_K);
-    let
+        .footer { position: fixed; bottom: 0; width: 100%; background: white; padding: 2
