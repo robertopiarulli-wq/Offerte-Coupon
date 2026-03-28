@@ -10,13 +10,11 @@
         :root { --p: #0088cc; --s: #28a745; --bg: #f4f7f9; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding-bottom: 160px; color: #333; }
         
-        /* Header & Search */
         .header { position: sticky; top: 0; background: white; z-index: 1000; padding: 15px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
         .container { max-width: 1250px; margin: auto; padding: 0 20px; }
         .search-bar { width: 100%; padding: 15px 25px; border: 2px solid #ddd; border-radius: 50px; font-size: 16px; outline: none; transition: 0.3s; }
         .search-bar:focus { border-color: var(--p); box-shadow: 0 0 10px rgba(0,136,204,0.1); }
         
-        /* Categorie Navigation */
         .cat-toggle-btn { background: #f8f9fa; color: var(--p); border: 1px solid #ddd; padding: 12px; border-radius: 12px; cursor: pointer; font-weight: bold; margin-top: 10px; width: 100%; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; }
         .nav-cats { display: none; flex-wrap: wrap; gap: 8px; margin-top: 15px; justify-content: center; background: white; padding: 15px; border-radius: 12px; border: 1px solid #eee; }
         .nav-cats.active { display: flex; }
@@ -26,7 +24,6 @@
         #welcome { text-align: center; margin: 40px 0; font-weight: 800; color: #1e293b; font-size: 2.2em; text-transform: uppercase; letter-spacing: -1px; }
         .cat-title { background: white; color: var(--p); border-left: 5px solid var(--p); padding: 15px 20px; border-radius: 4px; margin-top: 50px; text-transform: uppercase; font-size: 1.3em; font-weight: 900; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         
-        /* Grid & Cards */
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; margin-top: 25px; }
         .card { background: white; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0,0,0,0.02); display: flex; flex-direction: column; transition: 0.3s; position: relative; }
         .card:hover { transform: translateY(-5px); box-shadow: 0 12px 20px rgba(0,0,0,0.06); }
@@ -37,27 +34,24 @@
 
         .variant-label { font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 5px; display: block; }
         .variant-select { width: 100%; padding: 10px; border-radius: 10px; border: 2px solid #f1f5f9; background: #f8fafc; font-size: 13px; font-weight: 600; margin-bottom: 15px; outline: none; cursor: pointer; }
-        .variant-select:focus { border-color: var(--p); }
 
         .qta-area { display: flex; justify-content: space-between; align-items: center; padding-top: 15px; border-top: 1px solid #f1f5f9; }
         .qta-input { width: 55px; padding: 8px; border: 2px solid #e2e8f0; border-radius: 8px; text-align: center; font-weight: bold; font-size: 15px; }
         
-        .btn-add { background: var(--p); color: white; border: none; padding: 10px 15px; border-radius: 10px; font-weight: 800; font-size: 12px; cursor: pointer; transition: 0.2s; }
-        .btn-add:active { transform: scale(0.95); }
+        .btn-add { background: var(--p); color: white; border: none; padding: 10px 15px; border-radius: 10px; font-weight: 800; font-size: 12px; cursor: pointer; }
 
-        /* Footer */
         .footer { position: fixed; bottom: 0; width: 100%; background: white; padding: 25px 0; box-shadow: 0 -10px 25px rgba(0,0,0,0.1); z-index: 2000; border-top: 1px solid #e2e8f0; }
         .footer-btns { display: flex; justify-content: center; gap: 15px; max-width: 1100px; margin: auto; padding: 0 20px; }
         .btn-cart { background: #f1f5f9; border: 1px solid #e2e8f0; padding: 15px 25px; border-radius: 15px; font-weight: bold; cursor: pointer; position: relative; }
         .cart-badge { position: absolute; top: -5px; right: -5px; background: red; color: white; font-size: 10px; padding: 3px 7px; border-radius: 50%; }
-        .btn-send { background: var(--s); color: white; border: none; padding: 15px 35px; border-radius: 15px; font-weight: 800; font-size: 1.1em; flex-grow: 1; cursor: pointer; box-shadow: 0 4px 12px rgba(40,167,69,0.2); }
+        .btn-send { background: var(--s); color: white; border: none; padding: 15px 35px; border-radius: 15px; font-weight: 800; font-size: 1.1em; flex-grow: 1; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="header">
     <div class="container">
-        <input type="text" id="searchInput" class="search-bar" placeholder="🔍 Cerca nome prodotto o codice articolo..." onkeyup="render()">
+        <input type="text" id="searchInput" class="search-bar" placeholder="🔍 Cerca nome o codice..." onkeyup="render()">
         <button class="cat-toggle-btn" onclick="toggleCats()">📂 Sfoglia per Categoria</button>
         <div class="nav-cats" id="catNav"></div>
     </div>
@@ -78,11 +72,11 @@
 </div>
 
 <script>
-    // --- CONFIGURAZIONE (INSERISCI I TUOI DATI QUI) ---
+    // --- CONFIGURAZIONE ---
     const T_ID = "8604086640:AAEVbCc5RphJ09ngmW1-naxIXeahirKaGIA"; 
     const C_ID = "1068754998";
     const S_U = "https://fxcuwfpdzymwkemzppgm.supabase.co"; 
-    const S_K = "sb_publishable__jf5n22-ZlvGPRN-BAh38A_WdVt7B9d"; // <-- METTI LA TUA KEY QUI!
+    const S_K = "sb_publishable__jf5n22-ZlvGPRN-BAh38A_WdVt7B9d"; // <-- METTI LA KEY SUPABASE QUI!
 
     const sb = supabase.createClient(S_U, S_K);
     const slug = new URLSearchParams(window.location.search).get('c');
@@ -91,22 +85,21 @@
     let nomeCliente = "Cliente";
 
     async function start() {
-        // 1. Gestione Nome Cliente
         if (slug) {
-            const { data: contact } = await sb.from('contacts').select('nome').eq('slug', slug).single();
-            if (contact) { 
-                nomeCliente = contact.nome; 
-                document.getElementById('welcome').innerText = "Offerte per " + nomeCliente; 
-            }
+            try {
+                const { data: contact } = await sb.from('contacts').select('nome').eq('slug', slug).single();
+                if (contact) { 
+                    nomeCliente = contact.nome; 
+                    document.getElementById('welcome').innerText = "Offerte per " + nomeCliente; 
+                }
+            } catch(e) { console.log("Slug non trovato"); }
         } else {
             document.getElementById('welcome').innerText = "Listino Professionale 2026";
         }
         
-        // 2. Recupero Prodotti e Raggruppamento
         const { data: prodotti, error } = await sb.from('prodotti').select('*').order('nome');
-        
         if (error) {
-            document.getElementById('welcome').innerText = "Errore di connessione.";
+            document.getElementById('welcome').innerText = "Errore database.";
             return;
         }
 
@@ -168,14 +161,12 @@
             
             currentGrid.innerHTML += `
                 <div class="card ${isInCart ? 'selected' : ''}" id="card-${p.id}">
-                    <img src="${p.img || 'https://via.placeholder.com/200?text=Podopiu'}" onerror="this.src='https://via.placeholder.com/200'">
+                    <img src="${p.img || 'https://via.placeholder.com/200'}" onerror="this.src='https://via.placeholder.com/200'">
                     <h4>${p.nome}</h4>
-                    
                     <span class="variant-label">Codice / Formato</span>
                     <select class="variant-select" id="sel-${p.id}">
                         ${p.varianti.map(v => `<option value="${v.cod}">${v.spec || 'Unica'} [${v.cod || 'N/D'}]</option>`).join('')}
                     </select>
-
                     <div class="qta-area">
                         <input type="number" class="qta-input" min="1" id="qta-${p.id}" value="1">
                         <button class="btn-add" onclick="aggiungi('${p.id}', '${p.nome.replace(/'/g, "\\'")}')">AGGIUNGI</button>
@@ -199,8 +190,8 @@
             };
             aggiornaConteggio();
             render();
-            Swal.fire({ title: 'Aggiunto!', icon: 'success', timer: 800, showConfirmButton: false, position: 'center' });
             localStorage.setItem('podo_order_2026', JSON.stringify(carrello));
+            Swal.fire({ title: 'Aggiunto!', icon: 'success', timer: 800, showConfirmButton: false });
         }
     }
 
@@ -214,7 +205,7 @@
         let html = '<div style="text-align:left; max-height:400px; overflow-y:auto;">';
         const items = Object.keys(carrello);
         if (items.length === 0) {
-            html += '<p style="text-align:center; padding:20px;">Nessun prodotto selezionato.</p>';
+            html += '<p style="text-align:center; padding:20px;">Lista vuota.</p>';
         } else {
             items.forEach(cod => {
                 const p = carrello[cod];
@@ -223,13 +214,14 @@
                     <div style="font-size:12px; width:70%"><strong>${p.nomeCompleto}</strong></div>
                     <div style="display:flex; align-items:center; gap:8px">
                         <input type="number" value="${p.qta}" style="width:35px; text-align:center" onchange="modifica('${cod}', this.value)">
-                        <button onclick="rimuovi('${cod}')" style="color:red; background:none; border:none; font-weight:bold; cursor:pointer">✖</button>
+                        <button onclick="rimuovi('${cod}')" style="color:red; background:none; border:none; cursor:pointer">✖</button>
                     </div>
                 </div>`;
             });
         }
         html += '</div>';
-        Swal.fire({ title: 'La tua Lista', html: html, confirmButtonText: 'Chiudi', confirmButtonColor: var(--p) });
+        // RIGA 232 CORRETTA:
+        Swal.fire({ title: 'La tua Lista', html: html, confirmButtonText: 'Chiudi', confirmButtonColor: '#0088cc' });
     }
 
     function modifica(cod, qta) {
@@ -250,21 +242,16 @@
     async function inviaOrdine() {
         const lista = Object.values(carrello);
         if (lista.length === 0) return Swal.fire('Attenzione', 'La lista è vuota!', 'warning');
+        Swal.fire({ title: 'Invio...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
-        Swal.fire({ title: 'Invio in corso...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-
-        let msg = `📦 *NUOVA RICHIESTA PREVENTIVO*\n`;
-        msg += `👤 Cliente: *${nomeCliente}*\n`;
-        msg += `----------------------------------\n`;
+        let msg = `📦 *RICHIESTA PREVENTIVO*\n👤 *${nomeCliente}*\n----------\n`;
         lista.forEach(i => msg += `• ${i.nomeCompleto} x${i.qta}\n`);
 
         try {
             await fetch(`https://api.telegram.org/bot${T_ID}/sendMessage?chat_id=${C_ID}&text=${encodeURIComponent(msg)}&parse_mode=Markdown`);
-            Swal.fire('Inviato!', 'Riceverai il preventivo a breve.', 'success');
+            Swal.fire('Inviato!', 'Grazie, ti risponderemo a breve.', 'success');
             carrello = {}; localStorage.removeItem('podo_order_2026'); aggiornaConteggio(); render();
-        } catch {
-            Swal.fire('Errore', 'Impossibile inviare. Riprova.', 'error');
-        }
+        } catch { Swal.fire('Errore', 'Riprova più tardi.', 'error'); }
     }
 
     start();
