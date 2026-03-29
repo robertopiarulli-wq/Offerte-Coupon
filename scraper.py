@@ -4,30 +4,34 @@ import requests
 from bs4 import BeautifulSoup
 from supabase import create_client
 
-# MODIFICA QUI: Legge le credenziali dalle variabili d'ambiente di GitHub
-URL_SB = os.environ.get("https://fxcuwfpdzymwkemzppgm.supabase.co")
-KEY_SB = os.environ.get("sb_publishable__jf5n22-ZlvGPRN-BAh38A_WdVt7B9d")
+# --- CONFIGURAZIONE CHIAVI (Fondamentale per GitHub Actions) ---
+# os.environ.get cerca i "Secrets" che hai impostato su GitHub
+URL_SB = os.environ.get("SUPABASE_URL")
+KEY_SB = os.environ.get("SUPABASE_KEY")
 
+# Questo controllo serve per farti capire nei log se le chiavi mancano
 if not URL_SB or not KEY_SB:
     print("❌ Errore: Credenziali Supabase non trovate nelle variabili d'ambiente.")
+    print("Controlla di averle inserite in Settings -> Secrets -> Actions")
     exit(1)
 
 sb = create_client(URL_SB, KEY_SB)
 
 def cerca_prodotto_sul_sito(codice, nome):
-    # (Il resto della funzione rimane uguale...)
     search_url = f"https://www.podopiu.com/?s={codice}&post_type=product"
     headers = {"User-Agent": "Mozilla/5.0"}
     try:
         res = requests.get(search_url, headers=headers)
         soup = BeautifulSoup(res.text, 'html.parser')
-        product_title = soup.find('h1', class_='product_title')
-        if product_title:
+        
+        # Se WooCommerce reindirizza alla pagina prodotto
+        if soup.find('h1', class_='product_title'):
             return estrai_dati_pagina(soup)
-        primo_prodotto = soup.select_one('ul.products li.product a')
-        if primo_prodotto:
-            link = primo_prodotto['href']
-            res_p = requests.get(link, headers=headers)
+
+        # Se è una lista di risultati, prendi il primo
+        primo = soup.select_one('ul.products li.product a')
+        if primo:
+            res_p = requests.get(primo['href'], headers=headers)
             return estrai_dati_pagina(BeautifulSoup(res_p.text, 'html.parser'))
     except Exception as e:
         print(f"Errore ricerca {codice}: {e}")
@@ -43,40 +47,40 @@ def estrai_dati_pagina(soup):
         return None
 
 def esegui_aggiornamento():
-    # Prende solo i prodotti dove IMG_SCRAPER è ancora vuoto (NULL)
-    # Nota: su Supabase 'is_null' si usa così:
+    # Prende i prodotti dove IMG_SCRAPER è vuoto
     prodotti = sb.table("prodotti_catalogo").select("*").is_("IMG_SCRAPER", "null").execute().data
     
     print(f"🚀 Inizio elaborazione di {len(prodotti)} prodotti...")
 
     for p in prodotti:
-        # Pulizia codice: prende solo la parte prima del trattino
-        codice_puro = p['CODICE'].split('-')[0] if p['CODICE'] else ""
-        if not codice_puro: continue
-
-        print(f"🔍 Cerco: {codice_puro} ({p['NOME'][:30]}...)")
+        if not p['CODICE']: continue
+        
+        # Pulizia codice (es. da 11.60.041-F22 a 11.60.041)
+        codice_puro = p['CODICE'].split('-')[0]
+        print(f"🔍 Cerco: {codice_puro}...")
+        
         dati = cerca_prodotto_sul_sito(codice_puro, p['NOME'])
         
         if dati:
-            # Aggiorna il prodotto corrente
+            # Aggiorna il prodotto principale
             sb.table("prodotti_catalogo").update({
                 "IMG_SCRAPER": dati['img'],
                 "DESCRIZIONE_SCRAPER": dati['desc']
             }).eq("id", p['id']).execute()
             
-            # EFFETTO DOMINO: Aggiorna tutti i prodotti con lo stesso gruppo
-            if p['GRUPPO_CORRELATI'] and p['GRUPPO_CORRELATI'] != "":
+            # Aggiorna i correlati se presenti
+            if p['GRUPPO_CORRELATI']:
                 sb.table("prodotti_catalogo").update({
                     "IMG_SCRAPER": dati['img'],
                     "DESCRIZIONE_SCRAPER": dati['desc']
                 }).eq("GRUPPO_CORRELATI", p['GRUPPO_CORRELATI']).execute()
-                print(f" ✅ Gruppo {p['GRUPPO_CORRELATI']} aggiornato!")
+                print(f" ✅ Gruppo {p['GRUPPO_CORRELATI']} OK")
             else:
-                print(f" ✅ Singolo aggiornato!")
+                print(f" ✅ Singolo OK")
         else:
-            print(f" ⚠️ Non trovato sul sito.")
+            print(f" ⚠️ Non trovato")
         
-        time.sleep(1)
+        time.sleep(1.5) # Pausa per non essere bannati dal sito
 
 if __name__ == "__main__":
     esegui_aggiornamento()
