@@ -53,7 +53,12 @@
         
         .img-container { width: 100%; height: 220px; background: white; display: flex; align-items: center; justify-content: center; overflow: hidden;}
         .img-container img { max-width: 90%; max-height: 90%; object-fit: contain; cursor: zoom-in; transition: 0.3s; }
-        .img-container img:hover { transform: scale(1.05); }
+
+        .info-btn { 
+            background: none; border: none; color: var(--accent); cursor: pointer; 
+            font-size: 1.2rem; padding: 0; line-height: 1; transition: 0.2s;
+        }
+        .info-btn:hover { transform: scale(1.2); color: var(--primary); }
 
         .related-btn { 
             background: #eef7fd; border: 1px solid var(--accent); color: var(--accent); 
@@ -99,7 +104,7 @@
 <div id="main-content"><div id="product-grid"></div></div>
 
 <div id="cart-bar">
-    <div style="font-weight: bold; color: var(--primary)" onclick="apriRiepilogo()">🛒 CARRELLO: <span id="cart-count">0</span> PRODOTTI</div>
+    <div style="font-weight: bold; color: var(--primary); cursor:pointer;" onclick="apriRiepilogo()">🛒 CARRELLO: <span id="cart-count">0</span> ARTICOLI</div>
     <button class="send-btn" onclick="inviaRichiesta()">🚀 INVIA PREVENTIVO</button>
 </div>
 
@@ -125,9 +130,6 @@
         setupMacro();
         aggiornaConteggio();
         renderGrid(allProducts);
-        
-        // Attiva lo zoom sulle immagini
-        mediumZoom('.zoomable', { margin: 24, background: '#000000f0' });
     }
 
     function renderGrid(products) {
@@ -135,13 +137,22 @@
         grid.innerHTML = products.map(p => {
             const inCart = carrello[p.id];
             const hasCorr = p.GRUPPO_CORRELATI ? allProducts.some(pr => pr.GRUPPO_CORRELATI === p.GRUPPO_CORRELATI && pr.id !== p.id) : false;
+            const hasDesc = p.DESCRIZIONE_SCRAPER && p.DESCRIZIONE_SCRAPER.trim() !== '';
+
             return `
             <div class="product-card ${inCart ? 'selected' : ''}" id="card-${p.id}">
-                <div class="img-container"><img src="${getImageUrl(p, true)}" class="zoomable" loading="lazy"></div>
+                <div class="img-container">
+                    <img src="${getImageUrl(p, true)}" class="zoomable" loading="lazy">
+                </div>
                 <div class="card-body" style="padding:15px; flex-grow:1; display:flex; flex-direction:column">
-                    <div style="font-size:0.7rem; color:var(--accent); font-weight:bold">${p.CODICE || ''}</div>
-                    <div style="font-weight:600; font-size:0.85rem; height:38px; overflow:hidden; margin:5px 0">${p.NOME}</div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px">
+                        <div style="font-size:0.7rem; color:var(--accent); font-weight:bold">${p.CODICE || ''}</div>
+                        ${hasDesc ? `<button class="info-btn" onclick="mostraInfo('${p.id}')" title="Descrizione">ⓘ</button>` : ''}
+                    </div>
+                    <div style="font-weight:600; font-size:0.85rem; height:38px; overflow:hidden; margin-bottom:10px">${p.NOME}</div>
+                    
                     ${hasCorr ? `<button class="related-btn" onclick="mostraCorrelati('${p.GRUPPO_CORRELATI}')">VARIANTI/CORRELATI</button>` : ''}
+                    
                     <div class="qta-area">
                         <input type="number" id="qta-${p.id}" class="qta-input" value="${inCart ? inCart.qta : 1}" min="1">
                         <button class="add-btn" onclick="addToCart('${p.id}', '${p.NOME.replace(/'/g, "\\'")}')">${inCart ? 'OK' : 'AGGIUNGI'}</button>
@@ -149,7 +160,22 @@
                 </div>
             </div>`;
         }).join('');
-        mediumZoom('.zoomable');
+        
+        // Inizializza lo zoom su tutte le immagini caricate
+        mediumZoom('.zoomable', { margin: 24, background: '#000000f2' });
+    }
+
+    // NUOVA FUNZIONE DESCRIZIONE SCRAPER
+    function mostraInfo(id) {
+        const p = allProducts.find(item => item.id == id);
+        Swal.fire({
+            title: `<span style="font-size:1.1rem">${p.NOME}</span>`,
+            html: `<div style="text-align:left; font-size:0.9rem; line-height:1.6; border-top:1px solid #eee; pt-15px">${p.DESCRIZIONE_SCRAPER}</div>`,
+            confirmButtonText: 'CHIUDI',
+            confirmButtonColor: '#2c3e50',
+            width: '600px',
+            showCloseButton: true
+        });
     }
 
     function mostraCorrelati(gruppo) {
@@ -174,7 +200,6 @@
             title: 'SELEZIONA VARIANTE',
             html: html,
             width: '850px',
-            position: 'center',
             showConfirmButton: true,
             confirmButtonText: 'CHIUDI FINESTRA',
             confirmButtonColor: '#2c3e50',
@@ -202,11 +227,12 @@
 
     function apriRiepilogo() {
         let h = '<div style="text-align:left; max-height:350px; overflow-y:auto;">';
-        if(Object.keys(carrello).length === 0) h += "Il carrello è vuoto.";
-        Object.keys(carrello).forEach(id => {
+        const keys = Object.keys(carrello);
+        if(keys.length === 0) h += "Il carrello è vuoto.";
+        keys.forEach(id => {
             h += `<div style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom:1px solid #eee; padding-bottom:5px">
-                <span style="font-size:0.8rem"><b>${carrello[id].nome}</b></span>
-                <span>x${carrello[id].qta} <button onclick="delItem('${id}')" style="color:red; border:none; background:none; cursor:pointer">X</button></span>
+                <span style="font-size:0.8rem; flex:1; padding-right:10px"><b>${carrello[id].nome}</b></span>
+                <span style="white-space:nowrap">x${carrello[id].qta} <button onclick="delItem('${id}')" style="color:red; border:none; background:none; cursor:pointer; font-weight:bold; margin-left:10px">X</button></span>
             </div>`;
         });
         Swal.fire({ title: 'IL TUO PREVENTIVO', html: h + '</div>', confirmButtonText: 'CHIUDI' });
@@ -225,7 +251,7 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ chat_id: C_ID, text: msg })
         });
-        if (res.ok) { Swal.fire("Inviato!", "Riceverai una risposta a breve.", "success"); carrello = {}; localStorage.removeItem('podo_cart_v1'); aggiornaConteggio(); renderGrid(allProducts); }
+        if (res.ok) { Swal.fire("Inviato!", "Richiesta ricevuta, ti risponderemo presto.", "success"); carrello = {}; localStorage.removeItem('podo_cart_v1'); aggiornaConteggio(); renderGrid(allProducts); }
     }
 
     function getImageUrl(p, full = false) {
@@ -234,7 +260,7 @@
             let b = p.MACROCATEGORIE === 'ATTREZZATURE' ? 'catalogo-attrezzature' : (p.MACROCATEGORIE === 'ORTOPODOLOGIA' ? 'catalogo-orto' : 'catalogo-podopiu');
             return `${SB_URL}/storage/v1/object/public/${b}/${p.LINK_PAGINA_INTERA}`;
         }
-        return "https://via.placeholder.com/300";
+        return "https://via.placeholder.com/300?text=Immagine+Non+Disponibile";
     }
 
     function setupMacro() {
