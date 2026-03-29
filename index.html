@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PodoCatalogo Pro X - Preventivi</title>
+    <title>PodoCatalogo Pro X - Podopiù</title>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -16,6 +16,8 @@
         }
 
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--bg); display: flex; color: var(--primary); overflow-x: hidden; }
+        /* Classe per bloccare lo scroll della pagina quando lo zoom è aperto */
+        body.modal-open { overflow: hidden; }
 
         /* --- SIDEBAR FISSA --- */
         #sidebar { 
@@ -23,85 +25,48 @@
             height: 100vh; position: fixed; left: 0; top: 0; 
             display: flex; flex-direction: column; z-index: 1000;
         }
-        
         .sidebar-header { padding: 20px; background: var(--primary); color: white; }
         .sidebar-content { padding: 20px; overflow-y: auto; flex-grow: 1; padding-bottom: 100px; }
 
         .search-container { position: sticky; top: 0; background: var(--card); padding-bottom: 15px; z-index: 10; }
         #search-input { width: 100%; padding: 12px; border: 2px solid var(--accent); border-radius: 8px; font-size: 1rem; outline: none; box-sizing: border-box; }
 
-        .filter-group h3 { font-size: 0.9rem; text-transform: uppercase; color: #7f8c8d; margin: 20px 0 10px; }
-        .filter-btn { width: 100%; background: #fff; border: 1px solid var(--border); padding: 12px; border-radius: 8px; cursor: pointer; text-align: left; margin-bottom: 6px; font-weight: 500; }
-        .filter-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
-
-        /* --- MAIN CONTENT --- */
+        /* --- GRID E CARD --- */
         #main-content { flex: 1; margin-left: 320px; padding: 30px; min-height: 100vh; padding-bottom: 120px; }
         #product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
 
-        /* --- CARD POTENZIATA --- */
-        .product-card { 
-            background: var(--card); border-radius: 12px; overflow: hidden; 
-            border: 1px solid var(--border); display: flex; flex-direction: column; 
-            transition: 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); position: relative;
-        }
+        .product-card { background: var(--card); border-radius: 12px; overflow: hidden; border: 1px solid var(--border); display: flex; flex-direction: column; transition: 0.3s; position: relative; }
         .product-card.selected { border: 2px solid var(--success); background: #f0fff4; }
         
-        .img-container { 
-            width: 100%; height: 230px; background: white; display: flex; align-items: center; 
-            justify-content: center; cursor: zoom-in;
-        }
+        .img-container { width: 100%; height: 230px; background: white; display: flex; align-items: center; justify-content: center; cursor: zoom-in; }
         .img-container img { max-width: 90%; max-height: 90%; object-fit: contain; filter: grayscale(100%); transition: 0.4s; }
         .product-card:hover img { filter: grayscale(0%); }
 
-        .card-body { padding: 15px; flex-grow: 1; display: flex; flex-direction: column; }
-        .p-name { font-weight: 600; font-size: 0.95rem; margin: 5px 0 10px 0; height: 45px; overflow: hidden; line-height: 1.4; }
+        .related-btn { background: none; border: 1px solid var(--accent); color: var(--accent); padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; cursor: pointer; margin: 10px 0; }
         
-        .related-btn {
-            background: none; border: 1px solid var(--accent); color: var(--accent);
-            padding: 5px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold;
-            cursor: pointer; align-self: flex-start; margin-bottom: 10px; transition: 0.2s;
-        }
-        .related-btn:hover { background: var(--accent); color: white; }
-
         .qta-area { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 15px; border-top: 1px solid #eee; }
-        .qta-input { width: 70px; padding: 8px; border: 2px solid var(--primary); border-radius: 8px; text-align: center; font-weight: bold; }
-        .add-btn { background: var(--primary); color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .qta-input { width: 60px; padding: 8px; border: 2px solid var(--primary); border-radius: 8px; text-align: center; font-weight: bold; }
+        .add-btn { background: var(--primary); color: white; border: none; padding: 10px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
 
-        /* --- BARRA SOTTO --- */
-        #cart-bar { 
-            position: fixed; bottom: 0; left: 320px; right: 0; background: #fff; 
-            padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; 
-            box-shadow: 0 -10px 30px rgba(0,0,0,0.1); border-top: 4px solid var(--success); z-index: 1001;
-        }
-        .send-btn { background: var(--success); color: white; border: none; padding: 15px 45px; border-radius: 50px; font-size: 1.1rem; font-weight: bold; cursor: pointer; }
-
-        /* --- ZOOM MODAL REALE (Blindato per Mobile) --- */
+        /* --- ZOOM MODAL --- */
         #zoom-modal { 
             display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); 
-            z-index: 9999; justify-content: center; align-items: center; overflow: hidden;
+            z-index: 9999; justify-content: center; align-items: center;
         }
-        
-        /* Contenitore per la libreria di zoom */
-        .pinch-zoom-container {
-            width: 100%; height: 100%;
-            display: flex; justify-content: center; align-items: center;
-        }
+        .pinch-zoom-container { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
+        #zoom-img { max-width: 95%; max-height: 95%; object-fit: contain; }
+        .close-zoom { position: absolute; top: 20px; right: 20px; color: white; font-size: 40px; cursor: pointer; z-index: 10000; background: rgba(255,255,255,0.2); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 
-        #zoom-img { 
-            max-width: 90%; max-height: 90%; object-fit: contain; 
-            border-radius: 8px;
-            /* L'animazione a pulsante la togliamo qui perché disturberebbe lo zoom attivo */
-        }
-        
-        .close-zoom { 
-            position: absolute; top: 20px; right: 20px; color: white; 
-            font-size: 50px; cursor: pointer; z-index: 10000; 
-            background: rgba(0,0,0,0.5); width: 60px; height: 60px;
-            display: flex; align-items: center; justify-content: center; border-radius: 50%;
-        }
+        /* --- POPUP CORRELATI STILE --- */
+        .related-row { display: flex; align-items: center; gap: 15px; padding: 12px; border-bottom: 1px solid #eee; }
+        .related-row.selected { background: #f0fff4; }
+        .related-img { width: 50px; height: 50px; object-fit: contain; border-radius: 4px; }
+
+        #cart-bar { position: fixed; bottom: 0; left: 320px; right: 0; background: #fff; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 -10px 30px rgba(0,0,0,0.1); border-top: 4px solid var(--success); z-index: 1001; }
+        .send-btn { background: var(--success); color: white; border: none; padding: 15px 40px; border-radius: 50px; font-weight: bold; cursor: pointer; }
 
         @media (max-width: 768px) {
-            #sidebar { width: 100%; height: auto; position: relative; border-right: none; border-bottom: 2px solid var(--border); }
+            #sidebar { width: 100%; height: auto; position: relative; }
             #main-content { margin-left: 0; }
             #cart-bar { left: 0; }
         }
@@ -110,40 +75,24 @@
 <body>
 
 <div id="sidebar">
-    <div class="sidebar-header">
-        <h2 id="client-name" style="margin:0; font-size: 1.2rem;">PodoCatalogo</h2>
-    </div>
+    <div class="sidebar-header"><h2 id="client-name" style="margin:0; font-size: 1.1rem;">PodoCatalogo</h2></div>
     <div class="sidebar-content">
-        <div class="search-container">
-            <input type="text" id="search-input" placeholder="🔍 Cerca prodotto o codice...">
-        </div>
-        <div class="filter-group">
-            <h3>Macro Categorie</h3>
-            <div id="macro-filters"><button class="filter-btn active" data-filter="all">Tutte le Macro</button></div>
-        </div>
-        <div class="filter-group">
-            <h3>Sottocategorie</h3>
-            <div id="sub-filters"></div>
-        </div>
+        <div class="search-container"><input type="text" id="search-input" placeholder="🔍 Cerca prodotto o codice..."></div>
+        <div class="filter-group"><h3>Macro</h3><div id="macro-filters"><button class="filter-btn active" data-filter="all">Tutte</button></div></div>
+        <div class="filter-group"><h3>Categorie</h3><div id="sub-filters"></div></div>
     </div>
 </div>
 
-<div id="main-content">
-    <div id="product-grid"></div>
-</div>
+<div id="main-content"><div id="product-grid"></div></div>
 
 <div id="cart-bar">
-    <div style="font-size: 1.1rem; font-weight: bold; cursor:pointer" onclick="apriRiepilogo()">
-        🛒 Articoli: <span id="cart-count">0</span> (Vedi/Modifica)
-    </div>
+    <div style="font-weight: bold; cursor:pointer" onclick="apriRiepilogo()">🛒 Articoli: <span id="cart-count">0</span></div>
     <button class="send-btn" onclick="inviaRichiesta()">🚀 INVIA PREVENTIVO</button>
 </div>
 
 <div id="zoom-modal">
     <span class="close-zoom" onclick="closeZoom()">&times;</span>
-    <div class="pinch-zoom-container">
-        <img id="zoom-img" src="">
-    </div>
+    <div class="pinch-zoom-container"><img id="zoom-img" src=""></div>
 </div>
 
 <script>
@@ -157,16 +106,15 @@
     let allProducts = [];
     let carrello = JSON.parse(localStorage.getItem('podo_cart_v1')) || {};
     let nomeCliente = "Anonimo";
-    let pzInstance = null; // Istanza per lo zoom
+    let pzInstance = null;
 
     async function init() {
         if (slug) {
             const { data: contact } = await sb.from('contacts').select('nome').eq('slug', slug).single();
-            if (contact) { nomeCliente = contact.nome; document.getElementById('client-name').innerText = "Per: " + nomeCliente; }
+            if (contact) { nomeCliente = contact.nome; document.getElementById('client-name').innerText = "Cliente: " + nomeCliente; }
         }
         const { data } = await sb.from('prodotti_catalogo').select('*').order('NOME');
         allProducts = data || [];
-        
         setupMacro();
         aggiornaConteggio();
         renderGrid(allProducts);
@@ -176,160 +124,112 @@
         const grid = document.getElementById('product-grid');
         grid.innerHTML = products.map(p => {
             const inCart = carrello[p.id];
-            const correlati = p.GRUPPO_CORRELATI ? allProducts.filter(pr => pr.GRUPPO_CORRELATI === p.GRUPPO_CORRELATI && pr.id !== p.id) : [];
-            
+            const hasCorr = p.GRUPPO_CORRELATI ? allProducts.some(pr => pr.GRUPPO_CORRELATI === p.GRUPPO_CORRELATI && pr.id !== p.id) : false;
             return `
             <div class="product-card ${inCart ? 'selected' : ''}" id="card-${p.id}">
-                <div class="img-container" onclick="zoom('${getImageUrl(p, true)}')">
-                    <img src="${getImageUrl(p)}" loading="lazy">
-                </div>
-                <div class="card-body">
-                    <div style="font-size:0.75rem; color:var(--accent); font-weight:bold">${p.CODICE || '---'}</div>
-                    <p class="p-name">${p.NOME}</p>
-                    
-                    ${correlati.length > 0 ? `<button class="related-btn" onclick="mostraCorrelati('${p.GRUPPO_CORRELATI}', '${p.NOME.replace(/'/g, "\\'")}')">Vedi Correlati (+${correlati.length})</button>` : ''}
-
+                <div class="img-container" onclick="zoom('${getImageUrl(p, true)}')"><img src="${getImageUrl(p)}" loading="lazy"></div>
+                <div class="card-body" style="padding:15px">
+                    <div style="font-size:0.7rem; color:var(--accent); font-weight:bold">${p.CODICE || ''}</div>
+                    <div style="font-weight:600; font-size:0.9rem; height:40px; overflow:hidden; margin:5px 0">${p.NOME}</div>
+                    ${hasCorr ? `<button class="related-btn" onclick="mostraCorrelati('${p.GRUPPO_CORRELATI}')">Vedi Correlati</button>` : ''}
                     <div class="qta-area">
                         <input type="number" id="qta-${p.id}" class="qta-input" value="${inCart ? inCart.qta : 1}" min="1">
-                        <button class="add-btn" onclick="addToCart('${p.id}', '${p.NOME.replace(/'/g, "\\'")}')">
-                            ${inCart ? 'AGGIORNATO' : 'AGGIUNGI'}
-                        </button>
+                        <button class="add-btn" onclick="addToCart('${p.id}', '${p.NOME.replace(/'/g, "\\'")}')">${inCart ? 'OK' : 'AGGIUNGI'}</button>
                     </div>
                 </div>
             </div>`;
         }).join('');
     }
 
-    // --- ZOOM REALE (Pinch & Wheel) ---
-    function zoom(url) { 
+    // --- ZOOM LOGIC ---
+    function zoom(url) {
+        document.body.classList.add('modal-open');
         const modal = document.getElementById('zoom-modal');
         const img = document.getElementById('zoom-img');
-        const container = document.querySelector('.pinch-zoom-container');
-
-        // Reset istanza precedente se esiste
-        if (pzInstance) {
-            pzInstance.destroy();
-            pzInstance = null;
-        }
-
-        img.src = url; 
-        modal.style.display = 'flex'; 
-
-        // Inizializza la libreria di zoom sull'immagine appena caricata
-        img.onload = function() {
-            pzInstance = new PinchZoom(img, {
-                draggable: true,
-                swipeToClose: false, // Disabilitiamo swipe per non confondere col drag
-                minZoom: 1,
-                maxZoom: 5, // Permettiamo uno zoom potente per leggere i testi
-                onZoomEnd: function() { console.log('Zoom finito'); }
-            });
-        };
+        img.src = url;
+        modal.style.display = 'flex';
+        img.onload = () => { if (!pzInstance) pzInstance = new PinchZoom(img, { draggable: true, maxZoom: 5 }); };
     }
 
-    // Funzione dedicata per chiudere lo zoom e pulire la memoria
     function closeZoom() {
-        const modal = document.getElementById('zoom-modal');
-        modal.style.display = 'none';
-        if (pzInstance) {
-            pzInstance.destroy(); // Distrugge l'istanza per liberare risorse
-            pzInstance = null;
-        }
+        document.body.classList.remove('modal-open');
+        document.getElementById('zoom-modal').style.display = 'none';
+        if (pzInstance) { pzInstance.destroy(); pzInstance = null; }
     }
 
-    // --- FUNZIONI CORRELATI ---
-    function mostraCorrelati(gruppo, nomeProdottoOriginale) {
-        const correlati = allProducts.filter(p => p.GRUPPO_CORRELATI === gruppo);
-        let html = '<div id="related-popup-container">';
-        html += `<p style="font-size:0.9rem; color:#7f8c8d; margin-bottom:15px;">Prodotti correlati a: <strong>${nomeProdottoOriginale}</strong></p>`;
-        correlati.forEach(p => {
+    // --- CORRELATI LOGIC ---
+    function mostraCorrelati(gruppo) {
+        const lista = allProducts.filter(p => p.GRUPPO_CORRELATI === gruppo);
+        let html = '<div style="text-align:left">';
+        lista.forEach(p => {
             const inCart = carrello[p.id];
             html += `
-            <div class="related-item-row ${inCart ? 'selected' : ''}" id="rel-card-${p.id}">
-                <img src="${getImageUrl(p)}" class="related-item-img">
-                <div style="flex:1">
-                    <div style="font-size:0.7rem; color:var(--accent); font-weight:bold;">${p.CODICE || '---'}</div>
-                    <p style="font-size:0.85rem; margin:2px 0;">${p.NOME}</p>
-                </div>
-                <div style="display:flex; align-items:center; gap:5px;">
-                    <input type="number" id="rel-qta-${p.id}" value="${inCart ? inCart.qta : 1}" min="1" style="width:40px; text-align:center;">
-                    <button class="add-btn" style="padding:5px 10px; font-size:0.8rem;" onclick="addToCartFromRelated('${p.id}', '${p.NOME.replace(/'/g, "\\'")}')">
-                        ${inCart ? 'OK' : 'AGGIUNGI'}
-                    </button>
-                </div>
+            <div class="related-row ${inCart ? 'selected' : ''}" id="rel-row-${p.id}">
+                <img src="${getImageUrl(p)}" class="related-img">
+                <div style="flex:1; font-size:0.8rem"><b>${p.CODICE}</b><br>${p.NOME}</div>
+                <input type="number" id="rel-qta-${p.id}" value="${inCart ? inCart.qta : 1}" min="1" style="width:45px; margin-right:5px">
+                <button class="add-btn" style="padding:5px" onclick="addToCartFromPop('${p.id}', '${p.NOME.replace(/'/g, "\\'")}')">ADD</button>
             </div>`;
         });
         html += '</div>';
-        Swal.fire({ title: 'Prodotti del Gruppo ' + gruppo, html: html, confirmButtonText: 'Torna al Catalogo', confirmButtonColor: '#2c3e50', width: '600px' });
+        Swal.fire({ title: 'Prodotti Correlati', html: html, showConfirmButton: false, showCloseButton: true });
     }
 
-    function addToCartFromRelated(id, nome) {
+    function addToCartFromPop(id, nome) {
         const qta = parseInt(document.getElementById(`rel-qta-${id}`).value);
-        addToCart(id, nome, false);
-        document.getElementById(`rel-card-${id}`).classList.add('selected');
-        event.target.innerText = 'OK';
-        const mainCard = document.getElementById(`card-${id}`);
-        if(mainCard) { mainCard.classList.add('selected'); document.getElementById(`qta-${id}`).value = qta; }
+        carrello[id] = { nome, qta };
+        localStorage.setItem('podo_cart_v1', JSON.stringify(carrello));
+        document.getElementById(`rel-row-${id}`).classList.add('selected');
+        aggiornaConteggio();
+        renderGrid(allProducts); // Sincronizza card principale
     }
 
-    // --- FUNZIONI CARRELLO ---
-    function addToCart(id, nome, showSwal = true) {
-        const qtaField = document.getElementById(`qta-${id}`) || document.getElementById(`rel-qta-${id}`);
-        const qta = parseInt(qtaField.value);
-        if(qta > 0) { carrello[id] = { nome, qta }; const card = document.getElementById(`card-${id}`); if(card) card.classList.add('selected'); }
-        else { delete carrello[id]; const card = document.getElementById(`card-${id}`); if(card) card.classList.remove('selected'); }
+    // --- CARRELLO LOGIC ---
+    function addToCart(id, nome) {
+        const qta = parseInt(document.getElementById(`qta-${id}`).value);
+        carrello[id] = { nome, qta };
         localStorage.setItem('podo_cart_v1', JSON.stringify(carrello));
+        document.getElementById(`card-${id}`).classList.add('selected');
         aggiornaConteggio();
-        if(showSwal) Swal.fire({ title: 'Carrello aggiornato', icon: 'success', timer: 700, showConfirmButton: false });
+        Swal.fire({ title: 'Aggiunto', icon: 'success', timer: 600, showConfirmButton: false });
     }
 
     function apriRiepilogo() {
-        let html = '<div style="text-align:left; max-height:300px; overflow-y:auto;">';
-        const items = Object.keys(carrello);
-        if(items.length === 0) html += "<p>Il carrello è vuoto</p>";
-        items.forEach(id => {
-            html += `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:5px;">
-                <span style="font-size:0.8rem; flex:1;">${carrello[id].nome}</span>
-                <input type="number" value="${carrello[id].qta}" style="width:50px;" onchange="updateQtaDirect('${id}', this.value)">
-                <button onclick="updateQtaDirect('${id}', 0); apriRiepilogo();" style="border:none; background:none; color:red; cursor:pointer; margin-left:10px;">✖</button>
+        let h = '<div style="text-align:left; max-height:300px; overflow-y:auto;">';
+        Object.keys(carrello).forEach(id => {
+            h += `<div style="display:flex; justify-content:space-between; margin-bottom:10px; border-bottom:1px solid #eee">
+                <span style="font-size:0.8rem">${carrello[id].nome}</span>
+                <span>x${carrello[id].qta} <button onclick="delItem('${id}')" style="color:red; border:none; background:none; cursor:pointer">X</button></span>
             </div>`;
         });
-        html += '</div>';
-        Swal.fire({ title: 'Il tuo Carrello', html: html, confirmButtonText: 'Chiudi' });
+        Swal.fire({ title: 'Carrello', html: h + '</div>', confirmButtonText: 'Chiudi' });
     }
 
-    function updateQtaDirect(id, qta) {
-        qta = parseInt(qta);
-        if(qta <= 0) delete carrello[id];
-        else carrello[id].qta = qta;
-        localStorage.setItem('podo_cart_v1', JSON.stringify(carrello));
-        aggiornaConteggio();
-        renderGrid(allProducts);
-    }
+    function delItem(id) { delete carrello[id]; localStorage.setItem('podo_cart_v1', JSON.stringify(carrello)); aggiornaConteggio(); renderGrid(allProducts); apriRiepilogo(); }
+
+    function aggiornaConteggio() { document.getElementById('cart-count').innerText = Object.keys(carrello).length; }
 
     async function inviaRichiesta() {
         const items = Object.values(carrello);
         if (items.length === 0) return Swal.fire("Carrello Vuoto", "", "info");
-        let msg = `📄 PREVENTIVO PER: ${nomeCliente.toUpperCase()}\n🔗 Link Contatto: ${slug || 'N/A'}\n\n`;
+        let msg = `📄 PREVENTIVO: ${nomeCliente.toUpperCase()}\n\n`;
         items.forEach(i => msg += `• ${i.nome} (Q.tà: ${i.qta})\n`);
-        Swal.fire({ title: 'Invio...', didOpen: () => Swal.showLoading() });
         const res = await fetch(`https://api.telegram.org/bot${T_ID}/sendMessage`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ chat_id: C_ID, text: msg })
         });
-        if (res.ok) { Swal.fire("Inviato!", "Riceverai una risposta a breve.", "success"); carrello = {}; localStorage.removeItem('podo_cart_v1'); aggiornaConteggio(); renderGrid(allProducts); }
+        if (res.ok) { Swal.fire("Inviato!", "Ti risponderemo presto.", "success"); carrello = {}; localStorage.removeItem('podo_cart_v1'); aggiornaConteggio(); renderGrid(allProducts); }
     }
 
-    // --- LOGICHE FILTRI E IMMAGINI ---
+    // --- FILTRI ---
     function getImageUrl(p, full = false) {
         if (!full && p.IMG_SCRAPER) return p.IMG_SCRAPER;
         if (p.LINK_PAGINA_INTERA) {
-            let b = p.MACROCATEGORIE === 'ATTREZZATURE' ? 'catalogo-attrezzature' : 
-                    (p.MACROCATEGORIE === 'ORTOPODOLOGIA' ? 'catalogo-orto' : 'catalogo-podopiu');
+            let b = p.MACROCATEGORIE === 'ATTREZZATURE' ? 'catalogo-attrezzature' : (p.MACROCATEGORIE === 'ORTOPODOLOGIA' ? 'catalogo-orto' : 'catalogo-podopiu');
             return `${SB_URL}/storage/v1/object/public/${b}/${p.LINK_PAGINA_INTERA}`;
         }
-        return "https://via.placeholder.com/300?text=Foto+Assente";
+        return "https://via.placeholder.com/300";
     }
 
     function setupMacro() {
@@ -340,6 +240,12 @@
             btn.className = 'filter-btn';
             btn.dataset.filter = m;
             btn.innerText = m;
+            btn.onclick = () => {
+                document.querySelectorAll('#macro-filters .filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                updateSub(m);
+                filterGrid();
+            };
             container.appendChild(btn);
         });
         updateSub('all');
@@ -347,39 +253,34 @@
 
     function updateSub(macro) {
         const container = document.getElementById('sub-filters');
-        container.innerHTML = '<button class="filter-btn active" data-filter="all">Tutte le Sotto</button>';
+        container.innerHTML = '<button class="filter-btn active" data-filter="all">Tutte</button>';
         const filtered = macro === 'all' ? allProducts : allProducts.filter(p => p.MACROCATEGORIE === macro);
         const subs = [...new Set(filtered.map(p => p.CATEGORIE).filter(Boolean))].sort();
         subs.forEach(s => {
             const btn = document.createElement('button');
             btn.className = 'filter-btn';
-            btn.dataset.filter = s;
             btn.innerText = s;
+            btn.onclick = () => {
+                document.querySelectorAll('#sub-filters .filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                filterGrid();
+            };
             container.appendChild(btn);
         });
     }
 
-    function aggiornaConteggio() { document.getElementById('cart-count').innerText = Object.keys(carrello).length; }
+    function filterGrid() {
+        const search = document.getElementById('search-input').value.toLowerCase();
+        const macro = document.querySelector('#macro-filters .active').dataset.filter;
+        const subBtn = document.querySelector('#sub-filters .active');
+        const sub = subBtn ? subBtn.innerText : 'Tutte';
+        let filtered = allProducts.filter(p => (p.NOME.toLowerCase().includes(search) || p.CODICE?.toLowerCase().includes(search)));
+        if (macro !== 'all') filtered = filtered.filter(p => p.MACROCATEGORIE === macro);
+        if (sub !== 'Tutte') filtered = filtered.filter(p => p.CATEGORIE === sub);
+        renderGrid(filtered);
+    }
 
-    document.getElementById('search-input').addEventListener('input', e => {
-        const t = e.target.value.toLowerCase();
-        renderGrid(allProducts.filter(p => p.NOME.toLowerCase().includes(t) || p.CODICE?.toLowerCase().includes(t)));
-    });
-
-    document.addEventListener('click', e => {
-        if (e.target.classList.contains('filter-btn')) {
-            const group = e.target.parentElement.id;
-            e.target.parentElement.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            e.target.classList.add('active');
-            const macro = document.querySelector('#macro-filters .active').dataset.filter;
-            if (group === 'macro-filters') updateSub(macro);
-            const sub = document.querySelector('#sub-filters .active')?.dataset.filter || 'all';
-            let filtered = macro === 'all' ? allProducts : allProducts.filter(p => p.MACROCATEGORIE === macro);
-            if (sub !== 'all') filtered = filtered.filter(p => p.CATEGORIE === sub);
-            renderGrid(filtered);
-        }
-    });
-
+    document.getElementById('search-input').oninput = filterGrid;
     init();
 </script>
 </body>
