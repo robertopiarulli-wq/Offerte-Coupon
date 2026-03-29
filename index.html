@@ -9,8 +9,8 @@
     
     <style>
         :root {
-            --primary-color: #2c3e50; /* Blu scuro professionale */
-            --accent-color: #3498db;  /* Blu brillante */
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
             --bg-color: #f4f7f6;
             --card-bg: #ffffff;
             --text-color: #333;
@@ -42,404 +42,203 @@
             overflow-y: auto;
         }
 
-        #logo-container {
-            text-align: center;
-            margin-bottom: 20px;
-        }
+        #logo-container h1 { color: var(--primary-color); margin: 0; font-size: 1.5rem; }
 
-        #logo-container h1 {
-            color: var(--primary-color);
-            margin: 0;
-            font-size: 1.5rem;
-        }
-
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .filter-group h3 {
-            margin: 0;
-            font-size: 1.1rem;
-            color: var(--primary-color);
-        }
+        .filter-group { display: flex; flex-direction: column; gap: 10px; }
+        .filter-group h3 { margin: 0; font-size: 1.1rem; color: var(--primary-color); }
 
         .filter-btn {
-            background: none;
-            border: 1px solid var(--gray-light);
-            padding: 10px;
-            border-radius: 8px;
-            cursor: pointer;
-            text-align: left;
-            transition: var(--transition);
-            color: var(--text-color);
+            background: none; border: 1px solid var(--gray-light); padding: 10px;
+            border-radius: 8px; cursor: pointer; text-align: left; transition: var(--transition);
         }
 
-        .filter-btn:hover, .filter-btn.active {
-            background-color: var(--accent-color);
-            color: white;
-            border-color: var(--accent-color);
-        }
+        .filter-btn:hover, .filter-btn.active { background-color: var(--accent-color); color: white; border-color: var(--accent-color); }
 
-        #search-input {
-            padding: 12px;
-            border: 1px solid var(--gray-light);
-            border-radius: 8px;
-            outline: none;
-            transition: var(--transition);
-        }
-
-        #search-input:focus {
-            border-color: var(--accent-color);
-            box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
-        }
+        #search-input { padding: 12px; border: 1px solid var(--gray-light); border-radius: 8px; outline: none; }
 
         /* --- MAIN CONTENT --- */
-        #main-content {
-            flex: 1;
-            padding: 30px;
-        }
-
-        #header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-
-        #header h2 {
-            margin: 0;
-            color: var(--primary-color);
-        }
-
-        #product-count {
-            color: #7f8c8d;
-        }
+        #main-content { flex: 1; padding: 30px; }
+        #header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
 
         /* --- GRID --- */
-        #product-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 30px;
-        }
+        #product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 30px; }
 
-        /* --- PRODUCT CARD --- */
         .product-card {
-            background-color: var(--card-bg);
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            overflow: hidden;
-            transition: var(--transition);
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            opacity: 0;
-            transform: translateY(20px);
-            animation: slideUp 0.5s ease forwards;
+            background-color: var(--card-bg); border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05); overflow: hidden;
+            transition: var(--transition); position: relative;
+            display: flex; flex-direction: column;
         }
 
-        @keyframes slideUp {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+        .product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid var(--accent-color); }
 
-        /* EFFETTO HOVER (Grigio/Scala/Ombra) */
-        .product-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            border: 1px solid var(--accent-color);
-        }
+        .card-img-container { width: 100%; height: 250px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: white; }
+        .product-card img { max-width: 90%; max-height: 90%; object-fit: contain; transition: var(--transition); }
+        .product-card:hover img { transform: scale(1.05); }
 
-        .card-img-container {
-            width: 100%;
-            height: 250px;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #fff;
-            position: relative;
-        }
+        .card-body { padding: 20px; flex: 1; display: flex; flex-direction: column; gap: 8px; }
+        .product-code { font-size: 0.8rem; color: var(--accent-color); font-weight: bold; }
+        .product-name { font-size: 1rem; color: var(--primary-color); margin: 0; font-weight: 600; }
+        .product-category { font-size: 0.8rem; color: #7f8c8d; background: var(--gray-light); padding: 3px 8px; border-radius: 4px; align-self: flex-start; }
 
-        .product-card img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-            transition: var(--transition);
-        }
-
-        /* Effetto scala sull'immagine */
-        .product-card:hover img {
-            transform: scale(1.05);
-        }
-
-        .card-body {
-            padding: 20px;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .product-code {
-            font-size: 0.85rem;
-            color: var(--accent-color);
-            font-weight: bold;
-        }
-
-        .product-name {
-            font-size: 1.1rem;
-            color: var(--primary-color);
-            margin: 0;
-            line-height: 1.3;
-        }
-
-        .product-category {
-            font-size: 0.9rem;
-            color: #7f8c8d;
-            background-color: var(--gray-light);
-            padding: 4px 8px;
-            border-radius: 4px;
-            display: inline-block;
-        }
-
-        .product-price {
-            margin-top: auto;
-            font-size: 1.3rem;
-            color: var(--primary-color);
-            font-weight: bold;
-        }
-
-        /* Badge Gruppo Correlati */
-        .group-badge {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background-color: rgba(231, 76, 60, 0.8); /* Rosso */
-            color: white;
-            font-size: 0.75rem;
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-weight: bold;
-        }
-
+        .group-badge { position: absolute; top: 10px; right: 10px; background: #e74c3c; color: white; font-size: 0.7rem; padding: 4px 8px; border-radius: 12px; font-weight: bold; z-index: 2; }
     </style>
 </head>
 <body>
 
     <div id="sidebar">
         <div id="logo-container">
-            <h1>PodoCatalogo Pro</h1>
-            <p>Podopiù Database</p>
+            <h1>PodoCatalogo</h1>
+            <p>Database Prodotti</p>
         </div>
-        
         <input type="text" id="search-input" placeholder="Cerca codice o nome...">
-        
         <div class="filter-group">
             <h3>Macro Categorie</h3>
             <div id="macro-filters">
                 <button class="filter-btn active" data-filter="all">Tutti</button>
-                </div>
+            </div>
         </div>
-
         <div class="filter-group">
             <h3>Categorie</h3>
-            <div id="category-filters">
-                </div>
+            <div id="category-filters"></div>
         </div>
     </div>
 
     <div id="main-content">
         <div id="header">
-            <h2>Elenco Prodotti</h2>
+            <h2>Catalogo</h2>
             <div id="product-count">Trovati: 0</div>
         </div>
-        
-        <div id="product-grid">
-            </div>
+        <div id="product-grid"></div>
     </div>
 
     <script>
-        // --- CONFIGURAZIONE SUPABASE ---
-        // INSERISCI QUI I TUOI DATI
-        const SUPABASE_URL = "https://fxcuwfpdzymwkemzppgm.supabase.co";
-        const SUPABASE_ANON_KEY = "sb_publishable__jf5n22-ZlvGPRN-BAh38A_WdVt7B9d";
-        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // --- CONFIGURAZIONE ---
+        const SB_URL = "https://fxcuwfpdzymwkemzppgm.supabase.co"; 
+        const SB_KEY = "sb_publishable__jf5n22-ZlvGPRN-BAh38A_WdVt7B9d"; // Incolla la tua Anon Key (Publishable)
+
+        // Usiamo 'sb_client' per non andare in conflitto con l'oggetto 'supabase' della libreria
+        const sb_client = supabase.createClient(SB_URL, SB_KEY);
 
         let allProducts = [];
-        let currentMacro = 'all';
 
-        // --- INIZIALIZZAZIONE ---
         async function init() {
+            console.log("Inizializzazione...");
             await fetchProducts();
             populateFilters();
             renderGrid(allProducts);
             setupEventListeners();
         }
 
-        // --- CARICAMENTO DATI ---
         async function fetchProducts() {
-            const { data, error } = await supabase
+            const { data, error } = await sb_client
                 .from('prodotti_catalogo')
                 .select('*');
             
             if (error) {
-                console.error("Errore nel caricamento dei dati:", error);
+                console.error("Errore Supabase:", error);
                 return;
             }
-            allProducts = data;
+            allProducts = data || [];
+            console.log("Prodotti caricati:", allProducts.length);
         }
 
-        // --- CREAZIONE CARD PRODOTTO (La Chicca!) ---
-        function createProductCard(p) {
-            const imgUrl = getImageUrl(p);
+        function getImageUrl(p) {
+            // 1. Scraper
+            if (p.IMG_SCRAPER && p.IMG_SCRAPER.startsWith('http')) return p.IMG_SCRAPER;
             
+            // 2. Bucket Catalogo
+            if (p.MACROCATEGORIE && p.LINK_PAGINA_INTERA) {
+                let bucket = 'catalogo-podopiu';
+                const macro = p.MACROCATEGORIE.toUpperCase();
+                if (macro === 'ATTREZZATURE') bucket = 'catalogo-attrezzature';
+                if (macro === 'ORTOPODOLOGIA') bucket = 'catalogo-orto';
+                
+                return `${SB_URL}/storage/v1/object/public/${bucket}/${p.LINK_PAGINA_INTERA}`;
+            }
+            return "https://via.placeholder.com/300?text=Immagine+non+disponibile";
+        }
+
+        function createCard(p) {
             return `
                 <div class="product-card">
                     ${p.GRUPPO_CORRELATI ? `<div class="group-badge">GR ${p.GRUPPO_CORRELATI}</div>` : ''}
                     <div class="card-img-container">
-                        <img src="${imgUrl}" alt="${p.NOME}" onerror="this.src='https://via.placeholder.com/300?text=Immagine+non+disponibile';">
+                        <img src="${getImageUrl(p)}" loading="lazy" onerror="this.src='https://via.placeholder.com/300?text=Immagine+non+disponibile';">
                     </div>
                     <div class="card-body">
-                        <div class="product-code">${p.CODICE || 'N/A'}</div>
-                        <h3 class="product-name">${p.NOME || 'N/A'}</h3>
-                        <div class="product-category">${p.CATEGORIE || 'Senza Categoria'}</div>
-                        ${p.PREZZO ? `<div class="product-price">€ ${p.PREZZO.toFixed(2)}</div>` : ''}
+                        <div class="product-code">${p.CODICE || ''}</div>
+                        <h3 class="product-name">${p.NOME || 'Senza Nome'}</h3>
+                        <div class="product-category">${p.CATEGORIE || ''}</div>
                     </div>
                 </div>
             `;
         }
 
-        // --- LOGICA DELLE 3 PRIORITÀ (Intelligente) ---
-        function getImageUrl(p) {
-            // Priorità 1: Link dello Scraper
-            if (p.IMG_SCRAPER && p.IMG_SCRAPER.startsWith('http')) {
-                return p.IMG_SCRAPER;
-            }
-            
-            // Priorità 2: Pagina Catalogo nel Bucket giusto
-            if (p.MACROCATEGORIE && p.LINK_PAGINA_INTERA) {
-                const bucket = getBucketName(p.MACROCATEGORIE);
-                return `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${p.LINK_PAGINA_INTERA}`;
-            }
-            
-            // Priorità 3: Segnaposto
-            return "https://via.placeholder.com/300?text=Immagine+non+disponibile";
-        }
-
-        // Associa Macrocategoria -> Bucket
-        function getBucketName(macro) {
-            switch(macro.toUpperCase()) {
-                case 'ATTREZZATURE': return 'catalogo-attrezzature';
-                case 'PRODOTTI': return 'catalogo-podopiu';
-                case 'ORTOPODOLOGIA': return 'catalogo-orto';
-                default: return 'catalogo-podopiu';
-            }
-        }
-
-        // --- RENDER GRIGLIA ---
         function renderGrid(products) {
             const grid = document.getElementById('product-grid');
-            const count = document.getElementById('product-count');
-            
-            grid.innerHTML = products.map(createProductCard).join('');
-            count.innerText = `Trovati: ${products.length}`;
+            grid.innerHTML = products.map(createCard).join('');
+            document.getElementById('product-count').innerText = `Trovati: ${products.length}`;
         }
 
-        // --- POPOLAMENTO FILTRI DINAMICI ---
         function populateFilters() {
-            // Macro
             const macros = [...new Set(allProducts.map(p => p.MACROCATEGORIE).filter(Boolean))];
-            const macroFilters = document.getElementById('macro-filters');
-            macros.forEach(macro => {
+            const container = document.getElementById('macro-filters');
+            macros.forEach(m => {
                 const btn = document.createElement('button');
                 btn.className = 'filter-btn';
-                btn.dataset.filter = macro;
-                btn.innerText = macro;
-                macroFilters.appendChild(btn);
+                btn.dataset.filter = m;
+                btn.innerText = m;
+                container.appendChild(btn);
             });
-
-            // Categorie (dipendono dalla Macro selezionata)
             updateCategoryFilters('all');
         }
 
         function updateCategoryFilters(macro) {
-            const categoryFilters = document.getElementById('category-filters');
-            categoryFilters.innerHTML = ''; // Pulisce
-
-            let filteredForMacro = allProducts;
-            if (macro !== 'all') {
-                filteredForMacro = allProducts.filter(p => p.MACROCATEGORIE === macro);
-            }
-
-            const categories = [...new Set(filteredForMacro.map(p => p.CATEGORIE).filter(Boolean))];
-            categories.sort().forEach(cat => {
+            const container = document.getElementById('category-filters');
+            container.innerHTML = '';
+            const filtered = macro === 'all' ? allProducts : allProducts.filter(p => p.MACROCATEGORIE === macro);
+            const cats = [...new Set(filtered.map(p => p.CATEGORIE).filter(Boolean))].sort();
+            cats.forEach(c => {
                 const btn = document.createElement('button');
                 btn.className = 'filter-btn';
-                btn.dataset.filter = cat;
-                btn.innerText = cat;
-                categoryFilters.appendChild(btn);
+                btn.dataset.filter = c;
+                btn.innerText = c;
+                container.appendChild(btn);
             });
         }
 
-        // --- FILTRAGGIO E RICERCA IN TEMPO REALE ---
         function filterProducts() {
             const search = document.getElementById('search-input').value.toLowerCase();
-            const activeMacroBtn = document.querySelector('#macro-filters .filter-btn.active');
-            const activeCatBtn = document.querySelector('#category-filters .filter-btn.active');
-            
-            const macro = activeMacroBtn ? activeMacroBtn.dataset.filter : 'all';
-            const cat = activeCatBtn ? activeCatBtn.dataset.filter : 'all';
+            const macro = document.querySelector('#macro-filters .active').dataset.filter;
+            const catBtn = document.querySelector('#category-filters .active');
+            const cat = catBtn ? catBtn.dataset.filter : 'all';
 
             let filtered = allProducts;
-
-            // Filtro Macro
             if (macro !== 'all') filtered = filtered.filter(p => p.MACROCATEGORIE === macro);
-            // Filtro Categoria
             if (cat !== 'all') filtered = filtered.filter(p => p.CATEGORIE === cat);
-            
-            // Ricerca Testo
             if (search) {
                 filtered = filtered.filter(p => 
-                    (p.NOME && p.NOME.toLowerCase().includes(search)) ||
+                    (p.NOME && p.NOME.toLowerCase().includes(search)) || 
                     (p.CODICE && p.CODICE.toLowerCase().includes(search))
                 );
             }
-
             renderGrid(filtered);
         }
 
-        // --- EVENT LISTENERS ---
         function setupEventListeners() {
-            // Ricerca
             document.getElementById('search-input').addEventListener('input', filterProducts);
-
-            // Clic filtri
             document.addEventListener('click', e => {
                 if (e.target.classList.contains('filter-btn')) {
-                    const parentId = e.target.parentElement.id;
-                    const filterValue = e.target.dataset.filter;
-
-                    // Pulisce gli attivi nel gruppo
                     e.target.parentElement.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
                     e.target.classList.add('active');
-
-                    if (parentId === 'macro-filters') {
-                        updateCategoryFilters(filterValue);
-                        // Reset filtri categoria quando cambi macro
-                        document.getElementById('category-filters').querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                    }
+                    if (e.target.parentElement.id === 'macro-filters') updateCategoryFilters(e.target.dataset.filter);
                     filterProducts();
                 }
             });
         }
 
-        // Via!
         init();
-
     </script>
 </body>
 </html>
