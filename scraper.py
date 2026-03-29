@@ -4,32 +4,31 @@ import requests
 from bs4 import BeautifulSoup
 from supabase import create_client
 
-# Configurazione Supabase (inserisci i tuoi dati o usa variabili d'ambiente)
-URL_SB = "https://fxcuwfpdzymwkemzppgm.supabase.co"
-KEY_SB = "sb_publishable__jf5n22-ZlvGPRN-BAh38A_WdVt7B9d" # Usa la Service Role per poter scrivere
+# MODIFICA QUI: Legge le credenziali dalle variabili d'ambiente di GitHub
+URL_SB = os.environ.get("https://fxcuwfpdzymwkemzppgm.supabase.co")
+KEY_SB = os.environ.get("sb_publishable__jf5n22-ZlvGPRN-BAh38A_WdVt7B9d")
+
+if not URL_SB or not KEY_SB:
+    print("❌ Errore: Credenziali Supabase non trovate nelle variabili d'ambiente.")
+    exit(1)
+
 sb = create_client(URL_SB, KEY_SB)
 
 def cerca_prodotto_sul_sito(codice, nome):
+    # (Il resto della funzione rimane uguale...)
     search_url = f"https://www.podopiu.com/?s={codice}&post_type=product"
     headers = {"User-Agent": "Mozilla/5.0"}
-    
     try:
         res = requests.get(search_url, headers=headers)
         soup = BeautifulSoup(res.text, 'html.parser')
-        
-        # 1. Prova a vedere se la ricerca ha portato direttamente alla pagina prodotto
-        # (WooCommerce spesso reindirizza se c'è un match esatto dello SKU)
         product_title = soup.find('h1', class_='product_title')
         if product_title:
             return estrai_dati_pagina(soup)
-
-        # 2. Se è una pagina di risultati, prendi il primo link
         primo_prodotto = soup.select_one('ul.products li.product a')
         if primo_prodotto:
             link = primo_prodotto['href']
             res_p = requests.get(link, headers=headers)
             return estrai_dati_pagina(BeautifulSoup(res_p.text, 'html.parser'))
-            
     except Exception as e:
         print(f"Errore ricerca {codice}: {e}")
     return None
@@ -44,15 +43,18 @@ def estrai_dati_pagina(soup):
         return None
 
 def esegui_aggiornamento():
-    # 1. Prendi i prodotti dalla tabella che non hanno ancora l'immagine dello scraper
+    # Prende solo i prodotti dove IMG_SCRAPER è ancora vuoto (NULL)
+    # Nota: su Supabase 'is_null' si usa così:
     prodotti = sb.table("prodotti_catalogo").select("*").is_("IMG_SCRAPER", "null").execute().data
     
     print(f"🚀 Inizio elaborazione di {len(prodotti)} prodotti...")
 
     for p in prodotti:
-        codice_puro = p['CODICE'].split('-')[0] # Prende la parte prima del trattino
+        # Pulizia codice: prende solo la parte prima del trattino
+        codice_puro = p['CODICE'].split('-')[0] if p['CODICE'] else ""
+        if not codice_puro: continue
+
         print(f"🔍 Cerco: {codice_puro} ({p['NOME'][:30]}...)")
-        
         dati = cerca_prodotto_sul_sito(codice_puro, p['NOME'])
         
         if dati:
@@ -62,8 +64,8 @@ def esegui_aggiornamento():
                 "DESCRIZIONE_SCRAPER": dati['desc']
             }).eq("id", p['id']).execute()
             
-            # 2. EFFETTO DOMINO: Se fa parte di un gruppo, aggiorna tutti i correlati
-            if p['GRUPPO_CORRELATI']:
+            # EFFETTO DOMINO: Aggiorna tutti i prodotti con lo stesso gruppo
+            if p['GRUPPO_CORRELATI'] and p['GRUPPO_CORRELATI'] != "":
                 sb.table("prodotti_catalogo").update({
                     "IMG_SCRAPER": dati['img'],
                     "DESCRIZIONE_SCRAPER": dati['desc']
@@ -74,7 +76,7 @@ def esegui_aggiornamento():
         else:
             print(f" ⚠️ Non trovato sul sito.")
         
-        time.sleep(1) # Pausa per non essere bloccati
+        time.sleep(1)
 
 if __name__ == "__main__":
     esegui_aggiornamento()
