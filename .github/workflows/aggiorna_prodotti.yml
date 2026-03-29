@@ -1,9 +1,9 @@
-name: Scraping Automatico
+name: Scraping Automatico Podopiu
 
 on:
   schedule:
     - cron: '0 9 * * *' # Parte ogni mattina alle 09:00
-  workflow_dispatch:      # Ti permette di avviarlo a mano per testare
+  workflow_dispatch:      # Ti permette di avviarlo a mano cliccando su "Run workflow"
 
 jobs:
   run-scraper:
@@ -18,7 +18,8 @@ jobs:
           python-version: '3.9'
 
       - name: Installazione librerie
-        run: pip install requests beautifulsoup4 supabase
+        run: |
+          pip install requests beautifulsoup4 supabase
 
       - name: Esecuzione Scraper
         env:
