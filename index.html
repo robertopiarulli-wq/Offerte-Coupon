@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PodoCatalogo Pro - Preventivi</title>
+    <title>PodoCatalogo Pro X - Preventivi</title>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -27,27 +27,21 @@
         .sidebar-content { padding: 20px; overflow-y: auto; flex-grow: 1; padding-bottom: 100px; }
 
         .search-container { position: sticky; top: 0; background: var(--card); padding-bottom: 15px; z-index: 10; }
-        #search-input { 
-            width: 100%; padding: 12px; border: 2px solid var(--accent); 
-            border-radius: 8px; font-size: 1rem; outline: none; box-sizing: border-box;
-        }
+        #search-input { width: 100%; padding: 12px; border: 2px solid var(--accent); border-radius: 8px; font-size: 1rem; outline: none; box-sizing: border-box; }
 
         .filter-group h3 { font-size: 0.9rem; text-transform: uppercase; color: #7f8c8d; margin: 20px 0 10px; }
-        
-        .filter-btn { 
-            width: 100%; background: #fff; border: 1px solid var(--border); padding: 12px; 
-            border-radius: 8px; cursor: pointer; text-align: left; margin-bottom: 6px; font-weight: 500;
-        }
+        .filter-btn { width: 100%; background: #fff; border: 1px solid var(--border); padding: 12px; border-radius: 8px; cursor: pointer; text-align: left; margin-bottom: 6px; font-weight: 500; }
         .filter-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
 
         /* --- MAIN CONTENT --- */
         #main-content { flex: 1; margin-left: 320px; padding: 30px; min-height: 100vh; padding-bottom: 120px; }
         #product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
 
+        /* --- CARD POTENZIATA --- */
         .product-card { 
             background: var(--card); border-radius: 12px; overflow: hidden; 
             border: 1px solid var(--border); display: flex; flex-direction: column; 
-            transition: 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); position: relative;
         }
         .product-card.selected { border: 2px solid var(--success); background: #f0fff4; }
         
@@ -59,8 +53,16 @@
         .product-card:hover img { filter: grayscale(0%); }
 
         .card-body { padding: 15px; flex-grow: 1; display: flex; flex-direction: column; }
-        .p-name { font-weight: 600; font-size: 0.95rem; margin: 10px 0; height: 45px; overflow: hidden; }
+        .p-name { font-weight: 600; font-size: 0.95rem; margin: 5px 0 10px 0; height: 45px; overflow: hidden; line-height: 1.4; }
         
+        /* PULSANTE VEDI CORRELATI */
+        .related-btn {
+            background: none; border: 1px solid var(--accent); color: var(--accent);
+            padding: 5px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold;
+            cursor: pointer; align-self: flex-start; margin-bottom: 10px; transition: 0.2s;
+        }
+        .related-btn:hover { background: var(--accent); color: white; }
+
         .qta-area { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 15px; border-top: 1px solid #eee; }
         .qta-input { width: 70px; padding: 8px; border: 2px solid var(--primary); border-radius: 8px; text-align: center; font-weight: bold; }
         .add-btn { background: var(--primary); color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; }
@@ -73,9 +75,27 @@
         }
         .send-btn { background: var(--success); color: white; border: none; padding: 15px 45px; border-radius: 50px; font-size: 1.1rem; font-weight: bold; cursor: pointer; }
 
-        /* --- ZOOM & UTILS --- */
-        #zoom-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center; }
-        .close-zoom { position: absolute; top: 20px; right: 20px; color: white; font-size: 50px; cursor: pointer; }
+        /* --- ZOOM MODAL PULSANTE --- */
+        #zoom-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center; cursor: pointer; }
+        
+        #zoom-img { 
+            max-width: 90%; max-height: 90%; object-fit: contain; 
+            border: 3px solid #333; border-radius: 8px;
+            animation: pulse-border 2s infinite; /* Effetto pulsante */
+        }
+        
+        .close-zoom { position: absolute; top: 20px; right: 20px; color: white; font-size: 50px; cursor: pointer; z-index: 2001; }
+
+        @keyframes pulse-border {
+            0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(255, 255, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+        }
+
+        /* --- POPUP CORRELATI --- */
+        #related-popup-container { max-height: 80vh; overflow-y: auto; text-align: left; }
+        .related-item-row { display: flex; gap: 10px; align-items: center; border-bottom: 1px solid #eee; padding: 10px 0; }
+        .related-item-img { width: 60px; height: 60px; object-fit: contain; }
 
         @media (max-width: 768px) {
             #sidebar { width: 100%; height: auto; position: relative; }
@@ -118,7 +138,7 @@
 
 <div id="zoom-modal" onclick="this.style.display='none'">
     <span class="close-zoom">&times;</span>
-    <img id="zoom-img" style="max-width:90%; max-height:90%;">
+    <img id="zoom-img" src="">
 </div>
 
 <script>
@@ -134,16 +154,11 @@
     let nomeCliente = "Anonimo";
 
     async function init() {
-        // 1. Recupera Nome Cliente dallo Slug
+        // Recupero nome cliente e prodotti (intatto)
         if (slug) {
             const { data: contact } = await sb.from('contacts').select('nome').eq('slug', slug).single();
-            if (contact) {
-                nomeCliente = contact.nome;
-                document.getElementById('client-name').innerText = "Per: " + nomeCliente;
-            }
+            if (contact) { nomeCliente = contact.nome; document.getElementById('client-name').innerText = "Per: " + nomeCliente; }
         }
-
-        // 2. Recupera Prodotti
         const { data } = await sb.from('prodotti_catalogo').select('*').order('NOME');
         allProducts = data || [];
         
@@ -156,6 +171,8 @@
         const grid = document.getElementById('product-grid');
         grid.innerHTML = products.map(p => {
             const inCart = carrello[p.id];
+            const correlati = p.GRUPPO_CORRELATI ? allProducts.filter(pr => pr.GRUPPO_CORRELATI === p.GRUPPO_CORRELATI && pr.id !== p.id) : [];
+            
             return `
             <div class="product-card ${inCart ? 'selected' : ''}" id="card-${p.id}">
                 <div class="img-container" onclick="zoom('${getImageUrl(p, true)}')">
@@ -164,6 +181,9 @@
                 <div class="card-body">
                     <div style="font-size:0.75rem; color:var(--accent); font-weight:bold">${p.CODICE || '---'}</div>
                     <p class="p-name">${p.NOME}</p>
+                    
+                    ${correlati.length > 0 ? `<button class="related-btn" onclick="mostraCorrelati('${p.GRUPPO_CORRELATI}', '${p.NOME.replace(/'/g, "\\'")}')">Vedi Correlati (+${correlati.length})</button>` : ''}
+
                     <div class="qta-area">
                         <input type="number" id="qta-${p.id}" class="qta-input" value="${inCart ? inCart.qta : 1}" min="1">
                         <button class="add-btn" onclick="addToCart('${p.id}', '${p.NOME.replace(/'/g, "\\'")}')">
@@ -175,18 +195,88 @@
         }).join('');
     }
 
-    function addToCart(id, nome) {
-        const qta = parseInt(document.getElementById(`qta-${id}`).value);
+    // --- FUNZIONE PER MOSTRARE I CORRELATI IN POPUP ---
+    function mostraCorrelati(gruppo, nomeProdottoOriginale) {
+        const correlati = allProducts.filter(p => p.GRUPPO_CORRELATI === gruppo);
+        
+        let html = '<div id="related-popup-container">';
+        html += `<p style="font-size:0.9rem; color:#7f8c8d; margin-bottom:15px;">Prodotti correlati a: <strong>${nomeProdottoOriginale}</strong></p>`;
+        
+        correlati.forEach(p => {
+            const inCart = carrello[p.id];
+            html += `
+            <div class="related-item-row ${inCart ? 'selected' : ''}" id="rel-card-${p.id}">
+                <img src="${getImageUrl(p)}" class="related-item-img">
+                <div style="flex:1">
+                    <div style="font-size:0.7rem; color:var(--accent); font-weight:bold;">${p.CODICE || '---'}</div>
+                    <p style="font-size:0.85rem; margin:2px 0;">${p.NOME}</p>
+                </div>
+                <div style="display:flex; align-items:center; gap:5px;">
+                    <input type="number" id="rel-qta-${p.id}" value="${inCart ? inCart.qta : 1}" min="1" style="width:40px; text-align:center;">
+                    <button class="add-btn" style="padding:5px 10px; font-size:0.8rem;" onclick="addToCartFromRelated('${p.id}', '${p.NOME.replace(/'/g, "\\'")}')">
+                        ${inCart ? 'OK' : 'AGGIUNGI'}
+                    </button>
+                </div>
+            </div>`;
+        });
+        html += '</div>';
+
+        Swal.fire({
+            title: 'Prodotti del Gruppo ' + gruppo,
+            html: html,
+            confirmButtonText: 'Torna al Catalogo',
+            confirmButtonColor: '#2c3e50',
+            width: '600px'
+        });
+    }
+
+    // Aggiunta specifica dal popup dei correlati
+    function addToCartFromRelated(id, nome) {
+        const qta = parseInt(document.getElementById(`rel-qta-${id}`).value);
+        addToCart(id, nome, false); // false per non mostrare il Swal verde qui
+        
+        // Aggiorna l'area dei correlati visivamente
+        document.getElementById(`rel-card-${id}`).classList.add('selected');
+        event.target.innerText = 'OK';
+        
+        // Sincronizza il grid principale se il prodotto è visibile
+        const mainCard = document.getElementById(`card-${id}`);
+        if(mainCard) {
+            mainCard.classList.add('selected');
+            document.getElementById(`qta-${id}`).value = qta;
+        }
+    }
+
+    // --- ZOOM MODAL PULSANTE (Blindato e Funzionante anche su Mobile) ---
+    function zoom(url) { 
+        document.getElementById('zoom-img').src = url; 
+        const modal = document.getElementById('zoom-modal');
+        modal.style.display = 'flex'; 
+        
+        // Aggiungiamo il listener per chiudere cliccando ovunque
+        modal.onclick = function(e) {
+            if (e.target !== document.getElementById('zoom-img')) {
+                modal.style.display = 'none';
+            }
+        };
+    }
+
+    // --- FUNZIONI CARRELLO (Intatte e Funzionanti) ---
+    function addToCart(id, nome, showSwal = true) {
+        const qtaField = document.getElementById(`qta-${id}`) || document.getElementById(`rel-qta-${id}`);
+        const qta = parseInt(qtaField.value);
         if(qta > 0) {
             carrello[id] = { nome, qta };
-            document.getElementById(`card-${id}`).classList.add('selected');
+            const card = document.getElementById(`card-${id}`);
+            if(card) card.classList.add('selected');
         } else {
             delete carrello[id];
-            document.getElementById(`card-${id}`).classList.remove('selected');
+            const card = document.getElementById(`card-${id}`);
+            if(card) card.classList.remove('selected');
         }
         localStorage.setItem('podo_cart_v1', JSON.stringify(carrello));
         aggiornaConteggio();
-        Swal.fire({ title: 'Carrello aggiornato', icon: 'success', timer: 700, showConfirmButton: false });
+        if(showSwal) Swal.fire({ title: 'Carrello aggiornato', icon: 'success', timer: 700, showConfirmButton: false });
     }
 
     function apriRiepilogo() {
@@ -235,7 +325,7 @@
         }
     }
 
-    // --- LOGICHE FILTRI E IMMAGINI ---
+    // --- LOGICHE FILTRI E IMMAGINI (Intatte) ---
     function getImageUrl(p, full = false) {
         if (!full && p.IMG_SCRAPER) return p.IMG_SCRAPER;
         if (p.LINK_PAGINA_INTERA) {
@@ -274,7 +364,6 @@
     }
 
     function aggiornaConteggio() { document.getElementById('cart-count').innerText = Object.keys(carrello).length; }
-    function zoom(url) { document.getElementById('zoom-img').src = url; document.getElementById('zoom-modal').style.display = 'flex'; }
 
     document.getElementById('search-input').addEventListener('input', e => {
         const t = e.target.value.toLowerCase();
