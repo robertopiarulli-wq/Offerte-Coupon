@@ -16,77 +16,105 @@
         }
 
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--bg); display: flex; color: var(--primary); overflow-x: hidden; }
-        /* Classe per bloccare lo scroll della pagina quando lo zoom è aperto */
         body.modal-open { overflow: hidden; }
 
-        /* --- SIDEBAR FISSA --- */
+        /* --- SIDEBAR ELEGANTE (RIPRISTINATA) --- */
         #sidebar { 
-            width: 320px; background: var(--card); border-right: 2px solid var(--border);
+            width: 320px; background: var(--card); border-right: 1px solid var(--border);
             height: 100vh; position: fixed; left: 0; top: 0; 
             display: flex; flex-direction: column; z-index: 1000;
         }
-        .sidebar-header { padding: 20px; background: var(--primary); color: white; }
+        .sidebar-header { padding: 25px 20px; background: var(--primary); color: white; }
         .sidebar-content { padding: 20px; overflow-y: auto; flex-grow: 1; padding-bottom: 100px; }
 
-        .search-container { position: sticky; top: 0; background: var(--card); padding-bottom: 15px; z-index: 10; }
-        #search-input { width: 100%; padding: 12px; border: 2px solid var(--accent); border-radius: 8px; font-size: 1rem; outline: none; box-sizing: border-box; }
+        .search-container { position: sticky; top: 0; background: var(--card); padding-bottom: 20px; z-index: 10; }
+        #search-input { 
+            width: 100%; padding: 12px 15px; border: 2px solid #eee; border-radius: 10px; 
+            font-size: 0.95rem; outline: none; box-sizing: border-box; transition: 0.3s;
+        }
+        #search-input:focus { border-color: var(--accent); }
+
+        .filter-group h3 { font-size: 0.75rem; text-transform: uppercase; color: #95a5a6; letter-spacing: 1px; margin: 25px 0 12px; }
+        .filter-btn { 
+            width: 100%; background: #fff; border: 1px solid #eee; padding: 10px 15px; 
+            border-radius: 8px; cursor: pointer; text-align: left; margin-bottom: 6px; 
+            font-weight: 500; font-size: 0.9rem; transition: 0.2s;
+        }
+        .filter-btn:hover { background: #f9f9f9; }
+        .filter-btn.active { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3); }
 
         /* --- GRID E CARD --- */
-        #main-content { flex: 1; margin-left: 320px; padding: 30px; min-height: 100vh; padding-bottom: 120px; }
-        #product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
+        #main-content { flex: 1; margin-left: 320px; padding: 40px; min-height: 100vh; padding-bottom: 140px; }
+        #product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 30px; }
 
-        .product-card { background: var(--card); border-radius: 12px; overflow: hidden; border: 1px solid var(--border); display: flex; flex-direction: column; transition: 0.3s; position: relative; }
-        .product-card.selected { border: 2px solid var(--success); background: #f0fff4; }
+        .product-card { 
+            background: var(--card); border-radius: 15px; overflow: hidden; 
+            border: 1px solid var(--border); display: flex; flex-direction: column; 
+            transition: 0.3s ease; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+        }
+        .product-card.selected { border: 2px solid var(--success); background: #f0fff4; transform: translateY(-5px); }
         
-        .img-container { width: 100%; height: 230px; background: white; display: flex; align-items: center; justify-content: center; cursor: zoom-in; }
-        .img-container img { max-width: 90%; max-height: 90%; object-fit: contain; filter: grayscale(100%); transition: 0.4s; }
-        .product-card:hover img { filter: grayscale(0%); }
+        .img-container { width: 100%; height: 250px; background: white; display: flex; align-items: center; justify-content: center; cursor: zoom-in; }
+        .img-container img { max-width: 85%; max-height: 85%; object-fit: contain; filter: grayscale(100%); transition: 0.5s; }
+        .product-card:hover img { filter: grayscale(0%); transform: scale(1.05); }
 
-        .related-btn { background: none; border: 1px solid var(--accent); color: var(--accent); padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; cursor: pointer; margin: 10px 0; }
+        .related-btn { 
+            background: #eef7fd; border: 1px solid var(--accent); color: var(--accent); 
+            padding: 7px 15px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; 
+            cursor: pointer; margin: 10px 0; transition: 0.2s;
+        }
+        .related-btn:hover { background: var(--accent); color: white; }
         
-        .qta-area { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 15px; border-top: 1px solid #eee; }
-        .qta-input { width: 60px; padding: 8px; border: 2px solid var(--primary); border-radius: 8px; text-align: center; font-weight: bold; }
-        .add-btn { background: var(--primary); color: white; border: none; padding: 10px 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .qta-area { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding: 15px; border-top: 1px solid #f1f1f1; }
+        .qta-input { width: 65px; padding: 10px; border: 2px solid #eee; border-radius: 8px; text-align: center; font-weight: bold; outline: none; }
+        .qta-input:focus { border-color: var(--primary); }
+        .add-btn { background: var(--primary); color: white; border: none; padding: 12px 18px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .add-btn:active { transform: scale(0.95); }
 
-        /* --- ZOOM MODAL --- */
+        /* --- ZOOM MODAL (PIÙ GRANDE) --- */
         #zoom-modal { 
-            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); 
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.97); 
             z-index: 9999; justify-content: center; align-items: center;
         }
-        .pinch-zoom-container { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
-        #zoom-img { max-width: 95%; max-height: 95%; object-fit: contain; }
-        .close-zoom { position: absolute; top: 20px; right: 20px; color: white; font-size: 40px; cursor: pointer; z-index: 10000; background: rgba(255,255,255,0.2); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .pinch-zoom-container { width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center; }
+        #zoom-img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .close-zoom { position: absolute; top: 25px; right: 25px; color: white; font-size: 45px; cursor: pointer; z-index: 10000; background: rgba(255,255,255,0.1); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 
-        /* --- POPUP CORRELATI STILE --- */
-        .related-row { display: flex; align-items: center; gap: 15px; padding: 12px; border-bottom: 1px solid #eee; }
-        .related-row.selected { background: #f0fff4; }
-        .related-img { width: 50px; height: 50px; object-fit: contain; border-radius: 4px; }
+        /* --- POPUP CORRELATI (BELLO COME PRIMA) --- */
+        .related-grid-popup { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; text-align: left; padding: 10px; }
+        .rel-card { border: 1px solid #eee; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; transition: 0.3s; }
+        .rel-card.selected { border-color: var(--success); background: #f0fff4; }
+        .rel-img { width: 100%; height: 120px; object-fit: contain; margin-bottom: 10px; background: white; border-radius: 8px; }
 
-        #cart-bar { position: fixed; bottom: 0; left: 320px; right: 0; background: #fff; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 -10px 30px rgba(0,0,0,0.1); border-top: 4px solid var(--success); z-index: 1001; }
-        .send-btn { background: var(--success); color: white; border: none; padding: 15px 40px; border-radius: 50px; font-weight: bold; cursor: pointer; }
+        #cart-bar { 
+            position: fixed; bottom: 0; left: 320px; right: 0; background: #fff; 
+            padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; 
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.1); border-top: 4px solid var(--success); z-index: 1001; 
+        }
+        .send-btn { background: var(--success); color: white; border: none; padding: 16px 50px; border-radius: 50px; font-weight: 800; font-size: 1rem; cursor: pointer; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3); }
 
         @media (max-width: 768px) {
-            #sidebar { width: 100%; height: auto; position: relative; }
-            #main-content { margin-left: 0; }
-            #cart-bar { left: 0; }
+            #sidebar { width: 100%; height: auto; position: relative; border-right: none; }
+            #main-content { margin-left: 0; padding: 20px; }
+            #cart-bar { left: 0; padding: 15px 20px; }
         }
     </style>
 </head>
 <body>
 
 <div id="sidebar">
-    <div class="sidebar-header"><h2 id="client-name" style="margin:0; font-size: 1.1rem;">PodoCatalogo</h2></div>
+    <div class="sidebar-header"><h2 id="client-name" style="margin:0; font-size: 1.2rem; font-weight: 800;">PODOCATALOGO</h2></div>
     <div class="sidebar-content">
-        <div class="search-container"><input type="text" id="search-input" placeholder="🔍 Cerca prodotto o codice..."></div>
-        <div class="filter-group"><h3>Macro</h3><div id="macro-filters"><button class="filter-btn active" data-filter="all">Tutte</button></div></div>
-        <div class="filter-group"><h3>Categorie</h3><div id="sub-filters"></div></div>
+        <div class="search-container"><input type="text" id="search-input" placeholder="Cerca prodotto o codice..."></div>
+        <div class="filter-group"><h3>Macro Categorie</h3><div id="macro-filters"><button class="filter-btn active" data-filter="all">Tutte le Macro</button></div></div>
+        <div class="filter-group"><h3>Sottocategorie</h3><div id="sub-filters"></div></div>
     </div>
 </div>
 
 <div id="main-content"><div id="product-grid"></div></div>
 
 <div id="cart-bar">
-    <div style="font-weight: bold; cursor:pointer" onclick="apriRiepilogo()">🛒 Articoli: <span id="cart-count">0</span></div>
+    <div style="font-weight: 700; cursor:pointer; color: var(--primary)" onclick="apriRiepilogo()">🛒 CARRELLO: <span id="cart-count">0</span> ARTICOLI</div>
     <button class="send-btn" onclick="inviaRichiesta()">🚀 INVIA PREVENTIVO</button>
 </div>
 
@@ -111,7 +139,7 @@
     async function init() {
         if (slug) {
             const { data: contact } = await sb.from('contacts').select('nome').eq('slug', slug).single();
-            if (contact) { nomeCliente = contact.nome; document.getElementById('client-name').innerText = "Cliente: " + nomeCliente; }
+            if (contact) { nomeCliente = contact.nome; document.getElementById('client-name').innerText = "PER: " + nomeCliente.toUpperCase(); }
         }
         const { data } = await sb.from('prodotti_catalogo').select('*').order('NOME');
         allProducts = data || [];
@@ -128,10 +156,10 @@
             return `
             <div class="product-card ${inCart ? 'selected' : ''}" id="card-${p.id}">
                 <div class="img-container" onclick="zoom('${getImageUrl(p, true)}')"><img src="${getImageUrl(p)}" loading="lazy"></div>
-                <div class="card-body" style="padding:15px">
-                    <div style="font-size:0.7rem; color:var(--accent); font-weight:bold">${p.CODICE || ''}</div>
-                    <div style="font-weight:600; font-size:0.9rem; height:40px; overflow:hidden; margin:5px 0">${p.NOME}</div>
-                    ${hasCorr ? `<button class="related-btn" onclick="mostraCorrelati('${p.GRUPPO_CORRELATI}')">Vedi Correlati</button>` : ''}
+                <div class="card-body" style="padding:15px; flex-grow:1; display:flex; flex-direction:column">
+                    <div style="font-size:0.75rem; color:var(--accent); font-weight:800">${p.CODICE || 'ND'}</div>
+                    <div style="font-weight:600; font-size:0.95rem; height:45px; overflow:hidden; margin:8px 0; line-height:1.3">${p.NOME}</div>
+                    ${hasCorr ? `<button class="related-btn" onclick="mostraCorrelati('${p.GRUPPO_CORRELATI}', '${p.NOME.replace(/'/g, "\\'")}')">VEDI CORRELATI</button>` : ''}
                     <div class="qta-area">
                         <input type="number" id="qta-${p.id}" class="qta-input" value="${inCart ? inCart.qta : 1}" min="1">
                         <button class="add-btn" onclick="addToCart('${p.id}', '${p.NOME.replace(/'/g, "\\'")}')">${inCart ? 'OK' : 'AGGIUNGI'}</button>
@@ -141,14 +169,14 @@
         }).join('');
     }
 
-    // --- ZOOM LOGIC ---
+    // --- ZOOM LOGIC (LIBERO E GRANDE) ---
     function zoom(url) {
         document.body.classList.add('modal-open');
         const modal = document.getElementById('zoom-modal');
         const img = document.getElementById('zoom-img');
         img.src = url;
         modal.style.display = 'flex';
-        img.onload = () => { if (!pzInstance) pzInstance = new PinchZoom(img, { draggable: true, maxZoom: 5 }); };
+        img.onload = () => { if (!pzInstance) pzInstance = new PinchZoom(img, { draggable: true, maxZoom: 6, minZoom: 1 }); };
     }
 
     function closeZoom() {
@@ -157,22 +185,26 @@
         if (pzInstance) { pzInstance.destroy(); pzInstance = null; }
     }
 
-    // --- CORRELATI LOGIC ---
-    function mostraCorrelati(gruppo) {
+    // --- CORRELATI LOGIC (LAYOUT A CARD RIPRISTINATO) ---
+    function mostraCorrelati(gruppo, nomePadre) {
         const lista = allProducts.filter(p => p.GRUPPO_CORRELATI === gruppo);
-        let html = '<div style="text-align:left">';
+        let html = `<p style="font-size:0.85rem; margin-bottom:15px; color:#7f8c8d">Prodotti correlati a: <b>${nomePadre}</b></p>`;
+        html += '<div class="related-grid-popup">';
         lista.forEach(p => {
             const inCart = carrello[p.id];
             html += `
-            <div class="related-row ${inCart ? 'selected' : ''}" id="rel-row-${p.id}">
-                <img src="${getImageUrl(p)}" class="related-img">
-                <div style="flex:1; font-size:0.8rem"><b>${p.CODICE}</b><br>${p.NOME}</div>
-                <input type="number" id="rel-qta-${p.id}" value="${inCart ? inCart.qta : 1}" min="1" style="width:45px; margin-right:5px">
-                <button class="add-btn" style="padding:5px" onclick="addToCartFromPop('${p.id}', '${p.NOME.replace(/'/g, "\\'")}')">ADD</button>
+            <div class="rel-card ${inCart ? 'selected' : ''}" id="rel-row-${p.id}">
+                <img src="${getImageUrl(p)}" class="rel-img">
+                <div style="font-size:0.7rem; color:var(--accent); font-weight:bold">${p.CODICE}</div>
+                <div style="font-size:0.8rem; font-weight:600; height:35px; overflow:hidden; margin:5px 0">${p.NOME}</div>
+                <div style="display:flex; gap:5px; margin-top:10px">
+                    <input type="number" id="rel-qta-${p.id}" value="${inCart ? inCart.qta : 1}" min="1" style="width:50px; border:1px solid #ddd; border-radius:5px; text-align:center">
+                    <button class="add-btn" style="padding:8px; font-size:0.8rem; flex:1" onclick="addToCartFromPop('${p.id}', '${p.NOME.replace(/'/g, "\\'")}')">AGGIUNGI</button>
+                </div>
             </div>`;
         });
         html += '</div>';
-        Swal.fire({ title: 'Prodotti Correlati', html: html, showConfirmButton: false, showCloseButton: true });
+        Swal.fire({ title: 'MODELLI DISPONIBILI', html: html, width: '900px', showConfirmButton: false, showCloseButton: true });
     }
 
     function addToCartFromPop(id, nome) {
@@ -181,55 +213,62 @@
         localStorage.setItem('podo_cart_v1', JSON.stringify(carrello));
         document.getElementById(`rel-row-${id}`).classList.add('selected');
         aggiornaConteggio();
-        renderGrid(allProducts); // Sincronizza card principale
+        renderGrid(allProducts);
     }
 
     // --- CARRELLO LOGIC ---
     function addToCart(id, nome) {
-        const qta = parseInt(document.getElementById(`qta-${id}`).value);
+        const qtaInput = document.getElementById(`qta-${id}`);
+        const qta = qtaInput ? parseInt(qtaInput.value) : 1;
         carrello[id] = { nome, qta };
         localStorage.setItem('podo_cart_v1', JSON.stringify(carrello));
-        document.getElementById(`card-${id}`).classList.add('selected');
+        const card = document.getElementById(`card-${id}`);
+        if(card) card.classList.add('selected');
         aggiornaConteggio();
-        Swal.fire({ title: 'Aggiunto', icon: 'success', timer: 600, showConfirmButton: false });
+        Swal.fire({ title: 'Aggiunto al carrello', icon: 'success', timer: 600, showConfirmButton: false, position: 'center' });
     }
 
     function apriRiepilogo() {
-        let h = '<div style="text-align:left; max-height:300px; overflow-y:auto;">';
-        Object.keys(carrello).forEach(id => {
-            h += `<div style="display:flex; justify-content:space-between; margin-bottom:10px; border-bottom:1px solid #eee">
-                <span style="font-size:0.8rem">${carrello[id].nome}</span>
-                <span>x${carrello[id].qta} <button onclick="delItem('${id}')" style="color:red; border:none; background:none; cursor:pointer">X</button></span>
+        let h = '<div style="text-align:left; max-height:400px; overflow-y:auto; padding:10px">';
+        const keys = Object.keys(carrello);
+        if(keys.length === 0) h += "<p>Il carrello è ancora vuoto.</p>";
+        keys.forEach(id => {
+            h += `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #f1f1f1; padding-bottom:8px">
+                <div style="flex:1; padding-right:10px"><b style="font-size:0.85rem">${carrello[id].nome}</b></div>
+                <div style="display:flex; align-items:center; gap:10px">
+                    <span style="font-weight:bold; color:var(--accent)">x${carrello[id].qta}</span>
+                    <button onclick="delItem('${id}')" style="background:#ff7675; color:white; border:none; border-radius:5px; padding:5px 10px; cursor:pointer">ELIMINA</button>
+                </div>
             </div>`;
         });
-        Swal.fire({ title: 'Carrello', html: h + '</div>', confirmButtonText: 'Chiudi' });
+        Swal.fire({ title: 'RIEPILOGO PREVENTIVO', html: h + '</div>', confirmButtonText: 'TORNA AL CATALOGO', confirmButtonColor: var(--primary) });
     }
 
     function delItem(id) { delete carrello[id]; localStorage.setItem('podo_cart_v1', JSON.stringify(carrello)); aggiornaConteggio(); renderGrid(allProducts); apriRiepilogo(); }
-
     function aggiornaConteggio() { document.getElementById('cart-count').innerText = Object.keys(carrello).length; }
 
     async function inviaRichiesta() {
         const items = Object.values(carrello);
-        if (items.length === 0) return Swal.fire("Carrello Vuoto", "", "info");
-        let msg = `📄 PREVENTIVO: ${nomeCliente.toUpperCase()}\n\n`;
+        if (items.length === 0) return Swal.fire("Carrello Vuoto", "Scegli almeno un prodotto.", "info");
+        let msg = `📄 *PREVENTIVO PER: ${nomeCliente.toUpperCase()}*\n\n`;
         items.forEach(i => msg += `• ${i.nome} (Q.tà: ${i.qta})\n`);
+        Swal.fire({ title: 'Invio in corso...', didOpen: () => Swal.showLoading() });
         const res = await fetch(`https://api.telegram.org/bot${T_ID}/sendMessage`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chat_id: C_ID, text: msg })
+            body: JSON.stringify({ chat_id: C_ID, text: msg, parse_mode: 'Markdown' })
         });
-        if (res.ok) { Swal.fire("Inviato!", "Ti risponderemo presto.", "success"); carrello = {}; localStorage.removeItem('podo_cart_v1'); aggiornaConteggio(); renderGrid(allProducts); }
+        if (res.ok) { Swal.fire("Inviato con Successo!", "Riceverai il preventivo via WhatsApp o Email.", "success"); carrello = {}; localStorage.removeItem('podo_cart_v1'); aggiornaConteggio(); renderGrid(allProducts); }
     }
 
-    // --- FILTRI ---
+    // --- IMMAGINI E FILTRI ---
     function getImageUrl(p, full = false) {
         if (!full && p.IMG_SCRAPER) return p.IMG_SCRAPER;
         if (p.LINK_PAGINA_INTERA) {
             let b = p.MACROCATEGORIE === 'ATTREZZATURE' ? 'catalogo-attrezzature' : (p.MACROCATEGORIE === 'ORTOPODOLOGIA' ? 'catalogo-orto' : 'catalogo-podopiu');
             return `${SB_URL}/storage/v1/object/public/${b}/${p.LINK_PAGINA_INTERA}`;
         }
-        return "https://via.placeholder.com/300";
+        return "https://via.placeholder.com/300?text=Immagine+non+disponibile";
     }
 
     function setupMacro() {
@@ -237,14 +276,10 @@
         const container = document.getElementById('macro-filters');
         macros.forEach(m => {
             const btn = document.createElement('button');
-            btn.className = 'filter-btn';
-            btn.dataset.filter = m;
-            btn.innerText = m;
-            btn.onclick = () => {
+            btn.className = 'filter-btn'; btn.dataset.filter = m; btn.innerText = m;
+            btn.onclick = () => { 
                 document.querySelectorAll('#macro-filters .filter-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                updateSub(m);
-                filterGrid();
+                btn.classList.add('active'); updateSub(m); filterGrid(); 
             };
             container.appendChild(btn);
         });
@@ -253,17 +288,15 @@
 
     function updateSub(macro) {
         const container = document.getElementById('sub-filters');
-        container.innerHTML = '<button class="filter-btn active" data-filter="all">Tutte</button>';
+        container.innerHTML = '<button class="filter-btn active" data-filter="all">Tutte le Sottocategorie</button>';
         const filtered = macro === 'all' ? allProducts : allProducts.filter(p => p.MACROCATEGORIE === macro);
         const subs = [...new Set(filtered.map(p => p.CATEGORIE).filter(Boolean))].sort();
         subs.forEach(s => {
             const btn = document.createElement('button');
-            btn.className = 'filter-btn';
-            btn.innerText = s;
-            btn.onclick = () => {
+            btn.className = 'filter-btn'; btn.innerText = s;
+            btn.onclick = () => { 
                 document.querySelectorAll('#sub-filters .filter-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                filterGrid();
+                btn.classList.add('active'); filterGrid(); 
             };
             container.appendChild(btn);
         });
@@ -273,10 +306,10 @@
         const search = document.getElementById('search-input').value.toLowerCase();
         const macro = document.querySelector('#macro-filters .active').dataset.filter;
         const subBtn = document.querySelector('#sub-filters .active');
-        const sub = subBtn ? subBtn.innerText : 'Tutte';
+        const sub = subBtn ? subBtn.innerText : 'Tutte le Sottocategorie';
         let filtered = allProducts.filter(p => (p.NOME.toLowerCase().includes(search) || p.CODICE?.toLowerCase().includes(search)));
         if (macro !== 'all') filtered = filtered.filter(p => p.MACROCATEGORIE === macro);
-        if (sub !== 'Tutte') filtered = filtered.filter(p => p.CATEGORIE === sub);
+        if (sub !== 'Tutte le Sottocategorie') filtered = filtered.filter(p => p.CATEGORIE === sub);
         renderGrid(filtered);
     }
 
