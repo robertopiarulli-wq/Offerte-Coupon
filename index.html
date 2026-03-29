@@ -3,193 +3,443 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Podopiù Group - Catalogo 2026</title>
+    <title>PodoCatalogo Pro - Podopiù</title>
+    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <style>
-        :root { --p: #0088cc; --s: #28a745; --bg: #f4f7f9; --dark: #1e293b; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding-bottom: 160px; color: #333; }
-        .header { position: sticky; top: 0; background: white; z-index: 1000; padding: 15px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-        .container { max-width: 1250px; margin: auto; padding: 0 20px; }
-        .selector-area { display: flex; gap: 10px; margin-bottom: 15px; }
-        .btn-select { flex: 1; padding: 15px; border-radius: 12px; border: 2px solid transparent; font-weight: 800; cursor: pointer; transition: 0.3s; text-transform: uppercase; font-size: 14px; }
-        .btn-p { background: #e0f2fe; color: var(--p); border-color: var(--p); }
-        .btn-o { background: #f0fdf4; color: var(--s); border-color: var(--s); }
-        .btn-select.inactive { opacity: 0.4; border-color: transparent; background: #f1f5f9; color: #64748b; }
-        .search-bar { width: 100%; padding: 15px 25px; border: 2px solid #ddd; border-radius: 50px; font-size: 16px; outline: none; box-sizing: border-box; }
-        #welcome { text-align: center; margin: 30px 0; font-weight: 800; color: var(--dark); font-size: 1.8em; text-transform: uppercase; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-top: 20px; }
-        .card { background: white; padding: 15px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
-        .card img { width: 100%; height: 200px; object-fit: contain; background: #fff; border-radius: 8px; cursor: pointer; }
-        .card h4 { font-size: 1em; margin: 10px 0; color: var(--dark); min-height: 2.4em; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .variant-select { width: 100%; padding: 10px; border-radius: 8px; border: 2px solid #f1f5f9; background: #f8fafc; font-size: 13px; font-weight: 600; margin-bottom: 12px; }
-        .qta-area { display: flex; justify-content: space-between; align-items: center; }
-        .qta-input { width: 50px; padding: 8px; border: 2px solid #e2e8f0; border-radius: 8px; text-align: center; font-weight: bold; }
-        .btn-add { background: var(--p); color: white; border: none; padding: 10px 15px; border-radius: 8px; font-weight: 800; cursor: pointer; }
-        .footer { position: fixed; bottom: 0; width: 100%; background: white; padding: 20px 0; box-shadow: 0 -10px 25px rgba(0,0,0,0.1); z-index: 2000; }
-        .footer-btns { display: flex; gap: 10px; max-width: 1100px; margin: auto; padding: 0 20px; }
-        .btn-cart { background: #f1f5f9; border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; font-weight: bold; position: relative; }
-        .cart-badge { position: absolute; top: -5px; right: -5px; background: red; color: white; font-size: 10px; padding: 3px 7px; border-radius: 50%; }
-        .btn-send { background: var(--s); color: white; border: none; padding: 15px; border-radius: 12px; font-weight: 800; flex-grow: 1; cursor: pointer; }
+        :root {
+            --primary-color: #2c3e50; /* Blu scuro professionale */
+            --accent-color: #3498db;  /* Blu brillante */
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-color: #333;
+            --gray-light: #ecf0f1;
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* --- SIDEBAR --- */
+        #sidebar {
+            width: 280px;
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-right: 1px solid var(--gray-light);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        #logo-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #logo-container h1 {
+            color: var(--primary-color);
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .filter-group h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            color: var(--primary-color);
+        }
+
+        .filter-btn {
+            background: none;
+            border: 1px solid var(--gray-light);
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            transition: var(--transition);
+            color: var(--text-color);
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background-color: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+
+        #search-input {
+            padding: 12px;
+            border: 1px solid var(--gray-light);
+            border-radius: 8px;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        #search-input:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+        }
+
+        /* --- MAIN CONTENT --- */
+        #main-content {
+            flex: 1;
+            padding: 30px;
+        }
+
+        #header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        #header h2 {
+            margin: 0;
+            color: var(--primary-color);
+        }
+
+        #product-count {
+            color: #7f8c8d;
+        }
+
+        /* --- GRID --- */
+        #product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        /* --- PRODUCT CARD --- */
+        .product-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            overflow: hidden;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: slideUp 0.5s ease forwards;
+        }
+
+        @keyframes slideUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* EFFETTO HOVER (Grigio/Scala/Ombra) */
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border: 1px solid var(--accent-color);
+        }
+
+        .card-img-container {
+            width: 100%;
+            height: 250px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #fff;
+            position: relative;
+        }
+
+        .product-card img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            transition: var(--transition);
+        }
+
+        /* Effetto scala sull'immagine */
+        .product-card:hover img {
+            transform: scale(1.05);
+        }
+
+        .card-body {
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .product-code {
+            font-size: 0.85rem;
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        .product-name {
+            font-size: 1.1rem;
+            color: var(--primary-color);
+            margin: 0;
+            line-height: 1.3;
+        }
+
+        .product-category {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            background-color: var(--gray-light);
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .product-price {
+            margin-top: auto;
+            font-size: 1.3rem;
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        /* Badge Gruppo Correlati */
+        .group-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(231, 76, 60, 0.8); /* Rosso */
+            color: white;
+            font-size: 0.75rem;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
     </style>
 </head>
 <body>
 
-<div class="header">
-    <div class="container">
-        <div class="selector-area">
-            <button id="tab-P" class="btn-select btn-p" onclick="cambiaCatalogo('P')">PODOLOGIA</button>
-            <button id="tab-O" class="btn-select btn-o inactive" onclick="cambiaCatalogo('O')">ORTOPEDIA</button>
+    <div id="sidebar">
+        <div id="logo-container">
+            <h1>PodoCatalogo Pro</h1>
+            <p>Podopiù Database</p>
         </div>
-        <input type="text" id="searchInput" class="search-bar" placeholder="🔍 Cerca codice o descrizione..." onkeyup="render()">
+        
+        <input type="text" id="search-input" placeholder="Cerca codice o nome...">
+        
+        <div class="filter-group">
+            <h3>Macro Categorie</h3>
+            <div id="macro-filters">
+                <button class="filter-btn active" data-filter="all">Tutti</button>
+                </div>
+        </div>
+
+        <div class="filter-group">
+            <h3>Categorie</h3>
+            <div id="category-filters">
+                </div>
+        </div>
     </div>
-</div>
 
-<div class="container">
-    <h1 id="welcome">Connessione in corso...</h1>
-    <div id="catalogBody"></div>
-</div>
-
-<div class="footer">
-    <div class="footer-btns">
-        <button class="btn-cart" onclick="apriRiepilogo()">
-            🛒 LISTA <span id="cart-count" class="cart-badge">0</span>
-        </button>
-        <button class="btn-send" onclick="inviaOrdine()">🚀 INVIA RICHIESTA</button>
+    <div id="main-content">
+        <div id="header">
+            <h2>Elenco Prodotti</h2>
+            <div id="product-count">Trovati: 0</div>
+        </div>
+        
+        <div id="product-grid">
+            </div>
     </div>
-</div>
 
-<script>
-    const S_U = "https://fxcuwfpdzymwkemzppgm.supabase.co"; 
-    const S_K = "sb_publishable__jf5n22-ZlvGPRN-BAh38A_WdVt7B9d";
-    const T_ID = "8604086640:AAEVbCc5RphJ09ngmW1-naxIXeahirKaGIA"; 
-    const C_ID = "1068754998";
+    <script>
+        // --- CONFIGURAZIONE SUPABASE ---
+        // INSERISCI QUI I TUOI DATI
+        const SUPABASE_URL = "https://fxcuwfpdzymwkemzppgm.supabase.co";
+        const SUPABASE_ANON_KEY = "sb_publishable__jf5n22-ZlvGPRN-BAh38A_WdVt7B9d";
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    const sb = supabase.createClient(S_U, S_K);
-    let carrello = JSON.parse(localStorage.getItem('podo_order_2026')) || {};
-    let prodottiCache = [];
-    let tabellaAttiva = "prodotti_podopiu";
-    let bucketAttivo = "catalogo-podopiu";
-    let nomeCliente = "Cliente";
+        let allProducts = [];
+        let currentMacro = 'all';
 
-    window.cambiaCatalogo = async function(tipo) {
-        if(tipo === 'P') {
-            tabellaAttiva = "prodotti_podopiu";
-            bucketAttivo = "catalogo-podopiu";
-            document.getElementById('tab-P').classList.remove('inactive');
-            document.getElementById('tab-O').classList.add('inactive');
-        } else {
-            tabellaAttiva = "prodotti_orto";
-            bucketAttivo = "catalogo-orto";
-            document.getElementById('tab-O').classList.remove('inactive');
-            document.getElementById('tab-P').classList.add('inactive');
+        // --- INIZIALIZZAZIONE ---
+        async function init() {
+            await fetchProducts();
+            populateFilters();
+            renderGrid(allProducts);
+            setupEventListeners();
         }
-        await caricaDati();
-    };
 
-    async function caricaDati() {
-        const welcomeEl = document.getElementById('welcome');
-        welcomeEl.innerText = "Sincronizzazione...";
-        try {
-            const { data, error } = await sb.from(tabellaAttiva).select('*');
-            if (error) throw error;
-            if (!data || data.length === 0) {
-                welcomeEl.innerText = "Nessun dato trovato (Controlla RLS su Supabase)";
+        // --- CARICAMENTO DATI ---
+        async function fetchProducts() {
+            const { data, error } = await supabase
+                .from('prodotti_catalogo')
+                .select('*');
+            
+            if (error) {
+                console.error("Errore nel caricamento dei dati:", error);
                 return;
             }
-
-            const grouped = data.reduce((acc, item) => {
-                const foto = item.FOTO_RIFERIMENTO || "placeholder.jpg";
-                if (!acc[foto]) {
-                    acc[foto] = {
-                        nome: item.NOME_PRODOTTO_BOZZA || "Senza nome",
-                        img: `${S_U}/storage/v1/object/public/${bucketAttivo}/${foto}`,
-                        varianti: []
-                    };
-                }
-                if(item.CODICE) acc[foto].varianti.push(item.CODICE);
-                return acc;
-            }, {});
-
-            prodottiCache = Object.values(grouped);
-            welcomeEl.innerText = (tabellaAttiva === "prodotti_podopiu" ? "LISTINO PODOLOGIA" : "LISTINO ORTOPEDIA") + " - " + nomeCliente.toUpperCase();
-            window.render();
-        } catch (err) {
-            welcomeEl.innerText = "Errore: " + err.message;
+            allProducts = data;
         }
-    }
 
-    window.render = function() {
-        const body = document.getElementById('catalogBody');
-        body.innerHTML = "";
-        const term = document.getElementById('searchInput').value.toLowerCase();
-        const filtrati = prodottiCache.filter(p => p.nome.toLowerCase().includes(term) || p.varianti.some(v => v.toLowerCase().includes(term)));
-        
-        if(filtrati.length === 0) { body.innerHTML = "<p style='text-align:center;'>Nessun risultato.</p>"; return; }
-
-        const grid = document.createElement('div');
-        grid.className = 'grid';
-        filtrati.forEach((p, index) => {
-            grid.innerHTML += `
-                <div class="card">
-                    <img src="${p.img}" onerror="this.src='https://via.placeholder.com/400x300?text=Immagine+Mancante'" onclick="Swal.fire({imageUrl: '${p.img}', imageWidth: '100%', showConfirmButton: false})">
-                    <h4>${p.nome}</h4>
-                    <select class="variant-select" id="sel-${index}">${p.varianti.map(v => `<option value="${v}">Cod: ${v}</option>`).join('')}</select>
-                    <div class="qta-area">
-                        <input type="number" class="qta-input" min="1" id="qta-${index}" value="1">
-                        <button class="btn-add" onclick="aggiungi(${index})">AGGIUNGI</button>
+        // --- CREAZIONE CARD PRODOTTO (La Chicca!) ---
+        function createProductCard(p) {
+            const imgUrl = getImageUrl(p);
+            
+            return `
+                <div class="product-card">
+                    ${p.GRUPPO_CORRELATI ? `<div class="group-badge">GR ${p.GRUPPO_CORRELATI}</div>` : ''}
+                    <div class="card-img-container">
+                        <img src="${imgUrl}" alt="${p.NOME}" onerror="this.src='https://via.placeholder.com/300?text=Immagine+non+disponibile';">
                     </div>
-                </div>`;
-        });
-        body.appendChild(grid);
-    };
-
-    window.aggiungi = function(idx) {
-        const p = prodottiCache[idx];
-        const qta = parseInt(document.getElementById('qta-' + idx).value);
-        const cod = document.getElementById('sel-' + idx).value;
-        carrello[cod] = { nome: p.nome, cod: cod, qta: qta };
-        localStorage.setItem('podo_order_2026', JSON.stringify(carrello));
-        window.aggiornaConteggio();
-        Swal.fire({ title: 'Aggiunto!', icon: 'success', timer: 700, showConfirmButton: false });
-    };
-
-    window.aggiornaConteggio = function() { document.getElementById('cart-count').innerText = Object.keys(carrello).length; };
-
-    window.apriRiepilogo = function() {
-        let html = '<div style="text-align:left; max-height:300px; overflow-y:auto;">';
-        const keys = Object.keys(carrello);
-        if (keys.length === 0) html += '<p>Lista vuota</p>';
-        else keys.forEach(k => {
-            html += `<div style="border-bottom:1px solid #eee; padding:10px 0;"><b>${carrello[k].cod}</b> - ${carrello[k].qta}pz<br><small>${carrello[k].nome}</small><button onclick="rimuovi('${k}')" style="color:red; float:right; border:none; background:none; cursor:pointer">Elimina</button></div>`;
-        });
-        Swal.fire({ title: 'Riepilogo', html: html + '</div>' });
-    };
-
-    window.rimuovi = function(k) { delete carrello[k]; localStorage.setItem('podo_order_2026', JSON.stringify(carrello)); window.aggiornaConteggio(); window.apriRiepilogo(); };
-
-    window.inviaOrdine = async function() {
-        const lista = Object.values(carrello);
-        if (lista.length === 0) return Swal.fire('Lista vuota', '', 'warning');
-        let msg = `📦 *PREVENTIVO* %0A👤 *${nomeCliente}* %0A----------%0A`;
-        lista.forEach(i => msg += `• ${i.cod} (x${i.qta})%0A  ${i.nome}%0A`);
-        try {
-            await fetch(`https://api.telegram.org/bot${T_ID}/sendMessage?chat_id=${C_ID}&text=${msg}&parse_mode=Markdown`);
-            Swal.fire('Inviato!', '', 'success');
-            carrello = {}; localStorage.removeItem('podo_order_2026'); window.aggiornaConteggio(); window.render();
-        } catch { Swal.fire('Errore invio', '', 'error'); }
-    };
-
-    async function start() {
-        const slug = new URLSearchParams(window.location.search).get('c');
-        if (slug) {
-            const { data } = await sb.from('contacts').select('nome').eq('slug', slug).single();
-            if (data) nomeCliente = data.nome;
+                    <div class="card-body">
+                        <div class="product-code">${p.CODICE || 'N/A'}</div>
+                        <h3 class="product-name">${p.NOME || 'N/A'}</h3>
+                        <div class="product-category">${p.CATEGORIE || 'Senza Categoria'}</div>
+                        ${p.PREZZO ? `<div class="product-price">€ ${p.PREZZO.toFixed(2)}</div>` : ''}
+                    </div>
+                </div>
+            `;
         }
-        window.aggiornaConteggio();
-        await window.cambiaCatalogo('P');
-    }
-    start();
-</script>
+
+        // --- LOGICA DELLE 3 PRIORITÀ (Intelligente) ---
+        function getImageUrl(p) {
+            // Priorità 1: Link dello Scraper
+            if (p.IMG_SCRAPER && p.IMG_SCRAPER.startsWith('http')) {
+                return p.IMG_SCRAPER;
+            }
+            
+            // Priorità 2: Pagina Catalogo nel Bucket giusto
+            if (p.MACROCATEGORIE && p.LINK_PAGINA_INTERA) {
+                const bucket = getBucketName(p.MACROCATEGORIE);
+                return `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${p.LINK_PAGINA_INTERA}`;
+            }
+            
+            // Priorità 3: Segnaposto
+            return "https://via.placeholder.com/300?text=Immagine+non+disponibile";
+        }
+
+        // Associa Macrocategoria -> Bucket
+        function getBucketName(macro) {
+            switch(macro.toUpperCase()) {
+                case 'ATTREZZATURE': return 'catalogo-attrezzature';
+                case 'PRODOTTI': return 'catalogo-podopiu';
+                case 'ORTOPODOLOGIA': return 'catalogo-orto';
+                default: return 'catalogo-podopiu';
+            }
+        }
+
+        // --- RENDER GRIGLIA ---
+        function renderGrid(products) {
+            const grid = document.getElementById('product-grid');
+            const count = document.getElementById('product-count');
+            
+            grid.innerHTML = products.map(createProductCard).join('');
+            count.innerText = `Trovati: ${products.length}`;
+        }
+
+        // --- POPOLAMENTO FILTRI DINAMICI ---
+        function populateFilters() {
+            // Macro
+            const macros = [...new Set(allProducts.map(p => p.MACROCATEGORIE).filter(Boolean))];
+            const macroFilters = document.getElementById('macro-filters');
+            macros.forEach(macro => {
+                const btn = document.createElement('button');
+                btn.className = 'filter-btn';
+                btn.dataset.filter = macro;
+                btn.innerText = macro;
+                macroFilters.appendChild(btn);
+            });
+
+            // Categorie (dipendono dalla Macro selezionata)
+            updateCategoryFilters('all');
+        }
+
+        function updateCategoryFilters(macro) {
+            const categoryFilters = document.getElementById('category-filters');
+            categoryFilters.innerHTML = ''; // Pulisce
+
+            let filteredForMacro = allProducts;
+            if (macro !== 'all') {
+                filteredForMacro = allProducts.filter(p => p.MACROCATEGORIE === macro);
+            }
+
+            const categories = [...new Set(filteredForMacro.map(p => p.CATEGORIE).filter(Boolean))];
+            categories.sort().forEach(cat => {
+                const btn = document.createElement('button');
+                btn.className = 'filter-btn';
+                btn.dataset.filter = cat;
+                btn.innerText = cat;
+                categoryFilters.appendChild(btn);
+            });
+        }
+
+        // --- FILTRAGGIO E RICERCA IN TEMPO REALE ---
+        function filterProducts() {
+            const search = document.getElementById('search-input').value.toLowerCase();
+            const activeMacroBtn = document.querySelector('#macro-filters .filter-btn.active');
+            const activeCatBtn = document.querySelector('#category-filters .filter-btn.active');
+            
+            const macro = activeMacroBtn ? activeMacroBtn.dataset.filter : 'all';
+            const cat = activeCatBtn ? activeCatBtn.dataset.filter : 'all';
+
+            let filtered = allProducts;
+
+            // Filtro Macro
+            if (macro !== 'all') filtered = filtered.filter(p => p.MACROCATEGORIE === macro);
+            // Filtro Categoria
+            if (cat !== 'all') filtered = filtered.filter(p => p.CATEGORIE === cat);
+            
+            // Ricerca Testo
+            if (search) {
+                filtered = filtered.filter(p => 
+                    (p.NOME && p.NOME.toLowerCase().includes(search)) ||
+                    (p.CODICE && p.CODICE.toLowerCase().includes(search))
+                );
+            }
+
+            renderGrid(filtered);
+        }
+
+        // --- EVENT LISTENERS ---
+        function setupEventListeners() {
+            // Ricerca
+            document.getElementById('search-input').addEventListener('input', filterProducts);
+
+            // Clic filtri
+            document.addEventListener('click', e => {
+                if (e.target.classList.contains('filter-btn')) {
+                    const parentId = e.target.parentElement.id;
+                    const filterValue = e.target.dataset.filter;
+
+                    // Pulisce gli attivi nel gruppo
+                    e.target.parentElement.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+
+                    if (parentId === 'macro-filters') {
+                        updateCategoryFilters(filterValue);
+                        // Reset filtri categoria quando cambi macro
+                        document.getElementById('category-filters').querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    }
+                    filterProducts();
+                }
+            });
+        }
+
+        // Via!
+        init();
+
+    </script>
 </body>
 </html>
