@@ -5,8 +5,8 @@ from bs4 import BeautifulSoup
 from supabase import create_client
 
 # Configurazione Supabase (inserisci i tuoi dati o usa variabili d'ambiente)
-URL_SB = "IL_TUO_SUPABASE_URL"
-KEY_SB = "LA_TUA_SERVICE_ROLE_KEY" # Usa la Service Role per poter scrivere
+URL_SB = "https://fxcuwfpdzymwkemzppgm.supabase.co"
+KEY_SB = "sb_publishable__jf5n22-ZlvGPRN-BAh38A_WdVt7B9d" # Usa la Service Role per poter scrivere
 sb = create_client(URL_SB, KEY_SB)
 
 def cerca_prodotto_sul_sito(codice, nome):
