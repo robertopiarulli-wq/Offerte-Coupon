@@ -3,242 +3,195 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PodoCatalogo Pro - Podopiù</title>
+    <title>PodoCatalogo Pro - Carrello & Zoom</title>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <style>
         :root {
-            --primary-color: #2c3e50;
-            --accent-color: #3498db;
-            --bg-color: #f4f7f6;
-            --card-bg: #ffffff;
-            --text-color: #333;
-            --gray-light: #ecf0f1;
-            --transition: all 0.3s ease;
+            --primary: #2c3e50; --accent: #3498db; --success: #27ae60;
+            --bg: #f4f7f6; --card: #ffffff; --gray: #ecf0f1;
         }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            display: flex;
-            min-height: 100vh;
-        }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--bg); display: flex; }
 
         /* --- SIDEBAR --- */
-        #sidebar {
-            width: 280px;
-            background-color: var(--card-bg);
-            padding: 20px;
-            border-right: 1px solid var(--gray-light);
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            position: sticky;
-            top: 0;
-            height: 100vh;
-            overflow-y: auto;
-        }
-
-        #logo-container h1 { color: var(--primary-color); margin: 0; font-size: 1.5rem; }
-
-        .filter-group { display: flex; flex-direction: column; gap: 10px; }
-        .filter-group h3 { margin: 0; font-size: 1.1rem; color: var(--primary-color); }
-
-        .filter-btn {
-            background: none; border: 1px solid var(--gray-light); padding: 10px;
-            border-radius: 8px; cursor: pointer; text-align: left; transition: var(--transition);
-        }
-
-        .filter-btn:hover, .filter-btn.active { background-color: var(--accent-color); color: white; border-color: var(--accent-color); }
-
-        #search-input { padding: 12px; border: 1px solid var(--gray-light); border-radius: 8px; outline: none; }
-
-        /* --- MAIN CONTENT --- */
-        #main-content { flex: 1; padding: 30px; }
-        #header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        #sidebar { width: 280px; background: var(--card); padding: 20px; border-right: 1px solid var(--gray); height: 100vh; position: sticky; top: 0; overflow-y: auto; }
+        .filter-btn { width: 100%; background: none; border: 1px solid var(--gray); padding: 10px; border-radius: 8px; cursor: pointer; text-align: left; margin-bottom: 5px; }
+        .filter-btn.active { background: var(--accent); color: white; }
 
         /* --- GRID --- */
-        #product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 30px; }
+        #main-content { flex: 1; padding: 30px; padding-bottom: 120px; }
+        #product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 25px; }
 
-        .product-card {
-            background-color: var(--card-bg); border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05); overflow: hidden;
-            transition: var(--transition); position: relative;
-            display: flex; flex-direction: column;
-        }
+        .product-card { background: var(--card); border-radius: 12px; overflow: hidden; transition: 0.3s; position: relative; border: 1px solid transparent; display: flex; flex-direction: column; }
+        .product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); border-color: var(--accent); }
+        
+        .img-box { width: 100%; height: 200px; cursor: zoom-in; display: flex; align-items: center; justify-content: center; background: white; }
+        .img-box img { max-width: 90%; max-height: 90%; object-fit: contain; }
 
-        .product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid var(--accent-color); }
+        .card-body { padding: 15px; flex-grow: 1; }
+        .p-name { font-weight: 600; margin: 0 0 10px 0; font-size: 0.95rem; height: 40px; overflow: hidden; }
+        .add-btn { width: 100%; background: var(--primary); color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; transition: 0.2s; font-weight: bold; }
+        .add-btn:hover { background: var(--accent); }
 
-        .card-img-container { width: 100%; height: 250px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: white; }
-        .product-card img { max-width: 90%; max-height: 90%; object-fit: contain; transition: var(--transition); }
-        .product-card:hover img { transform: scale(1.05); }
+        /* --- CARRELLO BAR --- */
+        #cart-bar { position: fixed; bottom: 0; left: 0; right: 0; background: white; box-shadow: 0 -5px 20px rgba(0,0,0,0.1); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; z-index: 1000; border-top: 3px solid var(--accent); }
+        .checkout-btn { background: var(--success); color: white; border: none; padding: 12px 25px; border-radius: 30px; font-weight: bold; cursor: pointer; }
 
-        .card-body { padding: 20px; flex: 1; display: flex; flex-direction: column; gap: 8px; }
-        .product-code { font-size: 0.8rem; color: var(--accent-color); font-weight: bold; }
-        .product-name { font-size: 1rem; color: var(--primary-color); margin: 0; font-weight: 600; }
-        .product-category { font-size: 0.8rem; color: #7f8c8d; background: var(--gray-light); padding: 3px 8px; border-radius: 4px; align-self: flex-start; }
-
-        .group-badge { position: absolute; top: 10px; right: 10px; background: #e74c3c; color: white; font-size: 0.7rem; padding: 4px 8px; border-radius: 12px; font-weight: bold; z-index: 2; }
+        /* --- MODAL ZOOM --- */
+        #zoom-modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center; }
+        #zoom-modal img { max-width: 90%; max-height: 90%; border-radius: 8px; box-shadow: 0 0 30px rgba(255,255,255,0.2); }
+        #zoom-modal .close { position: absolute; top: 20px; right: 30px; color: white; font-size: 40px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <div id="sidebar">
-        <div id="logo-container">
-            <h1>PodoCatalogo</h1>
-            <p>Database Prodotti</p>
-        </div>
-        <input type="text" id="search-input" placeholder="Cerca codice o nome...">
-        <div class="filter-group">
-            <h3>Macro Categorie</h3>
-            <div id="macro-filters">
-                <button class="filter-btn active" data-filter="all">Tutti</button>
-            </div>
-        </div>
-        <div class="filter-group">
-            <h3>Categorie</h3>
-            <div id="category-filters"></div>
-        </div>
+<div id="sidebar">
+    <h2>PodoCatalogo</h2>
+    <input type="text" id="search" placeholder="Cerca prodotto..." style="width:100%; padding:10px; border-radius:8px; border:1px solid #ddd; margin-bottom:20px;">
+    <div id="macro-filters">
+        <button class="filter-btn active" data-filter="all">Tutte le Macro</button>
     </div>
+</div>
 
-    <div id="main-content">
-        <div id="header">
-            <h2>Catalogo</h2>
-            <div id="product-count">Trovati: 0</div>
-        </div>
-        <div id="product-grid"></div>
-    </div>
+<div id="main-content">
+    <div id="product-grid"></div>
+</div>
 
-    <script>
-        // --- CONFIGURAZIONE ---
-        const SB_URL = "https://fxcuwfpdzymwkemzppgm.supabase.co"; 
-        const SB_KEY = "sb_publishable__jf5n22-ZlvGPRN-BAh38A_WdVt7B9d"; // Incolla la tua Anon Key (Publishable)
+<div id="cart-bar">
+    <div>🛒 <span id="cart-count">0</span> articoli nel carrello</div>
+    <button class="checkout-btn" onclick="inviaOrdine()">📦 Invia Richiesta Preventivo</button>
+</div>
 
-        // Usiamo 'sb_client' per non andare in conflitto con l'oggetto 'supabase' della libreria
-        const sb_client = supabase.createClient(SB_URL, SB_KEY);
+<div id="zoom-modal" onclick="this.style.display='none'">
+    <span class="close">&times;</span>
+    <img id="zoom-img" src="" alt="Zoom">
+</div>
 
-        let allProducts = [];
+<script>
+    const SB_URL = "https://fxcuwfpdzymwkemzppgm.supabase.co";
+    const SB_KEY = "sb_publishable__jf5n22-ZlvGPRN-BAh38A_WdVt7B9d"; 
+    const sb = supabase.createClient(SB_URL, SB_KEY);
 
-        async function init() {
-            console.log("Inizializzazione...");
-            await fetchProducts();
-            populateFilters();
-            renderGrid(allProducts);
-            setupEventListeners();
+    let allProducts = [];
+    let carrello = {};
+
+    async function init() {
+        const { data } = await sb.from('prodotti_catalogo').select('*');
+        allProducts = data || [];
+        
+        // Popola Macro filtri
+        const macros = [...new Set(allProducts.map(p => p.MACROCATEGORIE).filter(Boolean))];
+        macros.forEach(m => {
+            const btn = document.createElement('button');
+            btn.className = 'filter-btn';
+            btn.dataset.filter = m;
+            btn.innerText = m;
+            document.getElementById('macro-filters').appendChild(btn);
+        });
+
+        renderGrid(allProducts);
+    }
+
+    function getImageUrl(p, full = false) {
+        if (!full && p.IMG_SCRAPER) return p.IMG_SCRAPER;
+        
+        if (p.LINK_PAGINA_INTERA) {
+            let bucket = 'catalogo-podopiu';
+            if (p.MACROCATEGORIE === 'ATTREZZATURE') bucket = 'catalogo-attrezzature';
+            if (p.MACROCATEGORIE === 'ORTOPODOLOGIA') bucket = 'catalogo-orto';
+            return `${SB_URL}/storage/v1/object/public/${bucket}/${p.LINK_PAGINA_INTERA}`;
         }
+        return "https://via.placeholder.com/400?text=Immagine+Assente";
+    }
 
-        async function fetchProducts() {
-            const { data, error } = await sb_client
-                .from('prodotti_catalogo')
-                .select('*');
-            
-            if (error) {
-                console.error("Errore Supabase:", error);
-                return;
-            }
-            allProducts = data || [];
-            console.log("Prodotti caricati:", allProducts.length);
-        }
-
-        function getImageUrl(p) {
-            // 1. Scraper
-            if (p.IMG_SCRAPER && p.IMG_SCRAPER.startsWith('http')) return p.IMG_SCRAPER;
-            
-            // 2. Bucket Catalogo
-            if (p.MACROCATEGORIE && p.LINK_PAGINA_INTERA) {
-                let bucket = 'catalogo-podopiu';
-                const macro = p.MACROCATEGORIE.toUpperCase();
-                if (macro === 'ATTREZZATURE') bucket = 'catalogo-attrezzature';
-                if (macro === 'ORTOPODOLOGIA') bucket = 'catalogo-orto';
-                
-                return `${SB_URL}/storage/v1/object/public/${bucket}/${p.LINK_PAGINA_INTERA}`;
-            }
-            return "https://via.placeholder.com/300?text=Immagine+non+disponibile";
-        }
-
-        function createCard(p) {
-            return `
-                <div class="product-card">
-                    ${p.GRUPPO_CORRELATI ? `<div class="group-badge">GR ${p.GRUPPO_CORRELATI}</div>` : ''}
-                    <div class="card-img-container">
-                        <img src="${getImageUrl(p)}" loading="lazy" onerror="this.src='https://via.placeholder.com/300?text=Immagine+non+disponibile';">
-                    </div>
-                    <div class="card-body">
-                        <div class="product-code">${p.CODICE || ''}</div>
-                        <h3 class="product-name">${p.NOME || 'Senza Nome'}</h3>
-                        <div class="product-category">${p.CATEGORIE || ''}</div>
-                    </div>
+    function renderGrid(products) {
+        const grid = document.getElementById('product-grid');
+        grid.innerHTML = products.map(p => `
+            <div class="product-card">
+                <div class="img-box" onclick="zoom('${getImageUrl(p, true)}')">
+                    <img src="${getImageUrl(p)}" loading="lazy">
                 </div>
-            `;
-        }
+                <div class="card-body">
+                    <div style="font-size:0.7rem; color:var(--accent)">${p.CODICE}</div>
+                    <p class="p-name">${p.NOME}</p>
+                    <button class="add-btn" onclick="addToCart('${p.id}', '${p.NOME.replace(/'/g, "\\'")}')">
+                        Aggiungi al Carrello
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    }
 
-        function renderGrid(products) {
-            const grid = document.getElementById('product-grid');
-            grid.innerHTML = products.map(createCard).join('');
-            document.getElementById('product-count').innerText = `Trovati: ${products.length}`;
-        }
+    function zoom(url) {
+        document.getElementById('zoom-img').src = url;
+        document.getElementById('zoom-modal').style.display = 'flex';
+    }
 
-        function populateFilters() {
-            const macros = [...new Set(allProducts.map(p => p.MACROCATEGORIE).filter(Boolean))];
-            const container = document.getElementById('macro-filters');
-            macros.forEach(m => {
-                const btn = document.createElement('button');
-                btn.className = 'filter-btn';
-                btn.dataset.filter = m;
-                btn.innerText = m;
-                container.appendChild(btn);
-            });
-            updateCategoryFilters('all');
-        }
+    function addToCart(id, nome) {
+        if (!carrello[id]) carrello[id] = { nome, qta: 1 };
+        else carrello[id].qta++;
+        
+        aggiornaBarra();
+        const btn = event.target;
+        btn.innerText = "✅ Aggiunto!";
+        btn.style.background = "#27ae60";
+        setTimeout(() => { btn.innerText = "Aggiungi al Carrello"; btn.style.background = ""; }, 1000);
+    }
 
-        function updateCategoryFilters(macro) {
-            const container = document.getElementById('category-filters');
-            container.innerHTML = '';
-            const filtered = macro === 'all' ? allProducts : allProducts.filter(p => p.MACROCATEGORIE === macro);
-            const cats = [...new Set(filtered.map(p => p.CATEGORIE).filter(Boolean))].sort();
-            cats.forEach(c => {
-                const btn = document.createElement('button');
-                btn.className = 'filter-btn';
-                btn.dataset.filter = c;
-                btn.innerText = c;
-                container.appendChild(btn);
-            });
-        }
+    function aggiornaBarra() {
+        const total = Object.values(carrello).reduce((acc, curr) => acc + curr.qta, 0);
+        document.getElementById('cart-count').innerText = total;
+    }
 
-        function filterProducts() {
-            const search = document.getElementById('search-input').value.toLowerCase();
-            const macro = document.querySelector('#macro-filters .active').dataset.filter;
-            const catBtn = document.querySelector('#category-filters .active');
-            const cat = catBtn ? catBtn.dataset.filter : 'all';
+    function inviaOrdine() {
+        const items = Object.values(carrello);
+        if (items.length === 0) return Swal.fire("Carrello vuoto", "Scegli almeno un prodotto!", "warning");
 
-            let filtered = allProducts;
-            if (macro !== 'all') filtered = filtered.filter(p => p.MACROCATEGORIE === macro);
-            if (cat !== 'all') filtered = filtered.filter(p => p.CATEGORIE === cat);
-            if (search) {
-                filtered = filtered.filter(p => 
-                    (p.NOME && p.NOME.toLowerCase().includes(search)) || 
-                    (p.CODICE && p.CODICE.toLowerCase().includes(search))
-                );
+        let messaggio = "Buongiorno Podopiù, vorrei richiedere un preventivo per:\n\n";
+        items.forEach(i => messaggio += `• ${i.nome} (Q.tà: ${i.qta})\n`);
+        messaggio += "\nAttendo vostra conferma. Grazie!";
+
+        Swal.fire({
+            title: 'Confermi l\'invio?',
+            text: "Ti risponderemo il prima possibile!",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Sì, invia!',
+            confirmButtonColor: '#27ae60'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Qui puoi collegare Telegram o WhatsApp
+                const url = `https://wa.me/39XXXXXXXXXX?text=${encodeURIComponent(messaggio)}`;
+                window.open(url, '_blank');
+                
+                Swal.fire('Inviato!', 'La tua richiesta è stata inoltrata con successo.', 'success');
+                carrello = {};
+                aggiornaBarra();
             }
+        });
+    }
+
+    // Event Listeners per Filtri e Ricerca
+    document.getElementById('search').addEventListener('input', e => {
+        const val = e.target.value.toLowerCase();
+        const filtered = allProducts.filter(p => p.NOME.toLowerCase().includes(val) || p.CODICE.toLowerCase().includes(val));
+        renderGrid(filtered);
+    });
+
+    document.getElementById('macro-filters').addEventListener('click', e => {
+        if (e.target.classList.contains('filter-btn')) {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            e.target.classList.add('active');
+            const f = e.target.dataset.filter;
+            const filtered = f === 'all' ? allProducts : allProducts.filter(p => p.MACROCATEGORIE === f);
             renderGrid(filtered);
         }
+    });
 
-        function setupEventListeners() {
-            document.getElementById('search-input').addEventListener('input', filterProducts);
-            document.addEventListener('click', e => {
-                if (e.target.classList.contains('filter-btn')) {
-                    e.target.parentElement.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                    e.target.classList.add('active');
-                    if (e.target.parentElement.id === 'macro-filters') updateCategoryFilters(e.target.dataset.filter);
-                    filterProducts();
-                }
-            });
-        }
-
-        init();
-    </script>
+    init();
+</script>
 </body>
 </html>
