@@ -7,6 +7,7 @@
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pinch-zoom-js@2.3.5/dist/pinch-zoom.min.js"></script>
     
     <style>
         :root {
@@ -14,7 +15,7 @@
             --bg: #f8f9fa; --card: #ffffff; --border: #d1d8e0;
         }
 
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--bg); display: flex; color: var(--primary); }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--bg); display: flex; color: var(--primary); overflow-x: hidden; }
 
         /* --- SIDEBAR FISSA --- */
         #sidebar { 
@@ -55,7 +56,6 @@
         .card-body { padding: 15px; flex-grow: 1; display: flex; flex-direction: column; }
         .p-name { font-weight: 600; font-size: 0.95rem; margin: 5px 0 10px 0; height: 45px; overflow: hidden; line-height: 1.4; }
         
-        /* PULSANTE VEDI CORRELATI */
         .related-btn {
             background: none; border: 1px solid var(--accent); color: var(--accent);
             padding: 5px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold;
@@ -75,30 +75,33 @@
         }
         .send-btn { background: var(--success); color: white; border: none; padding: 15px 45px; border-radius: 50px; font-size: 1.1rem; font-weight: bold; cursor: pointer; }
 
-        /* --- ZOOM MODAL PULSANTE --- */
-        #zoom-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center; cursor: pointer; }
+        /* --- ZOOM MODAL REALE (Blindato per Mobile) --- */
+        #zoom-modal { 
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); 
+            z-index: 9999; justify-content: center; align-items: center; overflow: hidden;
+        }
         
+        /* Contenitore per la libreria di zoom */
+        .pinch-zoom-container {
+            width: 100%; height: 100%;
+            display: flex; justify-content: center; align-items: center;
+        }
+
         #zoom-img { 
             max-width: 90%; max-height: 90%; object-fit: contain; 
-            border: 3px solid #333; border-radius: 8px;
-            animation: pulse-border 2s infinite; /* Effetto pulsante */
+            border-radius: 8px;
+            /* L'animazione a pulsante la togliamo qui perché disturberebbe lo zoom attivo */
         }
         
-        .close-zoom { position: absolute; top: 20px; right: 20px; color: white; font-size: 50px; cursor: pointer; z-index: 2001; }
-
-        @keyframes pulse-border {
-            0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4); }
-            70% { box-shadow: 0 0 0 15px rgba(255, 255, 255, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+        .close-zoom { 
+            position: absolute; top: 20px; right: 20px; color: white; 
+            font-size: 50px; cursor: pointer; z-index: 10000; 
+            background: rgba(0,0,0,0.5); width: 60px; height: 60px;
+            display: flex; align-items: center; justify-content: center; border-radius: 50%;
         }
 
-        /* --- POPUP CORRELATI --- */
-        #related-popup-container { max-height: 80vh; overflow-y: auto; text-align: left; }
-        .related-item-row { display: flex; gap: 10px; align-items: center; border-bottom: 1px solid #eee; padding: 10px 0; }
-        .related-item-img { width: 60px; height: 60px; object-fit: contain; }
-
         @media (max-width: 768px) {
-            #sidebar { width: 100%; height: auto; position: relative; }
+            #sidebar { width: 100%; height: auto; position: relative; border-right: none; border-bottom: 2px solid var(--border); }
             #main-content { margin-left: 0; }
             #cart-bar { left: 0; }
         }
@@ -136,9 +139,11 @@
     <button class="send-btn" onclick="inviaRichiesta()">🚀 INVIA PREVENTIVO</button>
 </div>
 
-<div id="zoom-modal" onclick="this.style.display='none'">
-    <span class="close-zoom">&times;</span>
-    <img id="zoom-img" src="">
+<div id="zoom-modal">
+    <span class="close-zoom" onclick="closeZoom()">&times;</span>
+    <div class="pinch-zoom-container">
+        <img id="zoom-img" src="">
+    </div>
 </div>
 
 <script>
@@ -152,9 +157,9 @@
     let allProducts = [];
     let carrello = JSON.parse(localStorage.getItem('podo_cart_v1')) || {};
     let nomeCliente = "Anonimo";
+    let pzInstance = null; // Istanza per lo zoom
 
     async function init() {
-        // Recupero nome cliente e prodotti (intatto)
         if (slug) {
             const { data: contact } = await sb.from('contacts').select('nome').eq('slug', slug).single();
             if (contact) { nomeCliente = contact.nome; document.getElementById('client-name').innerText = "Per: " + nomeCliente; }
@@ -195,13 +200,48 @@
         }).join('');
     }
 
-    // --- FUNZIONE PER MOSTRARE I CORRELATI IN POPUP ---
+    // --- ZOOM REALE (Pinch & Wheel) ---
+    function zoom(url) { 
+        const modal = document.getElementById('zoom-modal');
+        const img = document.getElementById('zoom-img');
+        const container = document.querySelector('.pinch-zoom-container');
+
+        // Reset istanza precedente se esiste
+        if (pzInstance) {
+            pzInstance.destroy();
+            pzInstance = null;
+        }
+
+        img.src = url; 
+        modal.style.display = 'flex'; 
+
+        // Inizializza la libreria di zoom sull'immagine appena caricata
+        img.onload = function() {
+            pzInstance = new PinchZoom(img, {
+                draggable: true,
+                swipeToClose: false, // Disabilitiamo swipe per non confondere col drag
+                minZoom: 1,
+                maxZoom: 5, // Permettiamo uno zoom potente per leggere i testi
+                onZoomEnd: function() { console.log('Zoom finito'); }
+            });
+        };
+    }
+
+    // Funzione dedicata per chiudere lo zoom e pulire la memoria
+    function closeZoom() {
+        const modal = document.getElementById('zoom-modal');
+        modal.style.display = 'none';
+        if (pzInstance) {
+            pzInstance.destroy(); // Distrugge l'istanza per liberare risorse
+            pzInstance = null;
+        }
+    }
+
+    // --- FUNZIONI CORRELATI ---
     function mostraCorrelati(gruppo, nomeProdottoOriginale) {
         const correlati = allProducts.filter(p => p.GRUPPO_CORRELATI === gruppo);
-        
         let html = '<div id="related-popup-container">';
         html += `<p style="font-size:0.9rem; color:#7f8c8d; margin-bottom:15px;">Prodotti correlati a: <strong>${nomeProdottoOriginale}</strong></p>`;
-        
         correlati.forEach(p => {
             const inCart = carrello[p.id];
             html += `
@@ -220,60 +260,24 @@
             </div>`;
         });
         html += '</div>';
-
-        Swal.fire({
-            title: 'Prodotti del Gruppo ' + gruppo,
-            html: html,
-            confirmButtonText: 'Torna al Catalogo',
-            confirmButtonColor: '#2c3e50',
-            width: '600px'
-        });
+        Swal.fire({ title: 'Prodotti del Gruppo ' + gruppo, html: html, confirmButtonText: 'Torna al Catalogo', confirmButtonColor: '#2c3e50', width: '600px' });
     }
 
-    // Aggiunta specifica dal popup dei correlati
     function addToCartFromRelated(id, nome) {
         const qta = parseInt(document.getElementById(`rel-qta-${id}`).value);
-        addToCart(id, nome, false); // false per non mostrare il Swal verde qui
-        
-        // Aggiorna l'area dei correlati visivamente
+        addToCart(id, nome, false);
         document.getElementById(`rel-card-${id}`).classList.add('selected');
         event.target.innerText = 'OK';
-        
-        // Sincronizza il grid principale se il prodotto è visibile
         const mainCard = document.getElementById(`card-${id}`);
-        if(mainCard) {
-            mainCard.classList.add('selected');
-            document.getElementById(`qta-${id}`).value = qta;
-        }
+        if(mainCard) { mainCard.classList.add('selected'); document.getElementById(`qta-${id}`).value = qta; }
     }
 
-    // --- ZOOM MODAL PULSANTE (Blindato e Funzionante anche su Mobile) ---
-    function zoom(url) { 
-        document.getElementById('zoom-img').src = url; 
-        const modal = document.getElementById('zoom-modal');
-        modal.style.display = 'flex'; 
-        
-        // Aggiungiamo il listener per chiudere cliccando ovunque
-        modal.onclick = function(e) {
-            if (e.target !== document.getElementById('zoom-img')) {
-                modal.style.display = 'none';
-            }
-        };
-    }
-
-    // --- FUNZIONI CARRELLO (Intatte e Funzionanti) ---
+    // --- FUNZIONI CARRELLO ---
     function addToCart(id, nome, showSwal = true) {
         const qtaField = document.getElementById(`qta-${id}`) || document.getElementById(`rel-qta-${id}`);
         const qta = parseInt(qtaField.value);
-        if(qta > 0) {
-            carrello[id] = { nome, qta };
-            const card = document.getElementById(`card-${id}`);
-            if(card) card.classList.add('selected');
-        } else {
-            delete carrello[id];
-            const card = document.getElementById(`card-${id}`);
-            if(card) card.classList.remove('selected');
-        }
+        if(qta > 0) { carrello[id] = { nome, qta }; const card = document.getElementById(`card-${id}`); if(card) card.classList.add('selected'); }
+        else { delete carrello[id]; const card = document.getElementById(`card-${id}`); if(card) card.classList.remove('selected'); }
         localStorage.setItem('podo_cart_v1', JSON.stringify(carrello));
         aggiornaConteggio();
         if(showSwal) Swal.fire({ title: 'Carrello aggiornato', icon: 'success', timer: 700, showConfirmButton: false });
@@ -306,26 +310,18 @@
     async function inviaRichiesta() {
         const items = Object.values(carrello);
         if (items.length === 0) return Swal.fire("Carrello Vuoto", "", "info");
-
-        let msg = `📄 PREVENTIVO PER: ${nomeCliente.toUpperCase()}\n`;
-        msg += `🔗 Link Contatto: ${slug || 'N/A'}\n\n`;
+        let msg = `📄 PREVENTIVO PER: ${nomeCliente.toUpperCase()}\n🔗 Link Contatto: ${slug || 'N/A'}\n\n`;
         items.forEach(i => msg += `• ${i.nome} (Q.tà: ${i.qta})\n`);
-        
         Swal.fire({ title: 'Invio...', didOpen: () => Swal.showLoading() });
-
         const res = await fetch(`https://api.telegram.org/bot${T_ID}/sendMessage`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ chat_id: C_ID, text: msg })
         });
-
-        if (res.ok) {
-            Swal.fire("Inviato!", "Riceverai una risposta a breve.", "success");
-            carrello = {}; localStorage.removeItem('podo_cart_v1'); aggiornaConteggio(); renderGrid(allProducts);
-        }
+        if (res.ok) { Swal.fire("Inviato!", "Riceverai una risposta a breve.", "success"); carrello = {}; localStorage.removeItem('podo_cart_v1'); aggiornaConteggio(); renderGrid(allProducts); }
     }
 
-    // --- LOGICHE FILTRI E IMMAGINI (Intatte) ---
+    // --- LOGICHE FILTRI E IMMAGINI ---
     function getImageUrl(p, full = false) {
         if (!full && p.IMG_SCRAPER) return p.IMG_SCRAPER;
         if (p.LINK_PAGINA_INTERA) {
