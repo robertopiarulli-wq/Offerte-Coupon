@@ -18,81 +18,76 @@
 
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--bg); color: var(--primary); }
 
-        /* --- TOP BAR COMPATTA --- */
+        /* --- TOP BAR --- */
         #top-header {
-            position: fixed; top: 0; left: 0; right: 0; height: 70px;
+            position: fixed; top: 0; left: 0; right: 0; height: 75px;
             background: var(--primary); color: white; display: flex;
             align-items: center; padding: 0 20px; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.2);
             gap: 15px;
         }
 
-        .user-welcome { font-weight: bold; font-size: 0.9rem; min-width: 120px; color: #ecf0f1; }
+        .user-welcome { font-weight: bold; font-size: 0.9rem; min-width: 140px; color: #ecf0f1; }
 
         #search-input {
-            flex-grow: 1; padding: 10px 15px; border-radius: 20px; border: none;
-            outline: none; font-size: 0.9rem; max-width: 400px;
+            flex-grow: 1; padding: 12px 18px; border-radius: 25px; border: none;
+            outline: none; font-size: 0.9rem; max-width: 350px;
         }
 
-        .nav-filters { display: flex; gap: 8px; flex-grow: 1; justify-content: center; }
+        .nav-filters { display: flex; gap: 8px; flex-grow: 1; justify-content: center; overflow-x: auto; padding: 5px; }
         .filter-btn {
             background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
             color: white; padding: 8px 15px; border-radius: 15px; cursor: pointer;
-            font-size: 0.8rem; transition: 0.3s; white-space: nowrap;
+            font-size: 0.75rem; transition: 0.3s; white-space: nowrap;
         }
-        .filter-btn.active { background: var(--accent); border-color: var(--accent); }
+        .filter-btn.active { background: var(--accent); border-color: var(--accent); font-weight: bold; }
 
-        .cart-actions { display: flex; align-items: center; gap: 15px; }
-        .cart-info { cursor: pointer; font-size: 0.85rem; font-weight: bold; background: #34495e; padding: 8px 12px; border-radius: 10px; }
-        .send-btn { background: var(--success); color: white; border: none; padding: 10px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 0.85rem; }
+        .cart-actions { display: flex; align-items: center; gap: 10px; }
+        .cart-info { cursor: pointer; font-size: 0.8rem; font-weight: bold; background: #34495e; padding: 10px 15px; border-radius: 12px; white-space: nowrap; }
+        .send-btn { background: var(--success); color: white; border: none; padding: 12px 20px; border-radius: 25px; font-weight: bold; cursor: pointer; font-size: 0.85rem; }
 
-        /* --- GRID E CARDS --- */
-        #main-content { margin-top: 90px; padding: 20px; }
-        #product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
+        /* --- GRID --- */
+        #main-content { margin-top: 100px; padding: 20px; }
+        #product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 25px; }
 
         .product-card { 
-            background: var(--card); border-radius: 12px; overflow: hidden; 
+            background: var(--card); border-radius: 15px; overflow: hidden; 
             border: 1px solid var(--border); display: flex; flex-direction: column; transition: 0.3s;
-            height: 100%; /* Forza altezza uniforme */
+            position: relative; height: 100%;
         }
-        .product-card.selected { border: 2px solid var(--success); box-shadow: 0 0 15px rgba(40, 167, 69, 0.2); }
+        .product-card.selected { border: 2px solid var(--success); box-shadow: 0 0 15px rgba(40, 167, 69, 0.15); }
         
-        /* CORREZIONE IMMAGINI: Altezza fissa per evitare sovrapposizioni */
-        .img-container { 
-            width: 100%; 
-            height: 200px; 
-            background: white; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            position: relative;
-            overflow: hidden; 
-        }
-        .img-container img { 
-            max-width: 100%; 
-            max-height: 100%; 
-            object-fit: contain; 
-            cursor: pointer; 
-        }
-        
-        .multi-badge { position: absolute; top: 10px; right: 10px; background: var(--accent); color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.65rem; font-weight: bold; z-index: 5; }
+        .img-container { width: 100%; height: 210px; background: white; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+        .img-container img { max-width: 95%; max-height: 95%; object-fit: contain; cursor: pointer; }
+        .multi-badge { position: absolute; top: 12px; right: 12px; background: var(--accent); color: white; padding: 3px 10px; border-radius: 12px; font-size: 0.65rem; font-weight: bold; z-index: 10; }
 
-        /* CORREZIONE TESTI: Spazio garantito per la descrizione */
-        .card-body { 
-            padding: 15px; 
-            flex-grow: 1; 
-            display: flex; 
-            flex-direction: column;
-            min-height: 140px; 
+        .info-btn { 
+            position: absolute; top: 12px; left: 12px; background: rgba(255,255,255,0.8); 
+            border: none; color: var(--accent); cursor: pointer; border-radius: 50%;
+            width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+            font-weight: bold; z-index: 10; font-family: serif; font-size: 1.1rem;
         }
 
-        .qta-area { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 10px; }
-        .qta-input { width: 45px; padding: 5px; border: 1px solid #ddd; border-radius: 5px; text-align: center; }
-        .add-btn { background: var(--primary); color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; }
+        .card-body { padding: 15px; flex-grow: 1; display: flex; flex-direction: column; min-height: 150px; }
+        .related-btn { 
+            background: #eef7fd; border: 1px solid var(--accent); color: var(--accent); 
+            padding: 6px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; 
+            cursor: pointer; margin: 10px 0; align-self: flex-start;
+        }
+
+        .qta-area { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 15px; }
+        .qta-input { width: 50px; padding: 8px; border: 1px solid #ddd; border-radius: 8px; text-align: center; font-weight: bold; }
+        .add-btn { background: var(--primary); color: white; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: bold; }
+
+        /* POPUP CORRELATI */
+        .rel-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; padding: 10px; }
+        .rel-item { border: 1px solid #eee; border-radius: 12px; padding: 12px; text-align: center; background: #fff; transition: 0.2s; }
+        .rel-item.selected { border-color: var(--success); background: #f0fff4; }
+        .rel-img { width: 100%; height: 110px; object-fit: contain; margin-bottom: 10px; }
 
         @media (max-width: 1024px) {
-            #top-header { flex-wrap: wrap; height: auto; padding: 10px; }
+            #top-header { flex-wrap: wrap; height: auto; padding: 15px; }
             .nav-filters { order: 3; width: 100%; margin-top: 10px; }
-            #main-content { margin-top: 140px; }
+            #main-content { margin-top: 160px; }
         }
     </style>
 </head>
@@ -100,15 +95,15 @@
 
 <header id="top-header">
     <div class="user-welcome" id="client-name">Ciao!</div>
-    <input type="text" id="search-input" placeholder="Cerca prodotto o codice in tutto il catalogo...">
+    <input type="text" id="search-input" placeholder="Cerca nome o codice...">
     
     <div class="nav-filters" id="macro-filters">
         <button class="filter-btn active" data-filter="all">Tutti</button>
     </div>
 
     <div class="cart-actions">
-        <div class="cart-info" onclick="apriRiepilogo()">🛒 Carrello: <span id="cart-count">0</span></div>
-        <button class="send-btn" onclick="inviaRichiesta()">🚀 Invia Preventivo</button>
+        <div class="cart-info" onclick="apriRiepilogo()">🛒 <span id="cart-count">0</span> ART.</div>
+        <button class="send-btn" onclick="inviaRichiesta()">🚀 INVIA</button>
     </div>
 </header>
 
@@ -133,7 +128,7 @@
             const { data: contact } = await sb.from('contacts').select('nome').eq('slug', slug).maybeSingle();
             if (contact) { 
                 nomeCliente = contact.nome; 
-                document.getElementById('client-name').innerText = "Ciao " + nomeCliente; 
+                document.getElementById('client-name').innerText = "PER: " + nomeCliente.toUpperCase(); 
             }
         }
         const { data } = await sb.from('prodotti_catalogo').select('*').order('NOME');
@@ -141,15 +136,14 @@
         setupMacro();
         aggiornaConteggio();
         renderGrid(allProducts);
-        
-        Fancybox.bind("[data-fancybox]", { /* opzioni galleria */ });
+        Fancybox.bind("[data-fancybox]", {});
     }
 
     function getImageUrl(p, index = 0) {
         if (p.LINK_PAGINA_INTERA && Array.isArray(p.LINK_PAGINA_INTERA) && p.LINK_PAGINA_INTERA.length > 0) {
             let bucket = p.MACROCATEGORIE === 'ATTREZZATURE' ? 'catalogo-attrezzature' : 
                         (p.MACROCATEGORIE === 'ORTOPODOLOGIA' ? 'catalogo-orto' : 'catalogo-podopiu');
-            const fileName = p.LINK_PAGINA_INTERA[index] || p.LINK_PAGINA_INTERA[0];
+            const fileName = p.LINK_PAGINA_INTERA[index];
             return `${SB_URL}/storage/v1/object/public/${bucket}/${fileName}`;
         }
         return p.IMG_SCRAPER || "https://via.placeholder.com/300?text=No+Image";
@@ -160,29 +154,32 @@
         grid.innerHTML = products.map(p => {
             const inCart = carrello[p.id];
             const isMulti = Array.isArray(p.LINK_PAGINA_INTERA) && p.LINK_PAGINA_INTERA.length > 1;
-            
+            const hasDesc = p.DESCRIZIONE_SCRAPER && p.DESCRIZIONE_SCRAPER.trim() !== '';
+            const hasCorr = p.GRUPPO_CORRELATI ? allProducts.some(pr => pr.GRUPPO_CORRELATI === p.GRUPPO_CORRELATI && pr.id !== p.id) : false;
+
             let galleriaHtml = "";
-            if (Array.isArray(p.LINK_PAGINA_INTERA) && p.LINK_PAGINA_INTERA.length > 0) {
+            if (Array.isArray(p.LINK_PAGINA_INTERA)) {
                 galleriaHtml = p.LINK_PAGINA_INTERA.map((img, idx) => {
                     const url = getImageUrl(p, idx);
                     return `<a href="${url}" data-fancybox="gallery-${p.id}" data-caption="${p.NOME}" ${idx > 0 ? 'style="display:none"' : ''}>
                                 <img src="${url}" alt="${p.NOME}" loading="lazy">
                             </a>`;
                 }).join('');
-            } else {
-                const singleUrl = getImageUrl(p);
-                galleriaHtml = `<a href="${singleUrl}" data-fancybox="gallery-${p.id}"><img src="${singleUrl}" loading="lazy"></a>`;
             }
 
             return `
             <div class="product-card ${inCart ? 'selected' : ''}" id="card-${p.id}">
+                ${hasDesc ? `<button class="info-btn" onclick="mostraInfo('${p.id}')">i</button>` : ''}
                 <div class="img-container">
                     ${isMulti ? `<div class="multi-badge">${p.LINK_PAGINA_INTERA.length} PAGINE</div>` : ''}
                     ${galleriaHtml}
                 </div>
                 <div class="card-body">
                     <div style="font-size:0.65rem; color:var(--accent); font-weight:bold">${p.CODICE || ''}</div>
-                    <div style="font-weight:600; font-size:0.8rem; height:35px; overflow:hidden; margin: 5px 0" title="${p.NOME}">${p.NOME}</div>
+                    <div style="font-weight:600; font-size:0.8rem; height:36px; overflow:hidden; margin: 8px 0">${p.NOME}</div>
+                    
+                    ${hasCorr ? `<button class="related-btn" onclick="mostraCorrelati('${p.GRUPPO_CORRELATI}')">VARIANTI/CORRELATI</button>` : ''}
+                    
                     <div class="qta-area">
                         <input type="number" id="qta-${p.id}" class="qta-input" value="${inCart ? inCart.qta : 1}" min="1">
                         <button class="add-btn" onclick="addToCart('${p.id}', '${p.NOME.replace(/'/g, "\\'")}')">${inCart ? 'MODIFICA' : 'AGGIUNGI'}</button>
@@ -190,6 +187,42 @@
                 </div>
             </div>`;
         }).join('');
+    }
+
+    function mostraInfo(id) {
+        const p = allProducts.find(item => item.id == id);
+        Swal.fire({
+            title: `<span style="font-size:1.1rem">${p.NOME}</span>`,
+            html: `<div style="text-align:left; font-size:0.9rem; line-height:1.6; border-top:1px solid #eee; padding-top:15px">${p.DESCRIZIONE_SCRAPER}</div>`,
+            confirmButtonText: 'CHIUDI', confirmButtonColor: '#2c3e50'
+        });
+    }
+
+    function mostraCorrelati(gruppo) {
+        const lista = allProducts.filter(p => p.GRUPPO_CORRELATI === gruppo);
+        let html = '<div class="rel-grid">';
+        lista.forEach(p => {
+            const inCart = carrello[p.id];
+            html += `
+            <div class="rel-item ${inCart ? 'selected' : ''}" id="rel-item-${p.id}">
+                <img src="${getImageUrl(p)}" class="rel-img">
+                <div style="font-size:0.7rem; font-weight:bold; color:var(--accent)">${p.CODICE || ''}</div>
+                <div style="font-size:0.75rem; margin:5px 0; height:32px; overflow:hidden">${p.NOME}</div>
+                <div style="display:flex; gap:5px; justify-content:center; margin-top:10px">
+                    <input type="number" id="rel-qta-${p.id}" value="${inCart ? inCart.qta : 1}" min="1" style="width:45px; text-align:center; border:1px solid #ddd; border-radius:5px">
+                    <button class="add-btn" style="padding:5px 10px; font-size:0.7rem" onclick="addToCartFromPop('${p.id}', '${p.NOME.replace(/'/g, "\\'")}')">ADD</button>
+                </div>
+            </div>`;
+        });
+        Swal.fire({ title: 'VARIANTI DISPONIBILI', html: html + '</div>', width: '800px', showConfirmButton: false, showCloseButton: true });
+    }
+
+    function addToCartFromPop(id, nome) {
+        const qta = parseInt(document.getElementById(`rel-qta-${id}`).value);
+        carrello[id] = { nome, qta };
+        localStorage.setItem('podo_cart_v1', JSON.stringify(carrello));
+        document.getElementById(`rel-item-${id}`).classList.add('selected');
+        aggiornaConteggio(); renderGrid(allProducts);
     }
 
     function setupMacro() {
@@ -200,8 +233,7 @@
             btn.className = 'filter-btn'; btn.dataset.filter = m; btn.innerText = m;
             btn.onclick = () => { 
                 document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active'); 
-                filterGrid(); 
+                btn.classList.add('active'); filterGrid(); 
             };
             container.appendChild(btn);
         });
@@ -210,11 +242,8 @@
     function filterGrid() {
         const search = document.getElementById('search-input').value.toLowerCase();
         const macro = document.querySelector('#macro-filters .active').dataset.filter;
-        
         let filtered = allProducts.filter(p => {
-            const matchSearch = p.NOME.toLowerCase().includes(search) || 
-                               (p.CODICE && p.CODICE.toLowerCase().includes(search)) ||
-                               (p.CATEGORIE && p.CATEGORIE.toLowerCase().includes(search));
+            const matchSearch = p.NOME.toLowerCase().includes(search) || (p.CODICE && p.CODICE.toLowerCase().includes(search));
             const matchMacro = (macro === 'all' || p.MACROCATEGORIE === macro);
             return matchSearch && matchMacro;
         });
@@ -227,7 +256,7 @@
         localStorage.setItem('podo_cart_v1', JSON.stringify(carrello));
         document.getElementById(`card-${id}`).classList.add('selected');
         aggiornaConteggio();
-        Swal.fire({ title: 'Aggiunto!', icon: 'success', timer: 700, showConfirmButton: false });
+        Swal.fire({ title: 'Aggiunto!', icon: 'success', timer: 600, showConfirmButton: false });
     }
 
     function aggiornaConteggio() { document.getElementById('cart-count').innerText = Object.keys(carrello).length; }
@@ -237,33 +266,28 @@
         const keys = Object.keys(carrello);
         if(keys.length === 0) h += "Il carrello è vuoto.";
         keys.forEach(id => {
-            h += `<div style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom:1px solid #eee; padding-bottom:5px">
-                <span style="font-size:0.8rem; flex:1; padding-right:10px"><b>${carrello[id].nome}</b></span>
-                <span>x${carrello[id].qta} <button onclick="delItem('${id}')" style="color:red; border:none; background:none; cursor:pointer;">✖</button></span>
+            h += `<div style="display:flex; justify-content:space-between; margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:8px">
+                <span style="font-size:0.85rem; flex:1; padding-right:10px"><b>${carrello[id].nome}</b></span>
+                <span style="white-space:nowrap">x${carrello[id].qta} <button onclick="delItem('${id}')" style="color:red; border:none; background:none; cursor:pointer; font-weight:bold; margin-left:10px">X</button></span>
             </div>`;
         });
-        Swal.fire({ title: 'RIEPILOGO PREVENTIVO', html: h + '</div>', confirmButtonText: 'CHIUDI' });
+        Swal.fire({ title: 'RIEPILOGO PREVENTIVO', html: h + '</div>', confirmButtonText: 'CHIUDI', confirmButtonColor: '#2c3e50' });
     }
 
     function delItem(id) { delete carrello[id]; localStorage.setItem('podo_cart_v1', JSON.stringify(carrello)); aggiornaConteggio(); renderGrid(allProducts); apriRiepilogo(); }
 
     async function inviaRichiesta() {
         const items = Object.values(carrello);
-        if (items.length === 0) return Swal.fire("Carrello Vuoto", "Aggiungi prodotti prima di inviare", "info");
-        let msg = `📄 PREVENTIVO: ${nomeCliente.toUpperCase()}\n\n`;
+        if (items.length === 0) return Swal.fire("Il carrello è vuoto", "", "info");
+        let msg = `📄 PREVENTIVO DA: ${nomeCliente.toUpperCase()}\n\n`;
         items.forEach(i => msg += `• ${i.nome} (Q.tà: ${i.qta})\n`);
-        
-        try {
-            const res = await fetch(`https://api.telegram.org/bot${T_ID}/sendMessage`, {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ chat_id: C_ID, text: msg })
-            });
-            if (res.ok) { 
-                Swal.fire("Inviato!", "Richiesta ricevuta con successo!", "success"); 
-                carrello = {}; localStorage.removeItem('podo_cart_v1'); aggiornaConteggio(); renderGrid(allProducts); 
-            }
-        } catch (e) {
-            Swal.fire("Errore", "Impossibile inviare il preventivo", "error");
+        const res = await fetch(`https://api.telegram.org/bot${T_ID}/sendMessage`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chat_id: C_ID, text: msg })
+        });
+        if (res.ok) { 
+            Swal.fire("Inviato!", "Richiesta ricevuta!", "success"); 
+            carrello = {}; localStorage.removeItem('podo_cart_v1'); aggiornaConteggio(); renderGrid(allProducts); 
         }
     }
 
