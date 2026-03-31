@@ -77,6 +77,7 @@
         .related-tag { 
             background: #eef7fd; border: 1px solid var(--accent); color: var(--accent); 
             padding: 5px 10px; border-radius: 15px; font-size: 0.7rem; font-weight: bold;
+            cursor: pointer;
         }
 
         .qta-area { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 10px; }
@@ -154,10 +155,12 @@
             const inCart = carrello[p.id];
             const isMulti = Array.isArray(p.LINK_PAGINA_INTERA) && p.LINK_PAGINA_INTERA.length > 1;
             
-            // MODIFICA RICHIESTA: Controllo se ci sono correlati nel DB
-            const hasCorr = p.GRUPPO_CORRELATI && allProducts.some(pr => pr.GRUPPO_CORRELATI === p.GRUPPO_CORRELATI && pr.id !== p.id);
+            // CORREZIONE: Mostra "CORRELATI" solo se il gruppo ha più di un prodotto
+            const hasCorr = p.GRUPPO_CORRELATI && 
+                           p.GRUPPO_CORRELATI !== "" && 
+                           p.GRUPPO_CORRELATI !== "null" &&
+                           allProducts.filter(pr => pr.GRUPPO_CORRELATI === p.GRUPPO_CORRELATI).length > 1;
             
-            // MODIFICA RICHIESTA: Controllo se c'è descrizione non nulla
             const hasDesc = p.DESCRIZIONE_SCRAPER && p.DESCRIZIONE_SCRAPER.trim() !== "" && p.DESCRIZIONE_SCRAPER !== "null";
 
             let galleriaHtml = "";
@@ -184,7 +187,7 @@
                     <div style="font-weight:600; font-size:0.8rem; height:35px; overflow:hidden; margin: 5px 0">${p.NOME}</div>
                     
                     <div class="action-row">
-                        ${hasCorr ? `<div class="related-tag">CORRELATI</div>` : ''}
+                        ${hasCorr ? `<div class="related-tag" onclick="mostraCorrelati('${p.GRUPPO_CORRELATI}')">CORRELATI</div>` : ''}
                         ${hasDesc ? `<button class="info-btn-large" onclick="mostraInfo('${p.id}')">ⓘ</button>` : ''}
                     </div>
 
@@ -195,6 +198,19 @@
                 </div>
             </div>`;
         }).join('');
+    }
+
+    function mostraCorrelati(gruppo) {
+        const lista = allProducts.filter(p => p.GRUPPO_CORRELATI === gruppo);
+        let h = '<div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:10px; text-align:center;">';
+        lista.forEach(p => {
+            h += `<div style="border:1px solid #eee; padding:10px; border-radius:8px;">
+                <img src="${getImageUrl(p)}" style="width:100%; height:80px; object-fit:contain;">
+                <div style="font-size:0.7rem; font-weight:bold; margin-top:5px;">${p.NOME}</div>
+                <div style="font-size:0.6rem; color:var(--accent);">${p.CODICE || ''}</div>
+            </div>`;
+        });
+        Swal.fire({ title: 'PRODOTTI CORRELATI', html: h + '</div>', confirmButtonText: 'CHIUDI' });
     }
 
     function mostraInfo(id) {
@@ -225,15 +241,10 @@
     function filterGrid() {
         const search = document.getElementById('search-input').value.toLowerCase();
         const macro = document.querySelector('#macro-filters .active').dataset.filter;
-        
         let filtered = allProducts.filter(p => {
-            const matchSearch = p.NOME.toLowerCase().includes(search) || 
-                               (p.CODICE && p.CODICE.toLowerCase().includes(search));
-            
+            const matchSearch = p.NOME.toLowerCase().includes(search) || (p.CODICE && p.CODICE.toLowerCase().includes(search));
             if (search.length > 0) return matchSearch;
-
-            const matchMacro = (macro === 'all' || p.MACROCATEGORIE === macro);
-            return matchMacro;
+            return (macro === 'all' || p.MACROCATEGORIE === macro);
         });
         renderGrid(filtered);
     }
@@ -269,7 +280,6 @@
         if (items.length === 0) return Swal.fire("Carrello Vuoto", "Aggiungi prodotti prima di inviare", "info");
         let msg = `📄 PREVENTIVO: ${nomeCliente.toUpperCase()}\n\n`;
         items.forEach(i => msg += `• ${i.nome} (Q.tà: ${i.qta})\n`);
-        
         try {
             const res = await fetch(`https://api.telegram.org/bot${T_ID}/sendMessage`, {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
