@@ -65,7 +65,6 @@
 
         .card-body { padding: 15px; flex-grow: 1; display: flex; flex-direction: column; min-height: 140px; }
 
-        /* NUOVO STILE TASTO INFO */
         .info-btn-large {
             background: var(--accent); color: white; border: none; 
             width: 30px; height: 30px; border-radius: 50%; 
@@ -73,7 +72,7 @@
             display: flex; align-items: center; justify-content: center;
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
-        .action-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .action-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; min-height: 35px; }
 
         .related-tag { 
             background: #eef7fd; border: 1px solid var(--accent); color: var(--accent); 
@@ -154,8 +153,13 @@
         grid.innerHTML = products.map(p => {
             const inCart = carrello[p.id];
             const isMulti = Array.isArray(p.LINK_PAGINA_INTERA) && p.LINK_PAGINA_INTERA.length > 1;
-            const hasCorr = p.GRUPPO_CORRELATI ? allProducts.some(pr => pr.GRUPPO_CORRELATI === p.GRUPPO_CORRELATI && pr.id !== p.id) : false;
             
+            // MODIFICA RICHIESTA: Controllo se ci sono correlati nel DB
+            const hasCorr = p.GRUPPO_CORRELATI && allProducts.some(pr => pr.GRUPPO_CORRELATI === p.GRUPPO_CORRELATI && pr.id !== p.id);
+            
+            // MODIFICA RICHIESTA: Controllo se c'è descrizione non nulla
+            const hasDesc = p.DESCRIZIONE_SCRAPER && p.DESCRIZIONE_SCRAPER.trim() !== "" && p.DESCRIZIONE_SCRAPER !== "null";
+
             let galleriaHtml = "";
             if (Array.isArray(p.LINK_PAGINA_INTERA) && p.LINK_PAGINA_INTERA.length > 0) {
                 galleriaHtml = p.LINK_PAGINA_INTERA.map((img, idx) => {
@@ -181,7 +185,7 @@
                     
                     <div class="action-row">
                         ${hasCorr ? `<div class="related-tag">CORRELATI</div>` : ''}
-                        <button class="info-btn-large" onclick="mostraInfo('${p.id}')">ⓘ</button>
+                        ${hasDesc ? `<button class="info-btn-large" onclick="mostraInfo('${p.id}')">ⓘ</button>` : ''}
                     </div>
 
                     <div class="qta-area">
@@ -197,7 +201,7 @@
         const p = allProducts.find(item => item.id == id);
         Swal.fire({
             title: p.NOME,
-            html: `<div style="text-align:left; font-size:0.9rem; line-height:1.5; border-top:1px solid #eee; padding-top:10px">${p.DESCRIZIONE_SCRAPER || 'Nessuna descrizione disponibile.'}</div>`,
+            html: `<div style="text-align:left; font-size:0.9rem; line-height:1.5; border-top:1px solid #eee; padding-top:10px">${p.DESCRIZIONE_SCRAPER}</div>`,
             confirmButtonText: 'CHIUDI',
             confirmButtonColor: '#2c3e50'
         });
@@ -226,7 +230,6 @@
             const matchSearch = p.NOME.toLowerCase().includes(search) || 
                                (p.CODICE && p.CODICE.toLowerCase().includes(search));
             
-            // MODIFICA RICHIESTA: Se c'è testo nella ricerca, ignora il filtro macro (Ricerca Globale)
             if (search.length > 0) return matchSearch;
 
             const matchMacro = (macro === 'all' || p.MACROCATEGORIE === macro);
