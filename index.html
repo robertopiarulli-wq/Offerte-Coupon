@@ -45,21 +45,46 @@
         .cart-info { cursor: pointer; font-size: 0.85rem; font-weight: bold; background: #34495e; padding: 8px 12px; border-radius: 10px; }
         .send-btn { background: var(--success); color: white; border: none; padding: 10px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 0.85rem; }
 
-        /* --- GRID --- */
+        /* --- GRID E CARDS --- */
         #main-content { margin-top: 90px; padding: 20px; }
         #product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
 
         .product-card { 
             background: var(--card); border-radius: 12px; overflow: hidden; 
             border: 1px solid var(--border); display: flex; flex-direction: column; transition: 0.3s;
+            height: 100%; /* Forza altezza uniforme */
         }
         .product-card.selected { border: 2px solid var(--success); box-shadow: 0 0 15px rgba(40, 167, 69, 0.2); }
         
-        .img-container { width: 100%; height: 200px; background: white; display: flex; align-items: center; justify-content: center; position: relative; }
-        .img-container img { max-width: 90%; max-height: 90%; object-fit: contain; cursor: pointer; }
-        .multi-badge { position: absolute; top: 10px; right: 10px; background: var(--accent); color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.65rem; font-weight: bold; }
+        /* CORREZIONE IMMAGINI: Altezza fissa per evitare sovrapposizioni */
+        .img-container { 
+            width: 100%; 
+            height: 200px; 
+            background: white; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            position: relative;
+            overflow: hidden; 
+        }
+        .img-container img { 
+            max-width: 100%; 
+            max-height: 100%; 
+            object-fit: contain; 
+            cursor: pointer; 
+        }
+        
+        .multi-badge { position: absolute; top: 10px; right: 10px; background: var(--accent); color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.65rem; font-weight: bold; z-index: 5; }
 
-        .card-body { padding: 15px; flex-grow: 1; display: flex; flex-direction: column; }
+        /* CORREZIONE TESTI: Spazio garantito per la descrizione */
+        .card-body { 
+            padding: 15px; 
+            flex-grow: 1; 
+            display: flex; 
+            flex-direction: column;
+            min-height: 140px; 
+        }
+
         .qta-area { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 10px; }
         .qta-input { width: 45px; padding: 5px; border: 1px solid #ddd; border-radius: 5px; text-align: center; }
         .add-btn { background: var(--primary); color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; }
@@ -75,7 +100,7 @@
 
 <header id="top-header">
     <div class="user-welcome" id="client-name">Ciao!</div>
-    <input type="text" id="search-input" placeholder="Cerca prodotto o codice...">
+    <input type="text" id="search-input" placeholder="Cerca prodotto o codice in tutto il catalogo...">
     
     <div class="nav-filters" id="macro-filters">
         <button class="filter-btn active" data-filter="all">Tutti</button>
@@ -83,7 +108,7 @@
 
     <div class="cart-actions">
         <div class="cart-info" onclick="apriRiepilogo()">🛒 Carrello: <span id="cart-count">0</span></div>
-        <button class="send-btn" onclick="inviaRichiesta()">🚀 Invia</button>
+        <button class="send-btn" onclick="inviaRichiesta()">🚀 Invia Preventivo</button>
     </div>
 </header>
 
@@ -117,8 +142,7 @@
         aggiornaConteggio();
         renderGrid(allProducts);
         
-        // Inizializza Fancybox
-        Fancybox.bind("[data-fancybox]", { /* opzioni */ });
+        Fancybox.bind("[data-fancybox]", { /* opzioni galleria */ });
     }
 
     function getImageUrl(p, index = 0) {
@@ -137,9 +161,8 @@
             const inCart = carrello[p.id];
             const isMulti = Array.isArray(p.LINK_PAGINA_INTERA) && p.LINK_PAGINA_INTERA.length > 1;
             
-            // Generiamo i link per la galleria Fancybox
             let galleriaHtml = "";
-            if (Array.isArray(p.LINK_PAGINA_INTERA)) {
+            if (Array.isArray(p.LINK_PAGINA_INTERA) && p.LINK_PAGINA_INTERA.length > 0) {
                 galleriaHtml = p.LINK_PAGINA_INTERA.map((img, idx) => {
                     const url = getImageUrl(p, idx);
                     return `<a href="${url}" data-fancybox="gallery-${p.id}" data-caption="${p.NOME}" ${idx > 0 ? 'style="display:none"' : ''}>
@@ -148,7 +171,7 @@
                 }).join('');
             } else {
                 const singleUrl = getImageUrl(p);
-                galleriaHtml = `<a href="${singleUrl}" data-fancybox="gallery-${p.id}"><img src="${singleUrl}"></a>`;
+                galleriaHtml = `<a href="${singleUrl}" data-fancybox="gallery-${p.id}"><img src="${singleUrl}" loading="lazy"></a>`;
             }
 
             return `
@@ -159,7 +182,7 @@
                 </div>
                 <div class="card-body">
                     <div style="font-size:0.65rem; color:var(--accent); font-weight:bold">${p.CODICE || ''}</div>
-                    <div style="font-weight:600; font-size:0.8rem; height:35px; overflow:hidden; margin: 5px 0">${p.NOME}</div>
+                    <div style="font-weight:600; font-size:0.8rem; height:35px; overflow:hidden; margin: 5px 0" title="${p.NOME}">${p.NOME}</div>
                     <div class="qta-area">
                         <input type="number" id="qta-${p.id}" class="qta-input" value="${inCart ? inCart.qta : 1}" min="1">
                         <button class="add-btn" onclick="addToCart('${p.id}', '${p.NOME.replace(/'/g, "\\'")}')">${inCart ? 'MODIFICA' : 'AGGIUNGI'}</button>
@@ -170,7 +193,7 @@
     }
 
     function setupMacro() {
-        const macros = [...new Set(allProducts.map(p => p.MACROCATEGORIE).filter(Boolean))];
+        const macros = [...new Set(allProducts.map(p => p.MACROCATEGORIE).filter(Boolean))].sort();
         const container = document.getElementById('macro-filters');
         macros.forEach(m => {
             const btn = document.createElement('button');
@@ -226,16 +249,21 @@
 
     async function inviaRichiesta() {
         const items = Object.values(carrello);
-        if (items.length === 0) return Swal.fire("Carrello Vuoto", "", "info");
+        if (items.length === 0) return Swal.fire("Carrello Vuoto", "Aggiungi prodotti prima di inviare", "info");
         let msg = `📄 PREVENTIVO: ${nomeCliente.toUpperCase()}\n\n`;
         items.forEach(i => msg += `• ${i.nome} (Q.tà: ${i.qta})\n`);
-        const res = await fetch(`https://api.telegram.org/bot${T_ID}/sendMessage`, {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chat_id: C_ID, text: msg })
-        });
-        if (res.ok) { 
-            Swal.fire("Inviato!", "Richiesta ricevuta!", "success"); 
-            carrello = {}; localStorage.removeItem('podo_cart_v1'); aggiornaConteggio(); renderGrid(allProducts); 
+        
+        try {
+            const res = await fetch(`https://api.telegram.org/bot${T_ID}/sendMessage`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chat_id: C_ID, text: msg })
+            });
+            if (res.ok) { 
+                Swal.fire("Inviato!", "Richiesta ricevuta con successo!", "success"); 
+                carrello = {}; localStorage.removeItem('podo_cart_v1'); aggiornaConteggio(); renderGrid(allProducts); 
+            }
+        } catch (e) {
+            Swal.fire("Errore", "Impossibile inviare il preventivo", "error");
         }
     }
 
