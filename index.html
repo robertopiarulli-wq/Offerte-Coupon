@@ -26,14 +26,12 @@
             gap: 15px;
         }
 
-        .user-welcome { font-weight: bold; font-size: 0.9rem; min-width: 140px; color: #ecf0f1; }
-
         #search-input {
             flex-grow: 1; padding: 12px 18px; border-radius: 25px; border: none;
-            outline: none; font-size: 0.9rem; max-width: 350px;
+            outline: none; font-size: 0.95rem; max-width: 400px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        .nav-filters { display: flex; gap: 8px; flex-grow: 1; justify-content: center; overflow-x: auto; padding: 5px; }
+        .nav-filters { display: flex; gap: 8px; flex-grow: 1; justify-content: center; overflow-x: auto; }
         .filter-btn {
             background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
             color: white; padding: 8px 15px; border-radius: 15px; cursor: pointer;
@@ -41,70 +39,64 @@
         }
         .filter-btn.active { background: var(--accent); border-color: var(--accent); font-weight: bold; }
 
-        .cart-actions { display: flex; align-items: center; gap: 10px; }
-        .cart-info { cursor: pointer; font-size: 0.8rem; font-weight: bold; background: #34495e; padding: 10px 15px; border-radius: 12px; white-space: nowrap; }
-        .send-btn { background: var(--success); color: white; border: none; padding: 12px 20px; border-radius: 25px; font-weight: bold; cursor: pointer; font-size: 0.85rem; }
+        .cart-info { cursor: pointer; font-size: 0.85rem; font-weight: bold; background: #34495e; padding: 10px 15px; border-radius: 12px; white-space: nowrap; }
 
-        /* --- GRID --- */
-        #main-content { margin-top: 100px; padding: 20px; }
-        #product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 25px; }
+        /* --- GRID E CARDS --- */
+        #main-content { margin-top: 95px; padding: 20px; }
+        #product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 25px; }
 
         .product-card { 
             background: var(--card); border-radius: 15px; overflow: hidden; 
             border: 1px solid var(--border); display: flex; flex-direction: column; transition: 0.3s;
-            position: relative; height: 100%;
+            height: 100%;
         }
-        .product-card.selected { border: 2px solid var(--success); box-shadow: 0 0 15px rgba(40, 167, 69, 0.15); }
+        .product-card.selected { border: 2px solid var(--success); box-shadow: 0 5px 15px rgba(40, 167, 69, 0.1); }
         
         .img-container { width: 100%; height: 210px; background: white; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
         .img-container img { max-width: 95%; max-height: 95%; object-fit: contain; cursor: pointer; }
-        .multi-badge { position: absolute; top: 12px; right: 12px; background: var(--accent); color: white; padding: 3px 10px; border-radius: 12px; font-size: 0.65rem; font-weight: bold; z-index: 10; }
 
-        .info-btn { 
-            position: absolute; top: 12px; left: 12px; background: rgba(255,255,255,0.8); 
-            border: none; color: var(--accent); cursor: pointer; border-radius: 50%;
-            width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
-            font-weight: bold; z-index: 10; font-family: serif; font-size: 1.1rem;
-        }
-
-        .card-body { padding: 15px; flex-grow: 1; display: flex; flex-direction: column; min-height: 150px; }
+        .card-body { padding: 15px; flex-grow: 1; display: flex; flex-direction: column; min-height: 160px; }
+        
+        /* BOTTONI AZIONI */
+        .action-row { display: flex; gap: 8px; margin: 10px 0; align-items: center; flex-wrap: wrap; }
+        
         .related-btn { 
             background: #eef7fd; border: 1px solid var(--accent); color: var(--accent); 
-            padding: 6px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; 
-            cursor: pointer; margin: 10px 0; align-self: flex-start;
+            padding: 8px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; 
+            cursor: pointer; transition: 0.2s;
+        }
+        .related-btn:hover { background: var(--accent); color: white; }
+
+        .big-info-btn { 
+            background: var(--accent); border: none; color: white; 
+            width: 34px; height: 34px; border-radius: 50%; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 1.1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
-        .qta-area { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 15px; }
-        .qta-input { width: 50px; padding: 8px; border: 1px solid #ddd; border-radius: 8px; text-align: center; font-weight: bold; }
-        .add-btn { background: var(--primary); color: white; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: bold; }
-
-        /* POPUP CORRELATI */
-        .rel-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; padding: 10px; }
-        .rel-item { border: 1px solid #eee; border-radius: 12px; padding: 12px; text-align: center; background: #fff; transition: 0.2s; }
-        .rel-item.selected { border-color: var(--success); background: #f0fff4; }
-        .rel-img { width: 100%; height: 110px; object-fit: contain; margin-bottom: 10px; }
+        .qta-area { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 15px; border-top: 1px solid #f8f9fa; }
+        .qta-input { width: 55px; padding: 8px; border: 1px solid #ddd; border-radius: 8px; text-align: center; font-weight: bold; }
+        .add-btn { background: var(--primary); color: white; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: bold; }
 
         @media (max-width: 1024px) {
             #top-header { flex-wrap: wrap; height: auto; padding: 15px; }
             .nav-filters { order: 3; width: 100%; margin-top: 10px; }
-            #main-content { margin-top: 160px; }
+            #main-content { margin-top: 165px; }
         }
     </style>
 </head>
 <body>
 
 <header id="top-header">
-    <div class="user-welcome" id="client-name">Ciao!</div>
-    <input type="text" id="search-input" placeholder="Cerca nome o codice...">
+    <div class="user-welcome" id="client-name" style="font-weight:bold; font-size:0.8rem; min-width:120px">Ciao!</div>
+    <input type="text" id="search-input" placeholder="🔍 Cerca ovunque (Nome o Codice)...">
     
     <div class="nav-filters" id="macro-filters">
-        <button class="filter-btn active" data-filter="all">Tutti</button>
+        <button class="filter-btn active" data-filter="all">TUTTI</button>
     </div>
 
-    <div class="cart-actions">
-        <div class="cart-info" onclick="apriRiepilogo()">🛒 <span id="cart-count">0</span> ART.</div>
-        <button class="send-btn" onclick="inviaRichiesta()">🚀 INVIA</button>
-    </div>
+    <div class="cart-info" onclick="apriRiepilogo()">🛒 <span id="cart-count">0</span> PRODOTTI</div>
+    <button class="add-btn" style="background:var(--success); border-radius:25px; margin-left:10px" onclick="inviaRichiesta()">INVIA 🚀</button>
 </header>
 
 <div id="main-content">
@@ -143,8 +135,7 @@
         if (p.LINK_PAGINA_INTERA && Array.isArray(p.LINK_PAGINA_INTERA) && p.LINK_PAGINA_INTERA.length > 0) {
             let bucket = p.MACROCATEGORIE === 'ATTREZZATURE' ? 'catalogo-attrezzature' : 
                         (p.MACROCATEGORIE === 'ORTOPODOLOGIA' ? 'catalogo-orto' : 'catalogo-podopiu');
-            const fileName = p.LINK_PAGINA_INTERA[index];
-            return `${SB_URL}/storage/v1/object/public/${bucket}/${fileName}`;
+            return `${SB_URL}/storage/v1/object/public/${bucket}/${p.LINK_PAGINA_INTERA[index]}`;
         }
         return p.IMG_SCRAPER || "https://via.placeholder.com/300?text=No+Image";
     }
@@ -153,32 +144,24 @@
         const grid = document.getElementById('product-grid');
         grid.innerHTML = products.map(p => {
             const inCart = carrello[p.id];
-            const isMulti = Array.isArray(p.LINK_PAGINA_INTERA) && p.LINK_PAGINA_INTERA.length > 1;
             const hasDesc = p.DESCRIZIONE_SCRAPER && p.DESCRIZIONE_SCRAPER.trim() !== '';
             const hasCorr = p.GRUPPO_CORRELATI ? allProducts.some(pr => pr.GRUPPO_CORRELATI === p.GRUPPO_CORRELATI && pr.id !== p.id) : false;
 
-            let galleriaHtml = "";
-            if (Array.isArray(p.LINK_PAGINA_INTERA)) {
-                galleriaHtml = p.LINK_PAGINA_INTERA.map((img, idx) => {
-                    const url = getImageUrl(p, idx);
-                    return `<a href="${url}" data-fancybox="gallery-${p.id}" data-caption="${p.NOME}" ${idx > 0 ? 'style="display:none"' : ''}>
-                                <img src="${url}" alt="${p.NOME}" loading="lazy">
-                            </a>`;
-                }).join('');
-            }
-
             return `
             <div class="product-card ${inCart ? 'selected' : ''}" id="card-${p.id}">
-                ${hasDesc ? `<button class="info-btn" onclick="mostraInfo('${p.id}')">i</button>` : ''}
                 <div class="img-container">
-                    ${isMulti ? `<div class="multi-badge">${p.LINK_PAGINA_INTERA.length} PAGINE</div>` : ''}
-                    ${galleriaHtml}
+                    <a href="${getImageUrl(p)}" data-fancybox="gallery-${p.id}" data-caption="${p.NOME}">
+                        <img src="${getImageUrl(p)}" alt="${p.NOME}" loading="lazy">
+                    </a>
                 </div>
                 <div class="card-body">
                     <div style="font-size:0.65rem; color:var(--accent); font-weight:bold">${p.CODICE || ''}</div>
-                    <div style="font-weight:600; font-size:0.8rem; height:36px; overflow:hidden; margin: 8px 0">${p.NOME}</div>
+                    <div style="font-weight:600; font-size:0.85rem; height:40px; overflow:hidden; margin: 8px 0">${p.NOME}</div>
                     
-                    ${hasCorr ? `<button class="related-btn" onclick="mostraCorrelati('${p.GRUPPO_CORRELATI}')">VARIANTI/CORRELATI</button>` : ''}
+                    <div class="action-row">
+                        ${hasCorr ? `<button class="related-btn" onclick="mostraCorrelati('${p.GRUPPO_CORRELATI}')">VARIANTI / MISURE</button>` : ''}
+                        ${hasDesc ? `<button class="big-info-btn" onclick="mostraInfo('${p.id}')" title="Descrizione">ⓘ</button>` : ''}
+                    </div>
                     
                     <div class="qta-area">
                         <input type="number" id="qta-${p.id}" class="qta-input" value="${inCart ? inCart.qta : 1}" min="1">
@@ -192,37 +175,41 @@
     function mostraInfo(id) {
         const p = allProducts.find(item => item.id == id);
         Swal.fire({
-            title: `<span style="font-size:1.1rem">${p.NOME}</span>`,
-            html: `<div style="text-align:left; font-size:0.9rem; line-height:1.6; border-top:1px solid #eee; padding-top:15px">${p.DESCRIZIONE_SCRAPER}</div>`,
-            confirmButtonText: 'CHIUDI', confirmButtonColor: '#2c3e50'
+            title: p.NOME,
+            html: `<div style="text-align:left; font-size:0.95rem; line-height:1.6; border-top:1px solid #eee; padding-top:15px">${p.DESCRIZIONE_SCRAPER}</div>`,
+            confirmButtonText: 'HO CAPITO', confirmButtonColor: '#2c3e50'
         });
     }
 
+    function filterGrid() {
+        const search = document.getElementById('search-input').value.toLowerCase();
+        const macro = document.querySelector('#macro-filters .active').dataset.filter;
+        
+        let filtered = allProducts.filter(p => {
+            const matchSearch = p.NOME.toLowerCase().includes(search) || (p.CODICE && p.CODICE.toLowerCase().includes(search));
+            
+            // SE STO CERCANDO (search non vuoto), ignoro la macro per cercare in tutto il DB
+            if (search.length > 0) return matchSearch;
+            
+            // Altrimenti filtro per macro normalmente
+            const matchMacro = (macro === 'all' || p.MACROCATEGORIE === macro);
+            return matchSearch && matchMacro;
+        });
+        renderGrid(filtered);
+    }
+
+    /* --- RESTO DELLE FUNZIONI (CARRELLO, CORRELATI, ETC) --- */
     function mostraCorrelati(gruppo) {
         const lista = allProducts.filter(p => p.GRUPPO_CORRELATI === gruppo);
-        let html = '<div class="rel-grid">';
+        let html = '<div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(180px, 1fr)); gap:15px;">';
         lista.forEach(p => {
-            const inCart = carrello[p.id];
-            html += `
-            <div class="rel-item ${inCart ? 'selected' : ''}" id="rel-item-${p.id}">
-                <img src="${getImageUrl(p)}" class="rel-img">
-                <div style="font-size:0.7rem; font-weight:bold; color:var(--accent)">${p.CODICE || ''}</div>
-                <div style="font-size:0.75rem; margin:5px 0; height:32px; overflow:hidden">${p.NOME}</div>
-                <div style="display:flex; gap:5px; justify-content:center; margin-top:10px">
-                    <input type="number" id="rel-qta-${p.id}" value="${inCart ? inCart.qta : 1}" min="1" style="width:45px; text-align:center; border:1px solid #ddd; border-radius:5px">
-                    <button class="add-btn" style="padding:5px 10px; font-size:0.7rem" onclick="addToCartFromPop('${p.id}', '${p.NOME.replace(/'/g, "\\'")}')">ADD</button>
-                </div>
+            html += `<div style="border:1px solid #eee; padding:10px; text-align:center; border-radius:10px">
+                <img src="${getImageUrl(p)}" style="width:100%; height:100px; object-fit:contain">
+                <div style="font-size:0.75rem; margin:10px 0; font-weight:bold">${p.NOME}</div>
+                <button class="add-btn" onclick="addToCart('${p.id}', '${p.NOME.replace(/'/g, "\\'")}')">SCEGLI</button>
             </div>`;
         });
-        Swal.fire({ title: 'VARIANTI DISPONIBILI', html: html + '</div>', width: '800px', showConfirmButton: false, showCloseButton: true });
-    }
-
-    function addToCartFromPop(id, nome) {
-        const qta = parseInt(document.getElementById(`rel-qta-${id}`).value);
-        carrello[id] = { nome, qta };
-        localStorage.setItem('podo_cart_v1', JSON.stringify(carrello));
-        document.getElementById(`rel-item-${id}`).classList.add('selected');
-        aggiornaConteggio(); renderGrid(allProducts);
+        Swal.fire({ title: 'SELEZIONA VARIANTE', html: html + '</div>', width: '800px', showConfirmButton: false });
     }
 
     function setupMacro() {
@@ -233,21 +220,12 @@
             btn.className = 'filter-btn'; btn.dataset.filter = m; btn.innerText = m;
             btn.onclick = () => { 
                 document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active'); filterGrid(); 
+                btn.classList.add('active'); 
+                document.getElementById('search-input').value = ""; // Resetto ricerca quando cambio macro
+                filterGrid(); 
             };
             container.appendChild(btn);
         });
-    }
-
-    function filterGrid() {
-        const search = document.getElementById('search-input').value.toLowerCase();
-        const macro = document.querySelector('#macro-filters .active').dataset.filter;
-        let filtered = allProducts.filter(p => {
-            const matchSearch = p.NOME.toLowerCase().includes(search) || (p.CODICE && p.CODICE.toLowerCase().includes(search));
-            const matchMacro = (macro === 'all' || p.MACROCATEGORIE === macro);
-            return matchSearch && matchMacro;
-        });
-        renderGrid(filtered);
     }
 
     function addToCart(id, nome) {
@@ -268,18 +246,18 @@
         keys.forEach(id => {
             h += `<div style="display:flex; justify-content:space-between; margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:8px">
                 <span style="font-size:0.85rem; flex:1; padding-right:10px"><b>${carrello[id].nome}</b></span>
-                <span style="white-space:nowrap">x${carrello[id].qta} <button onclick="delItem('${id}')" style="color:red; border:none; background:none; cursor:pointer; font-weight:bold; margin-left:10px">X</button></span>
+                <span>x${carrello[id].qta} <button onclick="delItem('${id}')" style="color:red; border:none; background:none; cursor:pointer; font-weight:bold; margin-left:10px">X</button></span>
             </div>`;
         });
-        Swal.fire({ title: 'RIEPILOGO PREVENTIVO', html: h + '</div>', confirmButtonText: 'CHIUDI', confirmButtonColor: '#2c3e50' });
+        Swal.fire({ title: 'RIEPILOGO PREVENTIVO', html: h + '</div>', confirmButtonText: 'CHIUDI' });
     }
 
     function delItem(id) { delete carrello[id]; localStorage.setItem('podo_cart_v1', JSON.stringify(carrello)); aggiornaConteggio(); renderGrid(allProducts); apriRiepilogo(); }
 
     async function inviaRichiesta() {
         const items = Object.values(carrello);
-        if (items.length === 0) return Swal.fire("Il carrello è vuoto", "", "info");
-        let msg = `📄 PREVENTIVO DA: ${nomeCliente.toUpperCase()}\n\n`;
+        if (items.length === 0) return Swal.fire("Carrello Vuoto", "", "info");
+        let msg = `📄 PREVENTIVO: ${nomeCliente.toUpperCase()}\n\n`;
         items.forEach(i => msg += `• ${i.nome} (Q.tà: ${i.qta})\n`);
         const res = await fetch(`https://api.telegram.org/bot${T_ID}/sendMessage`, {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
