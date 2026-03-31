@@ -155,7 +155,6 @@
             const inCart = carrello[p.id];
             const isMulti = Array.isArray(p.LINK_PAGINA_INTERA) && p.LINK_PAGINA_INTERA.length > 1;
             
-            // CORREZIONE: Mostra "CORRELATI" solo se il gruppo ha più di un prodotto
             const hasCorr = p.GRUPPO_CORRELATI && 
                            p.GRUPPO_CORRELATI !== "" && 
                            p.GRUPPO_CORRELATI !== "null" &&
@@ -202,16 +201,35 @@
 
     function mostraCorrelati(gruppo) {
         const lista = allProducts.filter(p => p.GRUPPO_CORRELATI === gruppo);
-        let h = '<div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:10px; text-align:center;">';
+        let h = '<div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(180px, 1fr)); gap:15px; text-align:center;">';
+        
         lista.forEach(p => {
-            h += `<div style="border:1px solid #eee; padding:10px; border-radius:8px;">
-                <img src="${getImageUrl(p)}" style="width:100%; height:80px; object-fit:contain;">
-                <div style="font-size:0.7rem; font-weight:bold; margin-top:5px;">${p.NOME}</div>
-                <div style="font-size:0.6rem; color:var(--accent);">${p.CODICE || ''}</div>
+            const inCart = carrello[p.id];
+            h += `<div style="border:1px solid #eee; padding:10px; border-radius:12px; display:flex; flex-direction:column; background:white;">
+                <img src="${getImageUrl(p)}" style="width:100%; height:100px; object-fit:contain; margin-bottom:10px;">
+                <div style="font-size:0.75rem; font-weight:bold; height:30px; overflow:hidden;">${p.NOME}</div>
+                <div style="font-size:0.65rem; color:var(--accent); margin:5px 0;">${p.CODICE || ''}</div>
+                
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-top:10px;">
+                    <input type="number" id="qta-popup-${p.id}" style="width:40px; padding:4px; border:1px solid #ddd; border-radius:4px; text-align:center;" value="${inCart ? inCart.qta : 1}" min="1">
+                    <button class="add-btn" style="padding:6px 10px; font-size:0.75rem;" onclick="addToCartFromPopup('${p.id}', '${p.NOME.replace(/'/g, "\\'")}')">
+                        ${inCart ? 'AGGIORNA' : 'AGGIUNGI'}
+                    </button>
+                </div>
             </div>`;
         });
-        Swal.fire({ title: 'PRODOTTI CORRELATI', html: h + '</div>', confirmButtonText: 'CHIUDI' });
+        Swal.fire({ title: 'SELEZIONA VARIANTE', html: h + '</div>', width: '850px', showConfirmButton: false });
     }
+
+    // Funzione dedicata per aggiungere dal popup correlati
+    window.addToCartFromPopup = function(id, nome) {
+        const qta = parseInt(document.getElementById(`qta-popup-${id}`).value);
+        carrello[id] = { nome, qta };
+        localStorage.setItem('podo_cart_v1', JSON.stringify(carrello));
+        aggiornaConteggio();
+        renderGrid(allProducts); // Aggiorna la griglia sotto per mostrare il bordo verde
+        Swal.fire({ title: 'Aggiunto!', icon: 'success', timer: 700, showConfirmButton: false });
+    };
 
     function mostraInfo(id) {
         const p = allProducts.find(item => item.id == id);
@@ -250,7 +268,9 @@
     }
 
     function addToCart(id, nome) {
-        const qta = parseInt(document.getElementById(`qta-${id}`).value);
+        const qtaInput = document.getElementById(`qta-${id}`);
+        if (!qtaInput) return;
+        const qta = parseInt(qtaInput.value);
         carrello[id] = { nome, qta };
         localStorage.setItem('podo_cart_v1', JSON.stringify(carrello));
         document.getElementById(`card-${id}`).classList.add('selected');
