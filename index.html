@@ -151,15 +151,23 @@
 
     function renderGrid(products) {
         const grid = document.getElementById('product-grid');
+        const searchInput = document.getElementById('search-input').value.trim();
         
-        // LOGICA RAGGRUPPAMENTO: Mostriamo solo un prodotto per ogni GRUPPO_CORRELATI
-        const visti = new Set();
-        const prodottiVisualizzati = products.filter(p => {
-            if (!p.GRUPPO_CORRELATI || p.GRUPPO_CORRELATI.trim() === "" || p.GRUPPO_CORRELATI === "null") return true;
-            if (visti.has(p.GRUPPO_CORRELATI)) return false;
-            visti.add(p.GRUPPO_CORRELATI);
-            return true;
-        });
+        // LOGICA RAGGRUPPAMENTO: 
+        // Se c'è una ricerca attiva, NON raggruppiamo (mostriamo tutto il database che corrisponde)
+        // Se NON c'è ricerca, raggruppiamo per GRUPPO_CORRELATI
+        let prodottiVisualizzati = [];
+        if (searchInput.length > 0) {
+            prodottiVisualizzati = products;
+        } else {
+            const visti = new Set();
+            prodottiVisualizzati = products.filter(p => {
+                if (!p.GRUPPO_CORRELATI || p.GRUPPO_CORRELATI.trim() === "" || p.GRUPPO_CORRELATI === "null") return true;
+                if (visti.has(p.GRUPPO_CORRELATI)) return false;
+                visti.add(p.GRUPPO_CORRELATI);
+                return true;
+            });
+        }
 
         grid.innerHTML = prodottiVisualizzati.map(p => {
             const inCart = carrello[p.id];
@@ -243,9 +251,18 @@
 
     function mostraInfo(id) {
         const p = allProducts.find(item => item.id == id);
+        // CORREZIONE: Qui ora usiamo IMG_SCRAPER per il popup descrittivo
+        const imgInfo = p.IMG_SCRAPER || "https://via.placeholder.com/300?text=No+Image";
+        
         Swal.fire({
             title: p.NOME,
-            html: `<div style="text-align:left; font-size:0.9rem; line-height:1.5; border-top:1px solid #eee; padding-top:10px">${p.DESCRIZIONE_SCRAPER}</div>`,
+            html: `
+                <div style="text-align:center; margin-bottom:15px;">
+                    <img src="${imgInfo}" style="max-width:100%; max-height:250px; border-radius:8px;">
+                </div>
+                <div style="text-align:left; font-size:0.9rem; line-height:1.5; border-top:1px solid #eee; padding-top:10px">
+                    ${p.DESCRIZIONE_SCRAPER}
+                </div>`,
             confirmButtonText: 'CHIUDI',
             confirmButtonColor: '#2c3e50'
         });
@@ -266,9 +283,9 @@
         });
     }
 
-    // RICERCA NORMALIZZATA (Toglie accenti e ignora maiuscole/minuscole)
     function filterGrid() {
-        const searchInput = document.getElementById('search-input').value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        const rawSearch = document.getElementById('search-input').value;
+        const searchInput = rawSearch.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         const macro = document.querySelector('#macro-filters .active').dataset.filter;
         
         let filtered = allProducts.filter(p => {
