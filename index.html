@@ -151,7 +151,17 @@
 
     function renderGrid(products) {
         const grid = document.getElementById('product-grid');
-        grid.innerHTML = products.map(p => {
+        
+        // LOGICA RAGGRUPPAMENTO: Mostriamo solo un prodotto per ogni GRUPPO_CORRELATI
+        const visti = new Set();
+        const prodottiVisualizzati = products.filter(p => {
+            if (!p.GRUPPO_CORRELATI || p.GRUPPO_CORRELATI.trim() === "" || p.GRUPPO_CORRELATI === "null") return true;
+            if (visti.has(p.GRUPPO_CORRELATI)) return false;
+            visti.add(p.GRUPPO_CORRELATI);
+            return true;
+        });
+
+        grid.innerHTML = prodottiVisualizzati.map(p => {
             const inCart = carrello[p.id];
             const isMulti = Array.isArray(p.LINK_PAGINA_INTERA) && p.LINK_PAGINA_INTERA.length > 1;
             
@@ -186,7 +196,7 @@
                     <div style="font-weight:600; font-size:0.8rem; height:35px; overflow:hidden; margin: 5px 0">${p.NOME}</div>
                     
                     <div class="action-row">
-                        ${hasCorr ? `<div class="related-tag" onclick="mostraCorrelati('${p.GRUPPO_CORRELATI}')">CORRELATI</div>` : ''}
+                        ${hasCorr ? `<div class="related-tag" onclick="mostraCorrelati('${p.GRUPPO_CORRELATI}')">VARIANTI/CORRELATI</div>` : ''}
                         ${hasDesc ? `<button class="info-btn-large" onclick="mostraInfo('${p.id}')">ⓘ</button>` : ''}
                     </div>
 
@@ -221,13 +231,13 @@
         Swal.fire({ title: 'SELEZIONA VARIANTE', html: h + '</div>', width: '850px', showConfirmButton: false });
     }
 
-    // Funzione dedicata per aggiungere dal popup correlati
     window.addToCartFromPopup = function(id, nome) {
-        const qta = parseInt(document.getElementById(`qta-popup-${id}`).value);
+        const qtaVal = document.getElementById(`qta-popup-${id}`).value;
+        const qta = parseInt(qtaVal);
         carrello[id] = { nome, qta };
         localStorage.setItem('podo_cart_v1', JSON.stringify(carrello));
         aggiornaConteggio();
-        renderGrid(allProducts); // Aggiorna la griglia sotto per mostrare il bordo verde
+        renderGrid(allProducts); 
         Swal.fire({ title: 'Aggiunto!', icon: 'success', timer: 700, showConfirmButton: false });
     };
 
@@ -256,12 +266,18 @@
         });
     }
 
+    // RICERCA NORMALIZZATA (Toglie accenti e ignora maiuscole/minuscole)
     function filterGrid() {
-        const search = document.getElementById('search-input').value.toLowerCase();
+        const searchInput = document.getElementById('search-input').value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         const macro = document.querySelector('#macro-filters .active').dataset.filter;
+        
         let filtered = allProducts.filter(p => {
-            const matchSearch = p.NOME.toLowerCase().includes(search) || (p.CODICE && p.CODICE.toLowerCase().includes(search));
-            if (search.length > 0) return matchSearch;
+            const nomeNorm = p.NOME.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            const codNorm = (p.CODICE || "").toLowerCase();
+            
+            const matchSearch = nomeNorm.includes(searchInput) || codNorm.includes(searchInput);
+            
+            if (searchInput.length > 0) return matchSearch;
             return (macro === 'all' || p.MACROCATEGORIE === macro);
         });
         renderGrid(filtered);
